@@ -117,7 +117,7 @@ export default function Navbar() {
           </a>
 
           {/* Nav Links Center */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden lg:flex items-center space-x-4 xl:space-x-8">
             {menuItems.map((item) => {
               const isActive = location.pathname === item.path;
 
@@ -125,7 +125,7 @@ export default function Navbar() {
                 <Link
                   key={item.name}
                   to={item.path}
-                  className={`text-[14px] font-sans font-extrabold tracking-widest transition-colors relative py-1.5 ${
+                  className={`text-[12px] xl:text-[14px] font-sans font-extrabold tracking-wider xl:tracking-widest transition-colors relative py-1.5 ${
                     isTransparent ? 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] hover:text-gold' : 'text-forest/80 hover:text-forest'
                   }`}
                 >
@@ -171,7 +171,7 @@ export default function Navbar() {
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`md:hidden p-1.5 rounded-full focus:outline-none cursor-pointer ${isTransparent ? 'hover:bg-white/10 hover:text-white' : 'hover:bg-forest/5 hover:text-forest/80'}`}
+              className={`lg:hidden p-1.5 rounded-full focus:outline-none cursor-pointer ${isTransparent ? 'hover:bg-white/10 hover:text-white' : 'hover:bg-forest/5 hover:text-forest/80'}`}
               aria-label="Toggle navigation menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">

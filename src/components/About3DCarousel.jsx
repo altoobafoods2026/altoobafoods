@@ -110,7 +110,7 @@ export default function About3DCarousel({ products = [] }) {
               <img 
                 src={displayImages[currentIndex]} 
                 alt="Premium Showcase"
-                className={`relative z-10 w-[90%] sm:w-[65%] md:w-auto object-contain object-bottom h-auto md:h-[40vh] lg:h-[48vh] xl:h-[55vh] max-h-[550px] sepia-[.15] contrast-[1.05] brightness-[0.95] saturate-[1.10] transform-gpu ${
+                className={`relative z-10 w-[90%] sm:w-[65%] md:w-auto object-contain object-bottom h-[30vh] sm:h-[35vh] md:h-[40vh] lg:h-[48vh] xl:h-[55vh] max-h-[550px] sepia-[.15] contrast-[1.05] brightness-[0.95] saturate-[1.10] transform-gpu ${
                   displayImages[currentIndex]?.toLowerCase().includes('kalonji') || 
                   displayImages[currentIndex]?.toLowerCase().includes('black-seed') 
                     ? 'translate-y-[27%]' 
@@ -129,7 +129,7 @@ export default function About3DCarousel({ products = [] }) {
               <img 
                 src={displayImages[currentIndex]} 
                 alt="Reflection"
-                className={`absolute top-[88%] z-[-4] w-[90%] sm:w-[65%] md:w-auto object-contain object-top h-auto md:h-[40vh] lg:h-[48vh] xl:h-[55vh] max-h-[550px] opacity-[0.06] blur-[4px] pointer-events-none ${
+                className={`absolute top-[88%] z-[-4] w-[90%] sm:w-[65%] md:w-auto object-contain object-top h-[30vh] sm:h-[35vh] md:h-[40vh] lg:h-[48vh] xl:h-[55vh] max-h-[550px] opacity-[0.06] blur-[4px] pointer-events-none ${
                   displayImages[currentIndex]?.toLowerCase().includes('kalonji') || 
                   displayImages[currentIndex]?.toLowerCase().includes('black-seed') 
                     ? 'translate-y-[27%]' 

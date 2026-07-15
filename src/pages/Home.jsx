@@ -111,7 +111,7 @@ export default function Home() {
       <section className="relative w-full min-h-[100svh] flex flex-col items-center justify-start text-center px-0 md:px-6 pt-[90px] md:pt-[100px] pb-4 md:pb-0 overflow-hidden">
         {/* Background Video */}
         <video
-          className="absolute inset-0 w-full h-full object-cover z-0"
+          className="absolute inset-0 w-full h-full object-cover object-bottom z-0"
           src={heroVideo}
           poster="/hero_bg.jpg"
           autoPlay
@@ -130,10 +130,10 @@ export default function Home() {
         <HeroParticles />
 
         {/* Hero Content Wrapper */}
-        <div className="relative z-10 w-full h-full flex-grow max-w-7xl mx-auto px-4 sm:px-8 flex flex-col md:flex-row items-center justify-start md:justify-between pt-[15vh] md:pt-0 pb-[30vh] md:pb-0">
+        <div className="relative z-10 w-full h-full flex-grow max-w-7xl mx-auto px-4 sm:px-8 flex flex-col lg:flex-row items-center justify-start lg:justify-between pt-[15vh] lg:pt-0 pb-[30vh] lg:pb-0">
           
           {/* Left: Text, CTA & Trust Badges */}
-          <div className="w-full md:w-[45%] flex flex-col items-center md:items-start justify-center text-center md:text-left relative z-30 mt-0">
+          <div className="w-full lg:w-[45%] flex flex-col items-center lg:items-start justify-center text-center lg:text-left relative z-30 mt-0">
             {/* Small Golden Leaf Icon */}
             <div className="mb-4 opacity-90">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -166,7 +166,7 @@ export default function Home() {
               </p>
 
               {/* CTA Premium Pill Button */}
-              <div ref={ctaRef} className="mt-6 md:mt-8 flex justify-center md:justify-start opacity-0">
+              <div ref={ctaRef} className="mt-6 lg:mt-8 flex justify-center lg:justify-start opacity-0">
                 <button
                   onClick={handleCTAClick}
                   className="group relative overflow-hidden rounded-full px-8 py-3.5 text-[11px] sm:text-xs font-sans font-extrabold uppercase tracking-[0.15em] bg-gradient-to-r from-[#eec373] via-[#D4A24C] to-[#eec373] text-[#0D3B2A] border-none shadow-[0_8px_25px_rgba(212,162,76,0.4)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
@@ -183,7 +183,7 @@ export default function Home() {
           </div>
 
           {/* Right: 3D Product Centerpiece */}
-          <div className="w-full md:w-[50%] flex justify-center absolute bottom-[10vh] md:relative md:bottom-0 left-0 right-0 z-20 pointer-events-none md:pointer-events-auto md:mb-20">
+          <div className="w-full lg:w-[45%] flex justify-center absolute bottom-[10vh] lg:bottom-0 left-0 right-0 lg:left-auto lg:right-[5%] z-20 pointer-events-none lg:pointer-events-auto lg:mb-[14.5vh]">
             <div className="w-full origin-bottom flex justify-center">
                <About3DCarousel products={products} />
             </div>
