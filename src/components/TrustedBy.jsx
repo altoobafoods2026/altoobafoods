@@ -1,81 +1,92 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useToastStore } from '../store/toastStore';
+import { getReviews, submitReview } from '../services/judgeme';
+import { generateReviews } from '../utils/generateReviews';
 
-const reviewsData = [
-  {
-    id: 1,
-    name: "Aisha M.",
-    role: "Verified Buyer",
-    rating: 5,
-    text: "The Kalonji Oil is incredibly pure. I've noticed a huge difference in my energy levels and overall well-being since incorporating it into my daily routine.",
-    product: "Pure Kalonji Oil",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=150&auto=format&fit=crop"
-  },
-  {
-    id: 2,
-    name: "Omar F.",
-    role: "Verified Buyer",
-    rating: 5,
-    text: "Authentic Sidr honey is hard to find, but this is the real deal. The texture, the taste, and the healing properties are unmatched. Highly recommended.",
-    product: "Yemeni Sidr Honey",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop"
-  },
-  {
-    id: 3,
-    name: "Fatima S.",
-    role: "Verified Buyer",
-    rating: 5,
-    text: "I love the Talbina mix! It's my go-to breakfast. It keeps me full, energetic all morning, and is incredibly soothing for the stomach.",
-    product: "Premium Barley Talbina",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop"
-  },
-  {
-    id: 4,
-    name: "Zainab R.",
-    role: "Verified Buyer",
-    rating: 5,
-    text: "The Kalonji Shampoo completely transformed my hair! My hair feels stronger and much softer. Highly recommend it to anyone struggling with hair fall.",
-    product: "Kalonji Shampoo",
-    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=150&auto=format&fit=crop"
-  },
-  {
-    id: 5,
-    name: "Ahmed K.",
-    role: "Verified Buyer",
-    rating: 5,
-    text: "I was skeptical about dates vinegar, but it has drastically improved my digestion. I take a spoonful every morning and feel great.",
-    product: "Pure Dates Vinegar",
-    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=150&auto=format&fit=crop"
-  }
-];
-
-export default function TrustedBy({ productName }) {
+export default function TrustedBy({ productId, productName }) {
   const [showModal, setShowModal] = useState(false);
   const [rating, setRating] = useState(5);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [judgeMeReviews, setJudgeMeReviews] = useState([]);
   const showToast = useToastStore((state) => state.showToast);
 
+  useEffect(() => {
+    const fetchJudgeMeReviews = async () => {
+      if (productId) {
+        const reviews = await getReviews(productId);
+        // Map Judge.me format to our local format
+        const formattedReviews = reviews.map(r => ({
+          id: r.id,
+          name: r.reviewer?.name || "Verified Buyer",
+          role: "Verified Buyer",
+          rating: r.rating,
+          text: r.body,
+          product: productName,
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(r.reviewer?.name || 'V B')}&background=random`,
+          date: r.created_at
+        }));
+        setJudgeMeReviews(formattedReviews);
+      }
+    };
+    fetchJudgeMeReviews();
+  }, [productId, productName]);
+
+  const allReviews = useMemo(() => {
+    const defaultReviews = generateReviews(productId, productName);
+    // Show newest user reviews first
+    return [...judgeMeReviews, ...defaultReviews];
+  }, [productId, productName, judgeMeReviews]);
+
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % reviewsData.length);
+    setCurrentIndex((prev) => (prev + 1) % allReviews.length);
   };
 
   const handlePrev = () => {
-    setCurrentIndex((prev) => (prev - 1 + reviewsData.length) % reviewsData.length);
+    setCurrentIndex((prev) => (prev - 1 + allReviews.length) % allReviews.length);
   };
 
   const visibleReviews = [
-    reviewsData[currentIndex],
-    reviewsData[(currentIndex + 1) % reviewsData.length],
-    reviewsData[(currentIndex + 2) % reviewsData.length],
+    allReviews[currentIndex],
+    allReviews[(currentIndex + 1) % allReviews.length],
+    allReviews[(currentIndex + 2) % allReviews.length],
   ];
 
-  const handleSubmitReview = (e) => {
+  const handleSubmitReview = async (e) => {
     e.preventDefault();
-    setShowModal(false);
-    showToast('Thank you! Your review has been submitted for moderation.', 'success');
-    // Reset form rating
-    setRating(5);
+    const formData = new FormData(e.target);
+    const name = formData.get('name');
+    const text = formData.get('reviewText');
+    const email = formData.get('email');
+    
+    try {
+      await submitReview({
+        productId,
+        name,
+        email,
+        rating: rating,
+        title: "Review from " + name,
+        body: text
+      });
+      
+      // Optimistically update the UI
+      setJudgeMeReviews([{
+        id: Date.now(),
+        name,
+        role: "Verified Buyer",
+        rating,
+        text,
+        product: productName,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`,
+        date: new Date().toISOString()
+      }, ...judgeMeReviews]);
+
+      setShowModal(false);
+      showToast('Thank you! Your review has been added to Judge.me.', 'success');
+      setRating(5);
+    } catch (error) {
+      showToast('Failed to submit review. Please try again.', 'error');
+    }
   };
 
   return (
@@ -119,51 +130,46 @@ export default function TrustedBy({ productName }) {
         </div>
 
         {/* Reviews Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <AnimatePresence mode="popLayout">
-            {visibleReviews.map((review, index) => (
-              <motion.div
-                key={review.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3 }}
-                className={`bg-[#FAF7F2] rounded-3xl p-8 border border-[#0D3B2A]/5 hover:shadow-xl hover:shadow-[#0D3B2A]/5 transition-all duration-300 flex-col h-full ${index === 0 ? 'flex' : 'hidden md:flex'}`}
-              >
-              {/* Rating Stars */}
-              <div className="flex gap-1 mb-6">
-                {[...Array(review.rating)].map((_, i) => (
-                  <svg key={i} className="w-5 h-5 text-[#D4A24C] fill-current" viewBox="0 0 24 24">
-                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                  </svg>
-                ))}
-              </div>
-
-              {/* Review Text */}
-              <p className="text-[#0D3B2A]/80 font-serif italic text-lg leading-relaxed mb-8 flex-grow">
-                "{review.text}"
-              </p>
-
-              {/* Reviewer Info */}
-              <div className="mt-auto border-t border-[#0D3B2A]/10 pt-6 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <img 
-                    src={review.avatar} 
-                    alt={review.name} 
-                    className="w-10 h-10 rounded-full object-cover border border-[#0D3B2A]/10"
-                  />
-                  <div>
-                    <h4 className="font-sans font-bold text-[#0D3B2A] text-base leading-tight">{review.name}</h4>
-                    <span className="text-[10px] font-sans uppercase tracking-widest text-gray-500">{review.role}</span>
+        <div className="relative overflow-hidden min-h-[300px]">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentIndex}
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            >
+              {visibleReviews.map((review, index) => (
+                <div
+                  key={review.id}
+                  className={`bg-[#FAF7F2] rounded-3xl p-8 border border-[#0D3B2A]/5 hover:shadow-xl hover:shadow-[#0D3B2A]/5 transition-all duration-300 flex-col h-full ${index === 0 ? 'flex' : 'hidden md:flex'}`}
+                >
+                  <div className="flex gap-1 mb-6">
+                    {[...Array(review.rating)].map((_, i) => (
+                      <svg key={i} className="w-5 h-5 text-[#D4A24C] fill-current" viewBox="0 0 24 24">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <p className="text-[#0D3B2A]/80 font-sans text-base leading-relaxed mb-8 flex-grow">
+                    "{review.text}"
+                  </p>
+                  <div className="mt-auto border-t border-[#0D3B2A]/10 pt-6 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <img src={review.avatar} alt={review.name} className="w-10 h-10 rounded-full object-cover border border-[#0D3B2A]/10" />
+                      <div>
+                        <h4 className="font-sans font-bold text-[#0D3B2A] text-base leading-tight">{review.name}</h4>
+                        <span className="text-[10px] font-sans uppercase tracking-widest text-gray-500">{review.role}</span>
+                      </div>
+                    </div>
+                    <span className="text-[9px] font-sans font-bold uppercase tracking-widest bg-[#0D3B2A] text-[#FAF7F2] px-2.5 py-1 rounded-full text-center max-w-[100px] leading-tight flex-shrink-0">
+                      {review.product}
+                    </span>
                   </div>
                 </div>
-                <span className="text-[9px] font-sans font-bold uppercase tracking-widest bg-[#0D3B2A] text-[#FAF7F2] px-2.5 py-1 rounded-full text-center max-w-[100px] leading-tight flex-shrink-0">
-                  {productName || review.product}
-                </span>
-              </div>
-              </motion.div>
-            ))}
+              ))}
+            </motion.div>
           </AnimatePresence>
         </div>
 
@@ -238,11 +244,12 @@ export default function TrustedBy({ productName }) {
                   </div>
                 </div>
 
-                {/* Name & Product */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {/* Name and Email */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
                   <div>
                     <label className="block text-xs font-sans font-bold uppercase tracking-widest text-[#0D3B2A] mb-2">Your Name</label>
                     <input 
+                      name="name"
                       type="text" 
                       required
                       placeholder="e.g. Aisha M."
@@ -250,15 +257,14 @@ export default function TrustedBy({ productName }) {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-sans font-bold uppercase tracking-widest text-[#0D3B2A] mb-2">Product</label>
-                    <select required defaultValue={productName || ""} className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm font-sans focus:outline-none focus:border-[#D4A24C] focus:ring-1 focus:ring-[#D4A24C] transition-all text-gray-700">
-                      <option value="">Select Product...</option>
-                      {productName && <option value={productName}>{productName}</option>}
-                      <option value="Pure Kalonji Oil">Pure Kalonji Oil</option>
-                      <option value="Yemeni Sidr Honey">Yemeni Sidr Honey</option>
-                      <option value="Premium Barley Talbina">Premium Barley Talbina</option>
-                      <option value="Other">Other Remedy</option>
-                    </select>
+                    <label className="block text-xs font-sans font-bold uppercase tracking-widest text-[#0D3B2A] mb-2">Email (For verification)</label>
+                    <input 
+                      name="email"
+                      type="email" 
+                      required
+                      placeholder="e.g. aisha@example.com"
+                      className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm font-sans focus:outline-none focus:border-[#D4A24C] focus:ring-1 focus:ring-[#D4A24C] transition-all"
+                    />
                   </div>
                 </div>
 
@@ -266,6 +272,7 @@ export default function TrustedBy({ productName }) {
                 <div>
                   <label className="block text-xs font-sans font-bold uppercase tracking-widest text-[#0D3B2A] mb-2">Your Review</label>
                   <textarea 
+                    name="reviewText"
                     required
                     rows="4"
                     placeholder="Tell us about your experience..."

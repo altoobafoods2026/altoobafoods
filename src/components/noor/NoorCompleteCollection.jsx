@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import TiltCard from './TiltCard';
 import MagneticButton from './MagneticButton';
-import { products as allProducts } from '../../data/products';
+
 import { useCartStore } from '../../store/cartStore';
 import { useToastStore } from '../../store/toastStore';
 
@@ -53,14 +53,15 @@ const CursorImageSwap = ({ frontImg, backImg, alt }) => {
   );
 };
 
-export default function NoorCompleteCollection() {
+export default function NoorCompleteCollection({ products = [] }) {
   const addItem = useCartStore((state) => state.addItem);
   const showToast = useToastStore((state) => state.showToast);
 
+  const displayedProducts = products.slice(0, 16);
   const collectionProducts = [];
   const seenCategories = new Set();
   
-  for (const product of allProducts) {
+  for (const product of displayedProducts) {
     if (!seenCategories.has(product.category)) {
       seenCategories.add(product.category);
       collectionProducts.push(product);
@@ -121,7 +122,7 @@ export default function NoorCompleteCollection() {
         </div>
 
         {/* Dynamic Category Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
           {collectionProducts.map((product, idx) => (
             <motion.div
               key={product.id}
@@ -142,7 +143,7 @@ export default function NoorCompleteCollection() {
                     <span className="text-[9px] md:text-[11px] font-sans font-extrabold uppercase tracking-widest leading-none">{product.category}</span>
                   </div>
 
-                    <Link to={`/product/${product.slug}`} className="block w-full h-full text-inherit hover:no-underline">
+                    <Link to={`/product/${product.slug}`} className="flex flex-col flex-grow w-full h-full text-inherit hover:no-underline">
                       {/* Image Container with a clean thin border */}
                       <div className="relative w-full shrink-0 aspect-[10/11] md:aspect-[4/5] rounded-[12px] sm:rounded-[16px] overflow-hidden bg-white md:mb-5 z-10 shadow-inner border border-gray-100 group/img">
                         <CursorImageSwap 
@@ -154,7 +155,7 @@ export default function NoorCompleteCollection() {
                       </div>
 
                       {/* Product Details */}
-                      <div className="flex flex-col flex-1 z-10 relative py-1">
+                      <div className="flex flex-col flex-grow z-10 relative py-1">
                         
                         {/* Brand and Rating Row */}
                         <div className="flex flex-wrap items-center justify-between mb-1.5 sm:mb-2 gap-1">
@@ -170,7 +171,7 @@ export default function NoorCompleteCollection() {
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-[14px] sm:text-[17px] font-sans font-bold text-[#0D3B2A] mb-2 sm:mb-3 leading-snug group-hover:text-[#D4A24C] transition-colors duration-300 line-clamp-2">
+                        <h3 className="text-[14px] sm:text-[17px] font-sans font-bold text-[#0D3B2A] mb-2 sm:mb-3 leading-snug group-hover:text-[#D4A24C] transition-colors duration-300 line-clamp-2 min-h-[44px] sm:min-h-[50px]">
                           {product.name}
                         </h3>
                         

@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import TiltCard from './TiltCard';
 import MagneticButton from './MagneticButton';
-import { products as allProducts } from '../../data/products';
+
 import { useCartStore } from '../../store/cartStore';
 import { useToastStore } from '../../store/toastStore';
 
@@ -53,11 +53,11 @@ const CursorImageSwap = ({ frontImg, backImg, alt }) => {
   );
 };
 
-export default function NoorBestSellers() {
+export default function NoorBestSellers({ products = [] }) {
   const addItem = useCartStore((state) => state.addItem);
   const showToast = useToastStore((state) => state.showToast);
 
-  const topRatedProducts = [...allProducts]
+  const topRatedProducts = [...products]
     .sort((a, b) => b.rating - a.rating)
     .slice(0, 5);
 
@@ -111,7 +111,7 @@ export default function NoorBestSellers() {
                     {/* Subtle Background Glow */}
                     <div className="absolute inset-0 bg-gradient-to-b from-white/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0" />
 
-                    <Link to={`/product/${product.slug}`} className="block w-full h-full text-inherit hover:no-underline">
+                    <Link to={`/product/${product.slug}`} className="flex flex-col flex-grow w-full h-full text-inherit hover:no-underline">
                       {/* Image Container with a clean thin border */}
                       <div className="relative w-full shrink-0 aspect-[10/11] md:aspect-[4/5] rounded-[12px] sm:rounded-[16px] overflow-hidden bg-white md:mb-5 z-10 shadow-inner border border-gray-100 group/img">
                         <CursorImageSwap 
@@ -123,7 +123,7 @@ export default function NoorBestSellers() {
                       </div>
 
                       {/* Product Details (Right on mobile, Bottom on desktop) */}
-                      <div className="flex flex-col flex-1 z-10 relative py-1">
+                      <div className="flex flex-col flex-grow z-10 relative py-1">
                         
                         {/* Brand and Rating Row */}
                         <div className="flex flex-wrap items-center justify-between mb-1.5 sm:mb-2 gap-1">
@@ -139,7 +139,7 @@ export default function NoorBestSellers() {
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-[14px] sm:text-[17px] font-sans font-bold text-[#0D3B2A] mb-2 sm:mb-3 leading-snug group-hover:text-[#D4A24C] transition-colors duration-300 line-clamp-2">
+                        <h3 className="text-[14px] sm:text-[17px] font-sans font-bold text-[#0D3B2A] mb-2 sm:mb-3 leading-snug group-hover:text-[#D4A24C] transition-colors duration-300 line-clamp-2 min-h-[44px] sm:min-h-[50px]">
                           {product.name}
                         </h3>
                         

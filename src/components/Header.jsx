@@ -223,11 +223,11 @@ export default function Header({ activeMenu, onMenuClick, onBeginJourney }) {
       id="nav-bar"
       className="relative z-20 w-full transition-all duration-300 backdrop-blur-md bg-white/75 border-b border-brand-green/10 shadow-[0_4px_20px_rgba(31,58,29,0.03)]"
     >
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 py-4 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 py-2 flex items-center justify-between">
         {/* Logo */}
         <button
           id="logo-link"
-          onClick={() => onMenuClick('Home')}
+          onClick={() => window.location.href = '/'}
           className="focus:outline-none transition-transform active:scale-95 cursor-pointer max-w-[190px] sm:max-w-[230px] md:max-w-[250px] flex items-center text-[#1f3a1d] hover:opacity-90 transition-opacity duration-250"
         >
           <Logo className="h-9 sm:h-11 w-auto" />

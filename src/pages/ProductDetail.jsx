@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { products } from '../data/products';
+import { getProductBySlug, getProducts } from '../services/shopify';
 import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
 import TrustedBy from '../components/TrustedBy';
@@ -15,32 +15,65 @@ export default function ProductDetail() {
   const [isZooming, setIsZooming] = useState(false);
   const [zoomStyle, setZoomStyle] = useState({ transform: 'scale(1)', transformOrigin: 'center center' });
 
+  const [product, setProduct] = useState(null);
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const addItem = useCartStore((state) => state.addItem);
   const showToast = useToastStore((state) => state.showToast);
 
-  const product = products.find((p) => p.slug === slug);
-
   useEffect(() => {
-    if (!product) {
-      navigate('/studio');
-      return;
+    async function loadProduct() {
+      setIsLoading(true);
+      try {
+        const fetchedProduct = await getProductBySlug(slug);
+        if (!fetchedProduct) {
+          navigate('/studio');
+          return;
+        }
+        setProduct(fetchedProduct);
+        setActiveImage(0);
+        setQuantity(1);
+        setShowFullDesc(false);
+        
+        // Force scroll to top after DOM update
+        setTimeout(() => {
+          window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        }, 10);
+
+        // Load related products
+        const allProducts = await getProducts();
+        const related = allProducts
+          .filter(p => 
+            p.category === fetchedProduct.category && 
+            p.id !== fetchedProduct.id &&
+            !p.name.toLowerCase().includes('al-rayhan') &&
+            !p.name.toLowerCase().includes('tulsi')
+          )
+          .slice(0, 4);
+        setRelatedProducts(related);
+      } catch (error) {
+        console.error("Failed to load product:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
-    setActiveImage(0);
-    setQuantity(1);
-    setShowFullDesc(false);
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [slug, product, navigate]);
+    loadProduct();
+  }, [slug, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="pt-32 pb-24 min-h-screen bg-[#FAF7F2] flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-[#0D3B2A]/20 border-t-[#D4A24C] rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   if (!product) return null;
 
   const currentPrice = product.price;
   const mrpPrice = product.mrp || product.price * 1.25;
-  const discountPercent = Math.round(((mrpPrice - currentPrice) / mrpPrice) * 100);
-
-  // Find related products in same category
-  const relatedProducts = products
-    .filter((p) => p.category === product.category && p.id !== product.id)
-    .slice(0, 4);
+  const discountPercent = product.discount || Math.round(((mrpPrice - currentPrice) / mrpPrice) * 100);
 
   // Ensure maximum 4 images for the gallery without duplication
   const finalImages = product.images.slice(0, 5);
@@ -264,14 +297,14 @@ export default function ProductDetail() {
       </div>
       
       {/* Visual Description Section */}
-      {product.descriptionImages && product.descriptionImages.length > 0 && (
-        <div className="max-w-6xl mx-auto px-6 sm:px-8 mt-16 flex flex-col items-center gap-2">
-          {product.descriptionImages.map((img, idx) => (
+      {product.descriptionHtml && (
+        <div className="w-full mt-16 flex flex-col items-center">
+          {[...product.descriptionHtml.matchAll(/<img[^>]+src=["']([^"']+)["']/gi)].map((match, idx) => (
             <img 
               key={idx} 
-              src={img} 
+              src={match[1]} 
               alt={`${product.name} Description ${idx + 1}`} 
-              className="w-full object-contain block" 
+              className="w-full object-cover block" 
             />
           ))}
         </div>
@@ -293,7 +326,7 @@ export default function ProductDetail() {
       )}
 
       {/* Product Specific Reviews */}
-      <TrustedBy productName={product.name} />
+      <TrustedBy productId={product.id} productName={product.name} />
     </div>
   );
 }

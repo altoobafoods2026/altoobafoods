@@ -1,20 +1,18 @@
 import { useRef } from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
-import { products } from '../../data/products';
+export default function NoorCategories({ products = [] }) {
+  // Extract unique categories dynamically and map them to category objects
+  const uniqueCategories = [...new Set(products.map(p => p.category))];
 
-// Extract unique categories dynamically and map them to category objects
-const uniqueCategories = [...new Set(products.map(p => p.category))];
+  const categories = uniqueCategories.map(cat => {
+    const firstProduct = products.find(p => p.category === cat);
+    return {
+      name: cat,
+      bg: firstProduct.cardImage || firstProduct.images[0]
+    };
+  });
 
-const categories = uniqueCategories.map(cat => {
-  const firstProduct = products.find(p => p.category === cat);
-  return {
-    name: cat,
-    bg: firstProduct.cardImage || firstProduct.images[0]
-  };
-});
-
-export default function NoorCategories() {
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
@@ -132,26 +130,26 @@ export default function NoorCategories() {
                 
                 {/* Clipped Card Body */}
                 <div 
-                  className="relative w-full h-full overflow-hidden bg-[#0d2018]"
+                  className="relative w-full h-full overflow-hidden bg-[#FAF7F2]"
                   style={{ clipPath: 'url(#mehrab-clip)' }}
                 >
                   {/* Cinematic Image Area */}
-                  <div className="absolute inset-0 bg-black">
+                  <div className="absolute inset-0 bg-transparent flex items-center justify-center pt-2">
                     <img 
                       src={cat.bg} 
                       alt={cat.name}
-                      className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-[1.5s] ease-out opacity-80 group-hover:opacity-100"
+                      className="w-[100%] h-[85%] object-contain object-bottom group-hover:scale-110 transition-transform duration-[1.5s] ease-out opacity-100 drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)] pb-8"
                     />
-                    {/* Dark Gradient Overlay for perfect text contrast */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent opacity-80 group-hover:opacity-95 transition-opacity duration-500" />
+                    {/* Subtle warm gradient overlay at bottom for depth */}
+                    <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-[#E8E1D5] via-[#FAF7F2]/80 to-transparent opacity-90 transition-opacity duration-500" />
                   </div>
 
                   {/* Elegant Text Overlay */}
-                  <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6 flex flex-col items-center justify-end text-center z-20 pointer-events-none">
-                    <h3 className="text-sm sm:text-xl md:text-2xl font-serif font-bold text-[#f5ebd8] tracking-wide leading-tight">{cat.name}</h3>
+                  <div className="absolute inset-x-0 bottom-3 sm:bottom-4 flex flex-col items-center justify-end text-center z-20 pointer-events-none px-2">
+                    <h3 className="text-sm sm:text-lg md:text-xl font-serif font-bold text-[#0D3B2A] tracking-wide leading-tight drop-shadow-sm">{cat.name}</h3>
                     
                     {/* Expandable gold line */}
-                    <div className="w-0 h-[2px] bg-[#D4A24C] mt-2 sm:mt-4 opacity-0 group-hover:opacity-100 group-hover:w-8 sm:group-hover:w-16 transition-all duration-700 ease-out" />
+                    <div className="w-0 h-[2px] bg-[#D4A24C] mt-2 opacity-0 group-hover:opacity-100 group-hover:w-8 sm:group-hover:w-16 transition-all duration-700 ease-out" />
                   </div>
                 </div>
 

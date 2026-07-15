@@ -23,8 +23,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           {/* Column 1: Brand & Logo */}
           <div className="flex flex-col space-y-6">
-            <Link to="/" className="inline-block w-[180px] hover:opacity-95 transition-opacity">
-              <img src={logoSrc} alt="Al-Tooba Logo" className="h-10 w-auto brightness-0 invert" />
+            <Link to="/" className="inline-block mr-auto hover:opacity-95 transition-opacity">
+              <img src={logoSrc} alt="Al-Tooba Logo" className="h-20 sm:h-24 w-auto object-left brightness-0 invert" />
             </Link>
             <p className="text-sm leading-relaxed text-muted-green">
               Al Tooba® provides premium prophetic remedies and organic wellness solutions crafted with pure natural essence, shared with love.
@@ -48,60 +48,59 @@ export default function Footer() {
             </form>
           </div>
 
-          {/* Column 2: Discover */}
+          {/* Column 2: Shop & Explore */}
           <div className="flex flex-col space-y-4">
-            <h4 className="text-xs font-sans font-bold uppercase tracking-[0.18em] text-parchment">
-              Discover
+            <h4 className="text-xs font-sans font-bold uppercase tracking-[0.18em] text-parchment hover:text-gold transition-colors">
+              <Link to="/studio">Shop & Explore</Link>
             </h4>
-            <ul className="space-y-3 text-sm">
+            <ul className="space-y-3 text-sm flex flex-col">
               <li>
-                <a href="#labs" className="hover:text-parchment transition-colors">
-                  Labs & Workshops
-                </a>
+                <Link to="/studio" className="hover:text-parchment transition-colors text-muted-green">All Remedies</Link>
               </li>
               <li>
-                <a href="#herbals" className="hover:text-parchment transition-colors">
-                  Pure Herbals
-                </a>
+                <Link to="/studio?category=Talbina" onClick={() => window.scrollTo(0, 0)} className="hover:text-parchment transition-colors text-muted-green">Talbina</Link>
               </li>
               <li>
-                <a href="#sourcing" className="hover:text-parchment transition-colors">
-                  Botanical Sourcing
-                </a>
+                <Link to="/studio?category=Skin%20Care" onClick={() => window.scrollTo(0, 0)} className="hover:text-parchment transition-colors text-muted-green">Skin Care</Link>
               </li>
               <li>
-                <a href="#prophetic" className="hover:text-parchment transition-colors">
-                  Prophetic Science
-                </a>
+                <Link to="/studio?category=Hair%20Care" onClick={() => window.scrollTo(0, 0)} className="hover:text-parchment transition-colors text-muted-green">Hair Care</Link>
               </li>
               <li>
-                <a href="#guide" className="hover:text-parchment transition-colors">
-                  Wellness Guide
-                </a>
+                <Link to="/studio?category=Herbal%20Oil" onClick={() => window.scrollTo(0, 0)} className="hover:text-parchment transition-colors text-muted-green">Herbal Oil</Link>
+              </li>
+              <li>
+                <Link to="/studio?category=Herbal%20Tea" onClick={() => window.scrollTo(0, 0)} className="hover:text-parchment transition-colors text-muted-green">Herbal Tea</Link>
+              </li>
+              <li>
+                <Link to="/studio?category=Vinegars" onClick={() => window.scrollTo(0, 0)} className="hover:text-parchment transition-colors text-muted-green">Vinegars</Link>
+              </li>
+              <li>
+                <Link to="/studio?category=Prophetic%20Remedies" onClick={() => window.scrollTo(0, 0)} className="hover:text-parchment transition-colors text-muted-green">Prophetic Remedies</Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 3: The Mission */}
+          {/* Column 3: Our Heritage */}
           <div className="flex flex-col space-y-4">
-            <h4 className="text-xs font-sans font-bold uppercase tracking-[0.18em] text-parchment">
-              The Mission
+            <h4 className="text-xs font-sans font-bold uppercase tracking-[0.18em] text-parchment hover:text-gold transition-colors">
+              <Link to="/about">Our Heritage</Link>
             </h4>
             <ul className="space-y-3 text-sm">
               <li>
                 <Link to="/about" className="hover:text-parchment transition-colors">
-                  Origin Story
+                  The Origin Story
                 </Link>
               </li>
               <li>
-                <a href="#ingredients" className="hover:text-parchment transition-colors">
-                  Pure Ingredients
-                </a>
+                <Link to="/about" className="hover:text-parchment transition-colors">
+                  Ethical Cultivation
+                </Link>
               </li>
               <li>
-                <a href="#sustainability" className="hover:text-parchment transition-colors">
-                  Sustainability
-                </a>
+                <Link to="/about" className="hover:text-parchment transition-colors">
+                  Prophetic Science
+                </Link>
               </li>
               <li>
                 <Link to="/contact-us" className="hover:text-parchment transition-colors">
@@ -111,43 +110,45 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 4: Concierge */}
+          {/* Column 4: Contact Us */}
           <div className="flex flex-col space-y-4">
-            <h4 className="text-xs font-sans font-bold uppercase tracking-[0.18em] text-parchment">
-              Concierge
+            <h4 className="text-xs font-sans font-bold uppercase tracking-[0.18em] text-parchment hover:text-gold transition-colors">
+              <Link to="/contact-us">Contact Us</Link>
             </h4>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <Link to="/contact-us" className="hover:text-parchment transition-colors">
-                  Get in Touch
-                </Link>
+            <ul className="space-y-3 text-sm text-muted-green">
+              <li className="flex flex-col">
+                <span className="text-parchment/60 text-xs mb-1">Apothecary & HQ</span>
+                <span>Rampur, Uttar Pradesh</span>
+                <span>India</span>
               </li>
-              <li>
-                <a href="#privacy" className="hover:text-parchment transition-colors">
-                  Legal Privacy
-                </a>
-              </li>
-              <li>
-                <a href="#agreement" className="hover:text-parchment transition-colors">
-                  User Agreement
-                </a>
-              </li>
-              <li>
-                <Link to="/contact-us" className="hover:text-parchment transition-colors">
-                  Store Locator
-                </Link>
+              <li className="pt-2 flex flex-col">
+                <span className="text-parchment/60 text-xs mb-1">Direct Support</span>
+                <a href="mailto:sales@al-tooba.com" className="hover:text-parchment transition-colors">sales@al-tooba.com</a>
+                <a href="tel:+918591916905" className="hover:text-parchment transition-colors mt-1">+91 8591916905</a>
               </li>
             </ul>
           </div>
         </div>
 
+        {/* Policy Links */}
+        <div className="py-8 border-t border-parchment/10">
+          <ul className="flex flex-wrap items-center justify-center md:justify-between gap-x-6 gap-y-4 text-[10px] md:text-[11px] uppercase tracking-[0.2em] font-semibold text-[#90b09a]">
+            <li><Link to="/privacy-policy" className="hover:text-gold hover:-translate-y-0.5 inline-block transition-transform duration-300">Privacy Policy</Link></li>
+            <li><Link to="/terms-conditions" className="hover:text-gold hover:-translate-y-0.5 inline-block transition-transform duration-300">Terms & Conditions</Link></li>
+            <li><Link to="/shipping-policy" className="hover:text-gold hover:-translate-y-0.5 inline-block transition-transform duration-300">Shipping Policy</Link></li>
+            <li><Link to="/return-refund" className="hover:text-gold hover:-translate-y-0.5 inline-block transition-transform duration-300">Return & Refund</Link></li>
+            <li><Link to="/cancellation-policy" className="hover:text-gold hover:-translate-y-0.5 inline-block transition-transform duration-300">Cancellation Policy</Link></li>
+          </ul>
+        </div>
+
         {/* Bottom copyright details */}
-        <div className="pt-8 border-t border-parchment/10 text-center flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-[11px] text-[#5a8060] font-sans font-semibold tracking-wider">
-            © {new Date().getFullYear()} AL-TOOBA® PROPHETIC REMEDIES PVT. LTD. ALL RIGHTS RESERVED.
-          </p>
-          <p className="text-[11px] text-[#5a8060] font-sans font-semibold tracking-wider">
-            DESIGNED & CRAFTED FOR WELLNESS & PURITY.
+        <div className="pt-8 border-t border-parchment/10 flex flex-col md:flex-row items-center justify-start gap-2 text-left">
+          <p className="text-[11px] text-[#5a8060] font-sans font-semibold tracking-wider flex flex-wrap items-center justify-center md:justify-start gap-2">
+            <span>© {new Date().getFullYear()} AL-TOOBA®. ALL RIGHTS RESERVED.</span>
+            <span className="hidden md:inline">|</span>
+            <span>
+              DEVELOPED BY <a href="https://sociallyconnect.in" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition-colors font-bold">SOCIALLY CONNECT</a>
+            </span>
           </p>
         </div>
       </div>

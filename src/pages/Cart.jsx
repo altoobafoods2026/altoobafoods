@@ -271,25 +271,29 @@ export default function Cart() {
                   <h3 className="font-serif font-bold text-xl text-parchment mb-4">Apothecary Lab</h3>
                   <p className="text-sm text-parchment/75 leading-relaxed font-sans">
                     Al-Tooba® Prophetic Remedies Pvt. Ltd.<br />
-                    Plot 12-C, Sector H-9/4, Industrial Area,<br />
-                    Islamabad, Pakistan
+                    Rampur, Uttar Pradesh,<br />
+                    India
                   </p>
                 </div>
 
                 <div>
                   <h3 className="font-serif font-bold text-xl text-parchment mb-4">Direct Contact</h3>
                   <ul className="space-y-3 text-sm text-parchment/75 font-sans">
-                    <li className="flex items-center gap-2">
-                      <span className="text-gold font-bold">📞</span>
-                      <span>+92 (300) 111-TOOB (8662)</span>
+                    <li className="flex items-start gap-2">
+                      <span className="text-gold font-bold mt-0.5">📞</span>
+                      <div className="flex flex-col gap-1">
+                        <span>+91 8591916905</span>
+                        <span>+91 8433439628</span>
+                        <span>+91 8433284322</span>
+                      </div>
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="text-gold font-bold">✉️</span>
-                      <a href="mailto:healing@al-tooba.com" className="hover:text-gold transition-colors">healing@al-tooba.com</a>
+                      <a href="mailto:sales@al-tooba.com" className="hover:text-gold transition-colors">sales@al-tooba.com</a>
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="text-gold font-bold">💬</span>
-                      <span>WhatsApp Support: +92 300 1234567</span>
+                      <span>WhatsApp: +91 8591916905</span>
                     </li>
                   </ul>
                 </div>
@@ -298,16 +302,8 @@ export default function Cart() {
                   <h3 className="font-serif font-bold text-xl text-parchment mb-4">Operational Hours</h3>
                   <ul className="space-y-2 text-sm text-parchment/75 font-sans">
                     <li className="flex justify-between">
-                      <span>Monday - Friday</span>
-                      <span className="font-semibold text-parchment">09:00 AM - 06:00 PM</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span>Saturday</span>
-                      <span className="font-semibold text-parchment">10:00 AM - 04:00 PM</span>
-                    </li>
-                    <li className="flex justify-between text-parchment/40">
-                      <span>Sunday</span>
-                      <span className="italic">Closed (Rest Day)</span>
+                      <span>Monday - Sunday</span>
+                      <span className="font-semibold text-parchment">24x7 (Always Open)</span>
                     </li>
                   </ul>
                 </div>
@@ -317,7 +313,7 @@ export default function Cart() {
                   <span className="text-xl mb-2 block">🕋</span>
                   <h4 className="font-serif font-bold text-parchment mb-1 text-sm">International Orders</h4>
                   <p className="text-xs text-parchment/70 font-sans leading-relaxed">
-                    We ship to Saudi Arabia, UAE, UK, and USA. International inquiries can be forwarded to <a href="mailto:global@al-tooba.com" className="font-bold text-parchment hover:text-gold">global@al-tooba.com</a>.
+                    We ship to Saudi Arabia, UAE, UK, and USA. International inquiries can be forwarded to <a href="mailto:sales@al-tooba.com" className="font-bold text-parchment hover:text-gold">sales@al-tooba.com</a>.
                   </p>
                 </div>
               </div>

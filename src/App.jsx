@@ -4,15 +4,16 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Toast from './components/Toast';
 import TestimonialSection from './components/TestimonialSection';
-import EducateYourself from './components/EducateYourself';
 import InstagramReels from './components/InstagramReels';
 import ScrollToTop from './components/ScrollToTop';
 import TrustedBy from './components/TrustedBy';
+import CraftedWithCare from './components/CraftedWithCare';
 
 // Lazy load the page components
 const Home = lazy(() => import('./pages/Home'));
 const Studio = lazy(() => import('./pages/Studio'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const Booking = lazy(() => import('./pages/Booking'));
 const Cart = lazy(() => import('./pages/Cart'));
 const Checkout = lazy(() => import('./pages/Checkout'));
 const About = lazy(() => import('./pages/About'));
@@ -21,6 +22,7 @@ const JournalPost = lazy(() => import('./pages/JournalPost'));
 const ContactUs = lazy(() => import('./pages/ContactUs'));
 const Wishlist = lazy(() => import('./pages/Wishlist'));
 const Login = lazy(() => import('./pages/Login'));
+const PolicyPage = lazy(() => import('./pages/PolicyPage'));
 
 // Loading screen fallback for lazy loading
 const LoadingFallback = () => (
@@ -43,7 +45,12 @@ const GlobalSections = () => {
     location.pathname === '/about' ||
     location.pathname === '/login' ||
     location.pathname === '/cart' ||
-    location.pathname.startsWith('/product/')
+    location.pathname.startsWith('/product/') ||
+    location.pathname === '/privacy-policy' ||
+    location.pathname === '/terms-conditions' ||
+    location.pathname === '/shipping-policy' ||
+    location.pathname === '/return-refund' ||
+    location.pathname === '/cancellation-policy'
   ) {
     return null;
   }
@@ -51,8 +58,8 @@ const GlobalSections = () => {
   return (
     <>
       <TestimonialSection />
-      <EducateYourself />
       <InstagramReels />
+      <CraftedWithCare />
     </>
   );
 };
@@ -79,11 +86,19 @@ export default function App() {
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/about" element={<About />} />
-              <Route path="/journal" element={<Journal />} />
+              <Route path="/consultation" element={<Journal />} />
+              <Route path="/booking" element={<Booking />} />
               <Route path="/journal/:slug" element={<JournalPost />} />
               <Route path="/contact-us" element={<ContactUs />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/login" element={<Login />} />
+              
+              {/* Policy Pages */}
+              <Route path="/privacy-policy" element={<PolicyPage title="Privacy Policy" />} />
+              <Route path="/terms-conditions" element={<PolicyPage title="Terms & Conditions" />} />
+              <Route path="/shipping-policy" element={<PolicyPage title="Shipping Policy" />} />
+              <Route path="/return-refund" element={<PolicyPage title="Return & Refund" />} />
+              <Route path="/cancellation-policy" element={<PolicyPage title="Cancellation Policy" />} />
               
               {/* Fallback to Home */}
               <Route path="*" element={<Home />} />

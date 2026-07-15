@@ -1,8 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { products } from '../data/products';
+import { getProducts } from '../services/shopify';
 import HeroParticles from '../components/HeroParticles';
 import About3DCarousel from '../components/About3DCarousel';
 import NoorCategories from '../components/noor/NoorCategories';
@@ -13,6 +13,9 @@ import NoorQuoteDivider from '../components/noor/NoorQuoteDivider';
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const containerRef = useRef(null);
   const headlineRef = useRef(null);
   const subtextRef = useRef(null);
@@ -35,6 +38,18 @@ export default function Home() {
   };
 
   useEffect(() => {
+    async function loadProducts() {
+      try {
+        const fetchedProducts = await getProducts();
+        setProducts(fetchedProducts);
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadProducts();
+
     let ctx = gsap.context(() => {
       // 1. Stagger reveal characters on load
       const tl = gsap.timeline();
@@ -87,75 +102,94 @@ export default function Home() {
     document.getElementById('explore-section')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const regularProducts = products.filter(p => !(p.collections && p.collections.includes('hero-section-3d-images')));
+
   return (
     <div ref={containerRef} className="relative w-full overflow-hidden">
       {/* 1. Fullscreen Hero Section */}
-      <section className="relative w-full min-h-[78.5vh] flex flex-col items-center justify-end text-center px-6 pt-32 pb-16 md:pt-0 md:pb-0 overflow-hidden">
+      <section className="relative w-full min-h-[100svh] flex flex-col items-center justify-start text-center px-0 md:px-6 pt-[90px] md:pt-[100px] pb-4 md:pb-0 overflow-hidden">
         {/* Background Video */}
         <video
           className="absolute inset-0 w-full h-full object-cover z-0"
-          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_083109_283f3553-e28f-428b-a723-d639c617eb2b.mp4"
+          src="src\assets\Islamic_Altooba_.mp4"
           poster="/hero_bg.jpg"
           autoPlay
-          muted
           loop
+          muted
           playsInline
           preload="auto"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0D3B2A]/15 via-transparent to-[#0D3B2A]/15 z-0" />
+        
+        {/* Cinematic Grading Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0D3B2A]/40 via-transparent to-[#0D3B2A]/20 z-0 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent z-0 pointer-events-none md:block hidden" />
+        <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-[#FAF7F2]/10 to-transparent mix-blend-overlay pointer-events-none" />
 
-        {/* Floating Bokeh Particles */}
+        {/* Floating Golden Particles (Luxury effect) */}
         <HeroParticles />
 
         {/* Hero Content Wrapper */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-0 sm:px-8 flex flex-col-reverse md:flex-row items-center justify-center gap-8 md:gap-12 pb-12">
+        <div className="relative z-10 w-full h-full flex-grow max-w-7xl mx-auto px-4 sm:px-8 flex flex-col md:flex-row items-center justify-start md:justify-between pt-[15vh] md:pt-0 pb-[30vh] md:pb-0">
           
-          {/* Left: Text Content */}
-          <div className="w-full md:w-1/2 flex flex-col items-center md:items-start justify-end text-center md:text-left relative z-30 px-6 sm:px-0">
-            {/* Headline */}
+          {/* Left: Text, CTA & Trust Badges */}
+          <div className="w-full md:w-[45%] flex flex-col items-center md:items-start justify-center text-center md:text-left relative z-30 mt-0">
+            {/* Small Golden Leaf Icon */}
+            <div className="mb-4 opacity-90">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C12 2 11 6 7 8C11 8 12 12 12 12C12 12 13 8 17 8C13 6 12 2 12 2Z" fill="#D4A24C"/>
+                <path d="M12 22C12 22 13.5 17 18 15C13.5 15 12 10 12 10C12 10 10.5 15 6 15C10.5 17 12 22 12 22Z" fill="#D4A24C" opacity="0.7"/>
+              </svg>
+            </div>
+            {/* Premium Headline */}
             <h1
               ref={headlineRef}
-              className="text-4xl sm:text-6xl md:text-7xl leading-[0.95] tracking-tight font-serif select-none text-white drop-shadow-[0_16px_24px_rgba(0,0,0,0.5)]"
+              className="text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl lg:text-7xl tracking-tight font-serif select-none text-white drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)]"
             >
-              <div className="flex flex-wrap justify-start gap-x-4">
+              <div className="flex flex-wrap justify-center md:justify-start gap-x-3">
                 <span>{splitText('Reviving', false)}</span>
-                <span>{splitText('Sunnah,', true)}</span>
+                <span className="text-[#D4A24C] italic">{splitText('Sunnah,', true)}</span>
               </div>
-              <div className="flex flex-wrap justify-start gap-x-4 mt-2">
+              <div className="flex flex-wrap justify-center md:justify-start gap-x-3 mt-1">
                 <span>{splitText('restoring', false)}</span>
-                <span>{splitText('purity.', true)}</span>
+                <span className="text-[#D4A24C] italic">{splitText('purity.', true)}</span>
               </div>
             </h1>
 
-            {/* Subtext and Button Container */}
-            <div className="max-w-xl w-full mt-8">
+            {/* Short Luxury Description */}
+            <div className="max-w-[400px] w-full mt-4 md:mt-6">
               <p
                 ref={subtextRef}
-                className="text-sm sm:text-base text-white/90 leading-relaxed font-sans opacity-0 drop-shadow-[0_10px_18px_rgba(0,0,0,0.4)]"
+                className="text-sm md:text-base text-white/95 leading-snug font-sans opacity-0 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)] font-medium"
               >
-                Embrace the healing wisdom of Tibb-e-Nabawi. We curate organic, Sunnah-inspired botanical remedies crafted from pure, halal ingredients to nourish your soul, mind, and body.
+                Embrace the healing wisdom of Tibb-e-Nabawi. Premium organic remedies crafted to nourish soul, mind, and body.
               </p>
 
-              {/* CTA Button */}
-              <div ref={ctaRef} className="mt-8 flex justify-start opacity-0">
+              {/* CTA Premium Pill Button */}
+              <div ref={ctaRef} className="mt-6 md:mt-8 flex justify-center md:justify-start opacity-0">
                 <button
                   onClick={handleCTAClick}
-                  className="rounded-full px-10 py-4 text-xs font-sans font-bold uppercase tracking-widest bg-parchment text-forest border border-forest/20 hover:bg-forest hover:text-parchment hover:border-transparent transition-all duration-300 hover:scale-105 active:scale-95 btn-shimmer shadow-lg cursor-pointer"
+                  className="group relative overflow-hidden rounded-full px-8 py-3.5 text-[11px] sm:text-xs font-sans font-extrabold uppercase tracking-[0.15em] bg-gradient-to-r from-[#eec373] via-[#D4A24C] to-[#eec373] text-[#0D3B2A] border-none shadow-[0_8px_25px_rgba(212,162,76,0.4)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                 >
-                  Explore Now
+                  <span className="relative z-10 flex items-center gap-2">
+                    EXPLORE COLLECTION
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                  </span>
+                  <div className="absolute inset-0 bg-white/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
                 </button>
               </div>
+
             </div>
           </div>
 
-          {/* Right: 3D Premium Carousel */}
-          <div className="w-full md:w-1/2 flex justify-center md:justify-end -mt-[50%] md:mt-0 relative z-20">
-            <div className="w-full max-w-md origin-center md:origin-right flex justify-center">
-               <About3DCarousel />
+          {/* Right: 3D Product Centerpiece */}
+          <div className="w-full md:w-[50%] flex justify-center absolute bottom-[10vh] md:relative md:bottom-0 left-0 right-0 z-20 pointer-events-none md:pointer-events-auto md:mb-20">
+            <div className="w-full origin-bottom flex justify-center">
+               <About3DCarousel products={products} />
             </div>
           </div>
 
         </div>
+
       </section>
 
       {/* 2. Text Marquee Strip */}
@@ -173,17 +207,17 @@ export default function Home() {
       </div>
 
       {/* 3. Shop By Categories (Noor Remedies) */}
-      <NoorCategories />
+      <NoorCategories products={regularProducts} />
 
-      {/* 4. Our Best Sellers (Noor Remedies) */}
+      {/* 4. Best Sellers Section */}
       <div id="explore-section">
-        <NoorBestSellers />
+        <NoorBestSellers products={regularProducts} />
       </div>
 
-      {/* Complete Collection (Mehrab Cards) */}
-      <NoorCompleteCollection />
+      {/* 5. Complete Collection Section */}
+      <NoorCompleteCollection products={regularProducts} />
 
-      {/* 5. Brand Value / Hadith Divider */}
+      {/* 6. Brand Value / Hadith Divider */}
       <NoorQuoteDivider />
     </div>
   );

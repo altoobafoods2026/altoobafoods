@@ -1,19 +1,71 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-
-const shorts = [
-  { id: 1, image: 'https://images.unsplash.com/photo-1611078732627-7cdb22fb408b?q=80&w=600&auto=format&fit=crop', title: 'Herbal Routine', channel: 'Ruhani Souq', time: '0:15 / 0:45', embed: 'https://www.instagram.com/reel/C_uOf2ViJWm/embed' },
-  { id: 2, image: 'https://images.unsplash.com/photo-1608248593842-8d7d896173d1?q=80&w=600&auto=format&fit=crop', title: 'Main Ruhani Talbina Hu', channel: 'Ruhani Souq', time: '0:30 / 1:00', embed: 'https://www.instagram.com/reel/DZz1F4vz_K3/embed' },
-  { id: 3, image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=600&auto=format&fit=crop', title: 'Power Of Kalonji', channel: 'Ruhani Souq', time: '0:02 / 1:00', embed: 'https://www.instagram.com/reel/DZr_grEzSQS/embed' },
-  { id: 4, image: 'https://images.unsplash.com/photo-1615397323215-bdf97f0fb525?q=80&w=600&auto=format&fit=crop', title: 'Ruhani Talbina In Madina', channel: 'Ruhani Souq', time: '0:10 / 0:50', embed: 'https://www.instagram.com/reel/DZh1QCnTcte/embed' },
-  { id: 5, image: 'https://images.unsplash.com/photo-1611078449911-37d45c55be0f?q=80&w=600&auto=format&fit=crop', title: 'Morning Routine', channel: 'Ruhani Souq', time: '0:05 / 0:30', embed: 'https://www.instagram.com/reel/DUIfcrzjC2u/embed' },
-];
+import { getCollectionVideos } from '../services/shopify';
 
 export default function InstagramReels() {
   const [currentIndex, setCurrentIndex] = useState(2);
+  const [shorts, setShorts] = useState([]);
+  const [isMuted, setIsMuted] = useState(true);
+  
+  // Touch swipe state
+  const [touchStartX, setTouchStartX] = useState(0);
+  const [touchEndX, setTouchEndX] = useState(0);
+  
+  // Mobile responsiveness for 3D Math
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize(); // Initial check
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEndX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX || !touchEndX) return;
+    const distance = touchStartX - touchEndX;
+    const minSwipeDistance = 50;
+    
+    if (distance > minSwipeDistance && currentIndex < shorts.length - 1) {
+      // Swiped left
+      setCurrentIndex(prev => prev + 1);
+    }
+    
+    if (distance < -minSwipeDistance && currentIndex > 0) {
+      // Swiped right
+      setCurrentIndex(prev => prev - 1);
+    }
+    
+    setTouchStartX(0);
+    setTouchEndX(0);
+  };
+
+  useEffect(() => {
+    const fetchVideos = async () => {
+      const videos = await getCollectionVideos('videos_instagram');
+      setShorts(videos);
+      if (videos.length > 0) {
+        // Set the center video based on how many we got
+        setCurrentIndex(Math.floor(videos.length / 2));
+      }
+    };
+    fetchVideos();
+  }, []);
+
+  if (shorts.length === 0) {
+    return null; // Or a loading spinner
+  }
 
   return (
-    <section className="bg-[#e9f2e9] py-20 border-t border-[#FAF7F2] relative overflow-hidden flex flex-col items-center justify-center min-h-[800px]">
+    <section className="bg-[#FAF7F2] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white via-[#FAF7F2] to-[#FAF7F2] pt-10 pb-4 border-t border-[#D4A24C]/20 relative overflow-hidden flex flex-col items-center">
       
       {/* Header Area */}
       <div className="w-full max-w-[1400px] mx-auto px-6 sm:px-8 mb-12 text-center z-10 relative">
@@ -26,7 +78,7 @@ export default function InstagramReels() {
           transition={{ delay: 0.1 }}
           className="text-4xl md:text-5xl font-serif font-bold text-[#0D3B2A] mb-4"
         >
-          Benefits Of Our Products
+          Witness the Purity
         </motion.h2>
         
         <motion.p
@@ -34,14 +86,14 @@ export default function InstagramReels() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.2 }}
-          className="text-gray-600 max-w-2xl mx-auto font-sans text-sm md:text-base"
+          className="text-[#0D3B2A]/70 max-w-2xl mx-auto font-sans text-sm md:text-base leading-relaxed"
         >
-          Join our community and explore the benefits of purely natural lifestyle choices, straight from our Instagram.
+          Explore the authentic essence of Al-Tooba. Watch our videos to discover the rich ingredients, traditional preparation, and real benefits of our Prophetic remedies.
         </motion.p>
       </div>
 
       {/* Navigation Buttons and Carousel Container */}
-      <div className="relative w-full max-w-[1400px] flex items-center justify-center mb-8">
+      <div className="relative w-full max-w-[1400px] flex items-center justify-center mb-0 sm:mb-2">
         
         {/* Left Button */}
         <button 
@@ -53,7 +105,12 @@ export default function InstagramReels() {
         </button>
 
         {/* 3D Carousel */}
-        <div className="relative w-full h-[650px] flex items-center justify-center perspective-[1000px]">
+        <div 
+          className="relative w-full h-[650px] flex items-center justify-center perspective-[1000px] touch-pan-y"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           {shorts.map((short, index) => {
             const diff = index - currentIndex;
             const absDiff = Math.abs(diff);
@@ -61,12 +118,15 @@ export default function InstagramReels() {
             const isAdjacent = absDiff === 1;
             const isOuter = absDiff > 1;
 
+            const shift = isMobile ? 200 : 300;
+            const doubleShift = isMobile ? 320 : 500;
+
             let x = 0;
-            if (diff === -2) x = -500;
-            if (diff === -1) x = -300;
+            if (diff === -2) x = -doubleShift;
+            if (diff === -1) x = -shift;
             if (diff === 0) x = 0;
-            if (diff === 1) x = 300;
-            if (diff === 2) x = 500;
+            if (diff === 1) x = shift;
+            if (diff === 2) x = doubleShift;
 
             if (absDiff > 2) return null;
 
@@ -81,20 +141,42 @@ export default function InstagramReels() {
                   zIndex: 10 - absDiff,
                 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="absolute w-[340px] h-[600px] rounded-[24px] overflow-hidden shadow-2xl bg-white"
+                className={`absolute rounded-[24px] overflow-hidden shadow-2xl bg-white ${
+                  isMobile ? 'w-[260px] h-[460px]' : 'w-[340px] h-[600px]'
+                }`}
               >
-                {/* Adding a dynamic key ensures the iframe unmounts and remounts when it leaves the center, stopping the video */}
-                <iframe 
+                {/* Native video tag is the most premium and cleanest way to display a video */}
+                <video 
                   key={`${short.id}-${isCenter}`}
-                  src={short.embed} 
-                  width="340" 
-                  height="600" 
-                  frameBorder="0" 
-                  scrolling="no" 
-                  allowtransparency="true"
-                  allow="encrypted-media"
-                  className="w-full h-full scale-[1.01]"
-                ></iframe>
+                  src={short.videoSrc}
+                  autoPlay={isCenter}
+                  loop
+                  muted={isMuted}
+                  playsInline
+                  className="w-full h-full object-contain bg-black"
+                ></video>
+
+                {/* Mute/Unmute Button for Center Video */}
+                {isCenter && (
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsMuted(!isMuted);
+                    }}
+                    className="absolute bottom-4 right-4 z-50 p-3 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors backdrop-blur-sm"
+                  >
+                    {isMuted ? (
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                      </svg>
+                    ) : (
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                      </svg>
+                    )}
+                  </button>
+                )}
 
                 {/* Invisible overlay for non-center cards to capture click for rotation and block iframe interaction */}
                 {!isCenter && (
