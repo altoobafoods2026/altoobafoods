@@ -9,6 +9,7 @@ import NoorCategories from '../components/noor/NoorCategories';
 import NoorBestSellers from '../components/noor/NoorBestSellers';
 import NoorCompleteCollection from '../components/noor/NoorCompleteCollection';
 import NoorQuoteDivider from '../components/noor/NoorQuoteDivider';
+import heroVideo from '../assets/Islamic_Altooba_.mp4';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -111,7 +112,7 @@ export default function Home() {
         {/* Background Video */}
         <video
           className="absolute inset-0 w-full h-full object-cover z-0"
-          src="src\assets\Islamic_Altooba_.mp4"
+          src={heroVideo}
           poster="/hero_bg.jpg"
           autoPlay
           loop
