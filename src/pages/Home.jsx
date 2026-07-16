@@ -9,7 +9,6 @@ import NoorCategories from '../components/noor/NoorCategories';
 import NoorBestSellers from '../components/noor/NoorBestSellers';
 import NoorCompleteCollection from '../components/noor/NoorCompleteCollection';
 import NoorQuoteDivider from '../components/noor/NoorQuoteDivider';
-import heroVideo from '../assets/Islamic_Altooba_.mp4';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -109,10 +108,10 @@ export default function Home() {
     <div ref={containerRef} className="relative w-full overflow-hidden">
       {/* 1. Fullscreen Hero Section */}
       <section className="relative w-full min-h-[100svh] flex flex-col items-center justify-start text-center px-0 md:px-6 pt-[90px] md:pt-[100px] pb-4 md:pb-0 overflow-hidden">
-        {/* Background Video */}
+         {/* Background Video */}
         <video
           className="absolute inset-0 w-full h-full object-cover object-bottom z-0"
-          src={heroVideo}
+          src="/Islamic_Altooba_.mp4"
           poster="/hero_bg.jpg"
           autoPlay
           loop
@@ -135,7 +134,7 @@ export default function Home() {
           {/* Left: Text, CTA & Trust Badges */}
           <div className="w-full lg:w-[45%] flex flex-col items-center lg:items-start justify-center text-center lg:text-left relative z-30 mt-0">
             {/* Small Golden Leaf Icon */}
-            <div className="mb-4 opacity-90">
+            <div className="mb-2 lg:mb-3 xl:mb-4 opacity-90">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2C12 2 11 6 7 8C11 8 12 12 12 12C12 12 13 8 17 8C13 6 12 2 12 2Z" fill="#D4A24C"/>
                 <path d="M12 22C12 22 13.5 17 18 15C13.5 15 12 10 12 10C12 10 10.5 15 6 15C10.5 17 12 22 12 22Z" fill="#D4A24C" opacity="0.7"/>
@@ -144,20 +143,20 @@ export default function Home() {
             {/* Premium Headline */}
             <h1
               ref={headlineRef}
-              className="text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl lg:text-7xl tracking-tight font-serif select-none text-white drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)]"
+              className="text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl lg:text-[3.5rem] xl:text-7xl tracking-tight font-serif select-none text-white drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)]"
             >
-              <div className="flex flex-wrap justify-center md:justify-start gap-x-3">
+              <div className="flex flex-wrap justify-center lg:justify-start gap-x-3">
                 <span>{splitText('Reviving', false)}</span>
                 <span className="text-[#D4A24C] italic">{splitText('Sunnah,', true)}</span>
               </div>
-              <div className="flex flex-wrap justify-center md:justify-start gap-x-3 mt-1">
+              <div className="flex flex-wrap justify-center lg:justify-start gap-x-3 mt-1">
                 <span>{splitText('restoring', false)}</span>
                 <span className="text-[#D4A24C] italic">{splitText('purity.', true)}</span>
               </div>
             </h1>
 
             {/* Short Luxury Description */}
-            <div className="max-w-[400px] w-full mt-4 md:mt-6">
+            <div className="max-w-[400px] w-full mt-3 md:mt-4 xl:mt-6">
               <p
                 ref={subtextRef}
                 className="text-sm md:text-base text-white/95 leading-snug font-sans opacity-0 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)] font-medium"
@@ -166,7 +165,7 @@ export default function Home() {
               </p>
 
               {/* CTA Premium Pill Button */}
-              <div ref={ctaRef} className="mt-6 lg:mt-8 flex justify-center lg:justify-start opacity-0">
+              <div ref={ctaRef} className="mt-5 xl:mt-8 flex justify-center lg:justify-start opacity-0">
                 <button
                   onClick={handleCTAClick}
                   className="group relative overflow-hidden rounded-full px-8 py-3.5 text-[11px] sm:text-xs font-sans font-extrabold uppercase tracking-[0.15em] bg-gradient-to-r from-[#eec373] via-[#D4A24C] to-[#eec373] text-[#0D3B2A] border-none shadow-[0_8px_25px_rgba(212,162,76,0.4)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
@@ -185,7 +184,7 @@ export default function Home() {
           {/* Right: 3D Product Centerpiece */}
           <div className="w-full lg:w-[45%] flex justify-center absolute bottom-[10vh] lg:bottom-0 left-0 right-0 lg:left-auto lg:right-[5%] z-20 pointer-events-none lg:pointer-events-auto lg:mb-[14.5vh]">
             <div className="w-full origin-bottom flex justify-center">
-               <About3DCarousel products={products} />
+               {products.length > 0 && <About3DCarousel products={products} />}
             </div>
           </div>
 
