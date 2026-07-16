@@ -58,7 +58,7 @@ export default function About3DCarousel({ products = [] }) {
   };
 
   return (
-    <div className="relative w-full h-[40vh] md:h-[55vh] lg:h-[65vh] max-h-[600px] flex flex-col items-center justify-end pointer-events-none select-none overflow-visible">
+    <div className="relative w-full h-[45vh] md:h-[62vh] lg:h-[72vh] max-h-[700px] flex flex-col items-center justify-end pointer-events-none select-none overflow-visible">
       <AnimatePresence mode="wait">
           <motion.div
             key={currentIndex}
@@ -85,32 +85,14 @@ export default function About3DCarousel({ products = [] }) {
               className="flex items-end justify-center w-full h-full relative"
             >
               
-              {/* --- REALISTIC SURFACE SHADOWS --- */}
 
-              {/* 1. Cast Shadow (Light from upper-left) */}
-              <div 
-                className="absolute bottom-[2%] left-[45%] w-[100%] h-[20px] bg-[#0a150e]/40 blur-[12px] rounded-[100%] origin-left"
-                style={{ zIndex: -3, transform: 'skewX(50deg) rotate(-3deg)' }}
-              />
-              
-              {/* 2. Ambient Occlusion (Grounding blur) */}
-              <div 
-                className="absolute bottom-[0px] w-[75%] h-[12px] bg-[#0a150e]/60 blur-[6px] rounded-[100%]"
-                style={{ zIndex: -2 }}
-              />
-
-              {/* 3. Core Contact Shadow (Exactly under bottle) */}
-              <div 
-                className="absolute bottom-[1px] w-[60%] h-[4px] bg-[#050a07]/90 blur-[2px] rounded-[100%]"
-                style={{ zIndex: -1 }}
-              />
 
               {/* --- PRODUCT BOTTLE --- */}
               {/* Mobile: 90% width. Desktop: auto width/tall, viewport relative to prevent cutoff */}
               <img 
                 src={displayImages[currentIndex]} 
                 alt="Premium Showcase"
-                className={`relative z-10 w-[90%] sm:w-[65%] md:w-auto object-contain object-bottom h-[30vh] sm:h-[35vh] md:h-[40vh] lg:h-[48vh] xl:h-[55vh] max-h-[550px] sepia-[.15] contrast-[1.05] brightness-[0.95] saturate-[1.10] transform-gpu ${
+                className={`relative z-10 w-[85%] sm:w-[70%] md:w-[330px] lg:w-[380px] xl:w-[420px] object-contain object-bottom h-[36vh] sm:h-[42vh] md:h-[48vh] lg:h-[55vh] xl:h-[62vh] max-h-[650px] sepia-[.15] contrast-[1.05] brightness-[0.95] saturate-[1.10] transform-gpu ${
                   displayImages[currentIndex]?.toLowerCase().includes('kalonji') || 
                   displayImages[currentIndex]?.toLowerCase().includes('black-seed') 
                     ? 'translate-y-[27%]' 
@@ -129,7 +111,7 @@ export default function About3DCarousel({ products = [] }) {
               <img 
                 src={displayImages[currentIndex]} 
                 alt="Reflection"
-                className={`absolute top-[88%] z-[-4] w-[90%] sm:w-[65%] md:w-auto object-contain object-top h-[30vh] sm:h-[35vh] md:h-[40vh] lg:h-[48vh] xl:h-[55vh] max-h-[550px] opacity-[0.06] blur-[4px] pointer-events-none ${
+                className={`absolute top-[88%] z-[-4] w-[85%] sm:w-[70%] md:w-[330px] lg:w-[380px] xl:w-[420px] object-contain object-top h-[36vh] sm:h-[42vh] md:h-[48vh] lg:h-[55vh] xl:h-[62vh] max-h-[650px] opacity-[0.06] blur-[4px] pointer-events-none ${
                   displayImages[currentIndex]?.toLowerCase().includes('kalonji') || 
                   displayImages[currentIndex]?.toLowerCase().includes('black-seed') 
                     ? 'translate-y-[27%]' 
@@ -148,20 +130,7 @@ export default function About3DCarousel({ products = [] }) {
           </motion.div>
       </AnimatePresence>
       
-      {/* Carousel Indicators (Dots) */}
-      <div className="absolute bottom-[3%] left-0 w-full flex justify-center gap-2.5 z-50 pointer-events-auto">
-        {displayImages.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => setCurrentIndex(idx)}
-            className={`w-2 h-2 rounded-full transition-all duration-500 shadow-sm border border-[#0D3B2A]/40 ${
-              idx === currentIndex 
-                ? 'bg-[#D4A24C] scale-110 opacity-100' 
-                : 'bg-transparent border-[#D4A24C] scale-100 opacity-60 hover:opacity-100'
-            }`}
-          />
-        ))}
-      </div>
+
     </div>
   );
 }
