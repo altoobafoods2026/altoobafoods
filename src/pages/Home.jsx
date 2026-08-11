@@ -24,8 +24,8 @@ export default function Home() {
 
   // Custom text splitter for character stagger animation
   const splitText = (text, isItalic = false) => {
-    const textColor = isItalic ? 'text-[#D4A24C]' : 'text-white';
-    const fontClass = isItalic ? 'font-serif italic font-normal' : 'font-serif font-bold';
+    const textColor = isItalic ? 'text-[#738F3A]' : 'text-white';
+    const fontClass = isItalic ? 'font-serif italic font-bold' : 'font-serif font-bold';
     
     return text.split('').map((char, index) => (
       <span
@@ -107,7 +107,7 @@ export default function Home() {
   return (
     <div ref={containerRef} className="relative w-full overflow-hidden">
       {/* 1. Fullscreen Hero Section */}
-      <section className="relative w-full min-h-[100svh] flex flex-col items-center justify-start text-center px-0 md:px-6 pt-[90px] md:pt-[100px] pb-4 md:pb-0 overflow-hidden">
+      <section className="relative w-full min-h-svh flex flex-col items-center justify-start text-center px-0 md:px-6 pt-[90px] md:pt-[100px] pb-4 md:pb-0 overflow-hidden">
          {/* Background Video */}
         <video
           className="absolute inset-0 w-full h-full object-cover object-bottom z-0"
@@ -132,7 +132,7 @@ export default function Home() {
         <div className="relative z-10 w-full h-full flex-grow max-w-7xl mx-auto px-4 sm:px-8 flex flex-col lg:flex-row items-center justify-start lg:justify-between pt-[15vh] lg:pt-0 pb-[30vh] lg:pb-0">
           
           {/* Left: Text, CTA & Trust Badges */}
-          <div className="w-full lg:w-[45%] flex flex-col items-center lg:items-start justify-center text-center lg:text-left relative z-30 mt-0">
+          <div className="w-full lg:w-[60%] flex flex-col items-center lg:items-start justify-center text-center lg:text-left relative z-30 mt-0">
             {/* Small Golden Leaf Icon */}
             <div className="mb-2 lg:mb-3 xl:mb-4 opacity-90">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -147,11 +147,11 @@ export default function Home() {
             >
               <div className="flex flex-wrap justify-center lg:justify-start gap-x-3">
                 <span>{splitText('Reviving', false)}</span>
-                <span className="text-[#D4A24C] italic">{splitText('Sunnah,', true)}</span>
+                <span className="text-[#738F3A] italic">{splitText('Sunnah,', true)}</span>
               </div>
               <div className="flex flex-wrap justify-center lg:justify-start gap-x-3 mt-1">
                 <span>{splitText('restoring', false)}</span>
-                <span className="text-[#D4A24C] italic">{splitText('purity.', true)}</span>
+                <span className="text-[#738F3A] italic">{splitText('purity.', true)}</span>
               </div>
             </h1>
 
@@ -182,7 +182,7 @@ export default function Home() {
           </div>
 
           {/* Right: 3D Product Centerpiece */}
-          <div className="w-full lg:w-[45%] flex justify-center absolute bottom-[10vh] lg:bottom-0 left-0 right-0 lg:left-auto lg:right-[5%] z-20 pointer-events-none lg:pointer-events-auto lg:mb-[14.5vh]">
+          <div className="w-full lg:w-[45%] flex justify-center absolute bottom-[13vh] lg:bottom-0 left-0 right-0 lg:left-auto lg:right-[5%] z-20 pointer-events-none lg:pointer-events-auto lg:mb-[17.5vh]">
             <div className="w-full origin-bottom flex justify-center">
                {products.length > 0 && <About3DCarousel products={products} />}
             </div>
@@ -193,7 +193,7 @@ export default function Home() {
       </section>
 
       {/* 2. Text Marquee Strip */}
-      <div className="w-full bg-[#203d1e] border-y border-parchment/10 py-4 overflow-hidden relative z-10 select-none">
+      <div className="w-full bg-[#203D1E] border-y border-parchment/10 py-4 overflow-hidden relative z-10 select-none">
         <div ref={marqueeRef} className="flex whitespace-nowrap gap-16 text-parchment/80 font-serif italic text-lg sm:text-xl">
           {[...Array(6)].map((_, i) => (
             <span key={i} className="flex items-center gap-6">

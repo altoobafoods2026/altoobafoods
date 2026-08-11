@@ -26,11 +26,11 @@ export default function About3DCarousel({ products = [] }) {
     });
   }, [displayImages]);
 
-  // Exact 2.5s cycle for fast premium product changes
+  // Fast product rotation cycle (1.3s)
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % displayImages.length);
-    }, 2500);
+    }, 1300);
     return () => clearInterval(timer);
   }, [displayImages.length]);
 
@@ -58,7 +58,7 @@ export default function About3DCarousel({ products = [] }) {
   };
 
   return (
-    <div className="relative w-full h-[40vh] lg:h-[65vh] max-h-[600px] flex flex-col items-center justify-end pointer-events-none select-none overflow-visible">
+    <div className="relative w-full h-[45vh] lg:h-[75vh] max-h-[750px] flex flex-col items-center justify-end pointer-events-none select-none overflow-visible">
       <AnimatePresence mode="wait">
           <motion.div
             key={currentIndex}
@@ -70,9 +70,9 @@ export default function About3DCarousel({ products = [] }) {
             }}
             exit={{ opacity: 0, y: 10, scale: 0.96 }}
             transition={{
-              duration: 0.8,
-              ease: [0.22, 1, 0.36, 1], // Apple-style premium ease-out
-              exit: { duration: 0.4, ease: 'easeIn' }
+              duration: 0.45,
+              ease: [0.22, 1, 0.36, 1], // Apple-style fast ease-out
+              exit: { duration: 0.2, ease: 'easeIn' }
             }}
             className="relative flex items-end justify-center w-full h-full pb-0 pointer-events-auto cursor-pointer"
             style={{ transformOrigin: 'bottom center' }}
@@ -90,17 +90,17 @@ export default function About3DCarousel({ products = [] }) {
               <img 
                 src={displayImages[currentIndex]} 
                 alt="Premium Showcase"
-                className={`relative z-10 w-[75%] sm:w-[55%] lg:w-[320px] xl:w-[360px] object-contain object-bottom h-[30vh] sm:h-[35vh] lg:h-[48vh] xl:h-[55vh] max-h-[550px] sepia-[.15] contrast-[1.05] brightness-[0.95] saturate-[1.10] transform-gpu ${
+                className={`relative z-10 w-[80%] sm:w-[60%] lg:w-[400px] xl:w-[460px] object-contain object-bottom h-[35vh] sm:h-[42vh] lg:h-[60vh] xl:h-[68vh] max-h-[680px] sepia-[.15] contrast-[1.05] brightness-[0.95] saturate-[1.10] transform-gpu ${
                   displayImages[currentIndex]?.toLowerCase().includes('kalonji') || 
                   displayImages[currentIndex]?.toLowerCase().includes('black-seed') 
-                    ? 'translate-y-[27%]' 
+                    ? 'translate-y-[22%]' 
                   : displayImages[currentIndex]?.toLowerCase().includes('talbina') 
-                    ? 'translate-y-[24%]' 
+                    ? 'translate-y-[19%]' 
                   : displayImages[currentIndex]?.toLowerCase().includes('qalbina') 
-                    ? 'translate-y-[21%]' 
+                    ? 'translate-y-[16%]' 
                   : displayImages[currentIndex]?.toLowerCase().includes('tibb') 
-                    ? 'translate-y-[12%]' 
-                  : 'translate-y-[22%]'
+                    ? 'translate-y-[7%]' 
+                  : 'translate-y-[17%]'
                 }`}
               />
 
@@ -109,17 +109,17 @@ export default function About3DCarousel({ products = [] }) {
               <img 
                 src={displayImages[currentIndex]} 
                 alt="Reflection"
-                className={`absolute top-[88%] z-[-4] w-[75%] sm:w-[55%] lg:w-[320px] xl:w-[360px] object-contain object-top h-[30vh] sm:h-[35vh] lg:h-[48vh] xl:h-[55vh] max-h-[550px] opacity-[0.06] blur-[4px] pointer-events-none ${
+                className={`absolute top-[88%] z-[-4] w-[80%] sm:w-[60%] lg:w-[400px] xl:w-[460px] object-contain object-top h-[35vh] sm:h-[42vh] lg:h-[60vh] xl:h-[68vh] max-h-[680px] opacity-[0.06] blur-[4px] pointer-events-none ${
                   displayImages[currentIndex]?.toLowerCase().includes('kalonji') || 
                   displayImages[currentIndex]?.toLowerCase().includes('black-seed') 
-                    ? 'translate-y-[27%]' 
+                    ? 'translate-y-[22%]' 
                   : displayImages[currentIndex]?.toLowerCase().includes('talbina') 
-                    ? 'translate-y-[24%]' 
+                    ? 'translate-y-[19%]' 
                   : displayImages[currentIndex]?.toLowerCase().includes('qalbina') 
-                    ? 'translate-y-[21%]' 
+                    ? 'translate-y-[16%]' 
                   : displayImages[currentIndex]?.toLowerCase().includes('tibb') 
-                    ? 'translate-y-[12%]' 
-                  : 'translate-y-[22%]'
+                    ? 'translate-y-[7%]' 
+                  : 'translate-y-[17%]'
                 }`}
                 style={{ transform: 'scaleY(-1)' }}
               />

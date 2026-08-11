@@ -138,9 +138,9 @@ export default function ContactUs() {
                   <label htmlFor="name" className="absolute text-[11px] text-[#0D3B2A]/50 duration-300 transform -translate-y-2 scale-75 top-4 z-10 origin-[0] px-5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-1 peer-focus:scale-75 peer-focus:-translate-y-2 left-0 font-bold uppercase tracking-wider pointer-events-none">Your Name *</label>
                 </div>
                 <div className="relative group">
-                  <input type="email" name="email" value={form.email} onChange={handleInputChange} required id="email"
+                  <input type="email" name="email" value={form.email} onChange={handleInputChange} id="email"
                     className="block w-full px-5 pt-7 pb-3 text-[14px] font-medium text-[#0D3B2A] bg-[#FAF7F2] border border-transparent rounded-[16px] appearance-none focus:outline-none focus:border-[#D4A24C] focus:ring-1 focus:ring-[#D4A24C] transition-all peer" placeholder=" " />
-                  <label htmlFor="email" className="absolute text-[11px] text-[#0D3B2A]/50 duration-300 transform -translate-y-2 scale-75 top-4 z-10 origin-[0] px-5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-1 peer-focus:scale-75 peer-focus:-translate-y-2 left-0 font-bold uppercase tracking-wider pointer-events-none">Email Address *</label>
+                  <label htmlFor="email" className="absolute text-[11px] text-[#0D3B2A]/50 duration-300 transform -translate-y-2 scale-75 top-4 z-10 origin-[0] px-5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-1 peer-focus:scale-75 peer-focus:-translate-y-2 left-0 font-bold uppercase tracking-wider pointer-events-none">Email Address (Optional)</label>
                 </div>
               </div>
 

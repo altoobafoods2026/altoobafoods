@@ -5,6 +5,7 @@ import ConsultationForm from '../components/ConsultationForm';
 
 export default function Journal() {
   const navigate = useNavigate();
+  const [heroLang, setHeroLang] = useState('EN');
 
   const handleBooking = (type) => {
     navigate(`/booking?type=${encodeURIComponent(type)}`);
@@ -96,45 +97,87 @@ export default function Journal() {
       {/* ═══════════════════════════════════════════════ */}
       {/* SECTION 1: HERO */}
       {/* ═══════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 pt-12 sm:pt-20 pb-8 sm:pb-12">
+      <section className="relative overflow-hidden transition-all duration-500">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 pt-12 sm:pt-20 pb-8 sm:pb-12 relative">
+          
+          {/* Language Toggle */}
+          <div className="absolute top-4 right-6 sm:top-8 sm:right-8 flex items-center bg-white/60 backdrop-blur-md rounded-full border border-[#D4A24C]/40 p-1 shadow-sm z-20 transition-all duration-300">
+            <button 
+              onClick={() => setHeroLang('EN')}
+              className={`px-3 py-1 text-[10px] sm:text-xs font-bold font-sans rounded-full transition-all duration-300 ${heroLang === 'EN' ? 'bg-[#0D3B2A] text-[#FAF7F2] shadow-sm' : 'text-[#0D3B2A] hover:bg-[#D4A24C]/20'}`}
+            >
+              EN
+            </button>
+            <button 
+              onClick={() => setHeroLang('HI')}
+              className={`px-3 py-1 text-[10px] sm:text-xs font-bold font-sans rounded-full transition-all duration-300 ${heroLang === 'HI' ? 'bg-[#0D3B2A] text-[#FAF7F2] shadow-sm' : 'text-[#0D3B2A] hover:bg-[#D4A24C]/20'}`}
+            >
+              हिंदी
+            </button>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             
             {/* Left: Text */}
             <div className="space-y-6">
-              <span className="inline-block text-[10px] sm:text-xs font-sans font-bold uppercase tracking-[0.2em] text-[#0D3B2A] border border-[#0D3B2A]/20 rounded-full px-5 py-2">
-                Expert Care, Rooted In Sunnah
+              <span className={`inline-block text-[10px] sm:text-xs font-sans font-bold uppercase tracking-[0.2em] text-[#0D3B2A] border border-[#0D3B2A]/20 rounded-full px-5 py-2 transition-opacity duration-300 ${heroLang === 'HI' ? 'tracking-wider' : ''}`}>
+                {heroLang === 'EN' ? 'Expert Care, Rooted In Sunnah' : 'सुन्नत की रौशनी में बेहतरीन इलाज'}
               </span>
 
-              <h1 className="font-serif font-bold text-3xl sm:text-4xl lg:text-5xl text-[#0D3B2A] leading-tight tracking-tight">
-                Consult Hakeem<br />Abdul Qadir Attari
+              <h1 className="font-serif font-bold text-3xl sm:text-4xl lg:text-5xl text-[#0D3B2A] leading-tight tracking-tight transition-opacity duration-300">
+                {heroLang === 'EN' ? (
+                  <>Consult Hakeem<br />Abdul Qadir Attari</>
+                ) : (
+                  <>हकीम अब्दुल कादिर अत्तारी<br />से मशवरा लें</>
+                )}
               </h1>
 
-              <p className="text-[10px] sm:text-xs font-sans font-bold uppercase tracking-[0.18em] text-[#D4A24C]">
-                Personalized Consultation For Your Well-Being
+              <p className={`text-[10px] sm:text-xs font-sans font-bold uppercase tracking-[0.18em] text-[#D4A24C] transition-opacity duration-300 ${heroLang === 'HI' ? 'tracking-wider' : ''}`}>
+                {heroLang === 'EN' ? 'Personalized Consultation For Your Well-Being' : 'आपकी सेहत और तंदुरुस्ती के लिए खास मशवरा'}
               </p>
 
-              <p className="text-sm sm:text-base text-[#0D3B2A]/70 font-sans leading-relaxed max-w-md">
-                Get guidance from our experienced Hakeem Saab with personalized herbal & lifestyle solutions based entirely on the divine wisdom of Tibb-e-Nabawi (Prophetic Medicine).
+              <p className="text-sm sm:text-base text-[#0D3B2A]/70 font-sans leading-relaxed max-w-md transition-opacity duration-300">
+                {heroLang === 'EN' 
+                  ? 'Get guidance from our experienced Hakeem Saab with personalized herbal & lifestyle solutions based entirely on the divine wisdom of Tibb-e-Nabawi (Prophetic Medicine).' 
+                  : 'हमारे तजुर्बेकार हकीम साहब से अपनी सेहत के लिए खास हर्बल और लाइफस्टाइल रहनुमाई (guidance) हासिल करें, जो पूरी तरह तिब्ब-ए-नबवी के मुक़द्दस तरीकों पर मबनी है।'}
               </p>
 
               {/* Feature Badges */}
-              <div className="flex flex-wrap gap-4 sm:gap-6 pt-2">
+              <div className="flex flex-wrap gap-4 sm:gap-6 pt-2 transition-opacity duration-300">
                 {[
-                  { label: 'Sunnah Based Treatments', icon: '🌙' },
-                  { label: '100% Natural & Safe', icon: '🌿' },
-                  { label: 'Private & Confidential', icon: '🔒' },
-                ].map((f) => (
-                  <div key={f.label} className="flex items-center gap-2">
-                    <div className="w-9 h-9 rounded-full bg-[#0D3B2A]/5 border border-[#0D3B2A]/10 flex items-center justify-center text-sm">
-                      {f.icon}
+                  { 
+                    en: 'Sunnah Based Treatments', 
+                    hi: 'सुन्नत के मुताबीक इलाज',
+                    icon: '🌙' 
+                  },
+                  { 
+                    en: '100% Natural & Safe', 
+                    hi: '100% कुदरती और महफ़ूज़',
+                    icon: '🌿' 
+                  },
+                  { 
+                    en: 'Private & Confidential', 
+                    hi: 'निजी और राज़दारी',
+                    icon: '🔒' 
+                  },
+                ].map((f) => {
+                  const label = heroLang === 'EN' ? f.en : f.hi;
+                  const words = label.split(' ');
+                  const firstPart = words.length > 2 ? words.slice(0, 2).join(' ') : words[0];
+                  const secondPart = words.length > 2 ? words.slice(2).join(' ') : words.slice(1).join(' ');
+
+                  return (
+                    <div key={f.en} className="flex items-center gap-2">
+                      <div className="w-9 h-9 rounded-full bg-[#0D3B2A]/5 border border-[#0D3B2A]/10 flex items-center justify-center text-sm">
+                        {f.icon}
+                      </div>
+                      <span className="text-[10px] sm:text-xs font-sans font-bold text-[#0D3B2A]/80 leading-tight">
+                        {firstPart}<br />
+                        <span className="text-[#0D3B2A]/50 font-semibold">{secondPart}</span>
+                      </span>
                     </div>
-                    <span className="text-[10px] sm:text-xs font-sans font-bold text-[#0D3B2A]/80 leading-tight">
-                      {f.label.split(' ').slice(0, 2).join(' ')}<br />
-                      <span className="text-[#0D3B2A]/50 font-semibold">{f.label.split(' ').slice(2).join(' ')}</span>
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* CTA */}
@@ -144,7 +187,7 @@ export default function Journal() {
                 }}
                 className="mt-4 inline-flex items-center gap-2 bg-[#0D3B2A] text-[#FAF7F2] text-[11px] font-sans font-bold uppercase tracking-widest px-7 py-4 rounded-full hover:bg-[#D4A24C] hover:text-[#0D3B2A] transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer"
               >
-                Book Your Consultation
+                {heroLang === 'EN' ? 'Book Your Consultation' : 'अपना अपॉइंटमेंट बुक करें'}
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                 </svg>
@@ -184,9 +227,9 @@ export default function Journal() {
       <section id="consultation-types" className="pt-12 sm:pt-16 pb-10 sm:pb-16 border-t border-[#D4A24C]/30 shadow-[inset_0_10px_30px_-10px_rgba(212,162,76,0.15)] bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-white via-[#FAF7F2] to-[#E3D4B6]/20">
         <div className="max-w-7xl mx-auto px-6 sm:px-8">
           {/* Section Header */}
-          <div className="text-center mb-14">
+          <div className="text-center mb-14 transition-opacity duration-300">
             <h2 className="font-serif font-bold text-2xl sm:text-4xl text-[#0D3B2A] tracking-tight">
-              Schedule Your Consultation
+              {heroLang === 'EN' ? 'Schedule Your Consultation' : 'अपना अपॉइंटमेंट शेड्यूल करें'}
             </h2>
             <div className="flex items-center justify-center gap-3 mt-4">
               <div className="h-px w-12 bg-[#D4A24C]/40" />
@@ -198,22 +241,35 @@ export default function Journal() {
           {/* New 2-Column Layout for Booking */}
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center relative z-10">
             {/* Left Column: Descriptive Text */}
-            <div className="flex flex-col justify-center order-2 lg:order-1 pr-0 lg:pr-8">
-              <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white border border-[#D4A24C]/20 w-fit mb-8 shadow-sm">
+            <div className="flex flex-col justify-center order-2 lg:order-1 pr-0 lg:pr-8 transition-opacity duration-300">
+              <div className={`inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white border border-[#D4A24C]/20 w-fit mb-8 shadow-sm ${heroLang === 'HI' ? 'tracking-wider' : ''}`}>
                 <span className="relative flex h-2.5 w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4A24C] opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#D4A24C]"></span>
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#0D3B2A]">Appointments Open</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#0D3B2A]">
+                  {heroLang === 'EN' ? 'Appointments Open' : 'बुकिंग जारी है'}
+                </span>
               </div>
               
               <h3 className="font-serif font-bold text-4xl sm:text-5xl lg:text-6xl text-[#0D3B2A] mb-6 leading-[1.1] tracking-tight">
-                Begin Your Healing <br className="hidden sm:block" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4A24C] to-[#B08638] italic pr-2">Journey Today.</span>
+                {heroLang === 'EN' ? (
+                  <>
+                    Begin Your Healing <br className="hidden sm:block" />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4A24C] to-[#B08638] italic pr-2">Journey Today.</span>
+                  </>
+                ) : (
+                  <>
+                    आज ही अपनी <br className="hidden sm:block" />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4A24C] to-[#B08638] italic pr-2">शिफ़ा का सफर शुरू करें।</span>
+                  </>
+                )}
               </h3>
               
               <p className="font-sans text-base sm:text-lg text-[#0D3B2A]/70 mb-10 leading-relaxed max-w-lg">
-                Connect directly with Hakeem Saab for personalized, sunnah-based medical advice tailored specifically to your body's unique needs. Experience the purity of traditional healing methods that have stood the test of time.
+                {heroLang === 'EN' 
+                  ? "Connect directly with Hakeem Saab for personalized, sunnah-based medical advice tailored specifically to your body's unique needs. Experience the purity of traditional healing methods that have stood the test of time."
+                  : "हकीम साहब से सीधे राब्ता करें और अपने जिस्म की खास ज़रूरतों के मुताबीक सुन्नत पर मबनी तिब्बी मशवरा हासिल करें। सदियों से आज़माए हुए रिवायती (traditional) तिब्बी तरीकों की शिफ़ा का तजुर्बा करें।"}
               </p>
               
               <div className="h-px w-full max-w-md bg-gradient-to-r from-[#D4A24C]/30 to-transparent mb-10"></div>
@@ -224,8 +280,14 @@ export default function Journal() {
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                   </div>
                   <div>
-                    <h4 className="font-bold font-sans text-[#0D3B2A] text-sm mb-1.5 uppercase tracking-wider">Video Consultation</h4>
-                    <p className="text-sm text-[#0D3B2A]/60 leading-relaxed">Face-to-face interaction for a thorough diagnosis and a tailored holistic treatment plan.</p>
+                    <h4 className={`font-bold font-sans text-[#0D3B2A] text-sm mb-1.5 uppercase tracking-wider ${heroLang === 'HI' ? 'tracking-widest' : ''}`}>
+                      {heroLang === 'EN' ? 'Video Consultation' : 'वीडियो मशवरा'}
+                    </h4>
+                    <p className="text-sm text-[#0D3B2A]/60 leading-relaxed">
+                      {heroLang === 'EN' 
+                        ? 'Face-to-face interaction for a thorough diagnosis and a tailored holistic treatment plan.'
+                        : 'मुकम्मल तशखीस (thorough diagnosis) और एक खास तिब्बी मंसूबे के लिए आमने-सामने गुफ्तगू करें।'}
+                    </p>
                   </div>
                 </li>
                 <li className="flex items-start gap-5 group">
@@ -233,8 +295,14 @@ export default function Journal() {
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M14.25 9.75v-4.5m0 4.5h4.5m-4.5 0 6-6m-3 18c-8.284 0-15-6.716-15-15V4.5A2.25 2.25 0 0 1 4.5 2.25h1.372c.516 0 .966.351 1.091.852l1.106 4.423c.11.44-.054.902-.417 1.173l-1.293.97a1.062 1.062 0 0 0-.38 1.21 12.035 12.035 0 0 0 7.143 7.143c.441.162.928-.004 1.21-.38l.97-1.293a1.125 1.125 0 0 1 1.173-.417l4.423 1.106c.5.125.852.575.852 1.091V19.5a2.25 2.25 0 0 1-2.25 2.25h-2.25Z" /></svg>
                   </div>
                   <div>
-                    <h4 className="font-bold font-sans text-[#0D3B2A] text-sm mb-1.5 uppercase tracking-wider">Audio & WhatsApp</h4>
-                    <p className="text-sm text-[#0D3B2A]/60 leading-relaxed">Convenient options for follow-ups and quick, accessible guidance from anywhere in the world.</p>
+                    <h4 className={`font-bold font-sans text-[#0D3B2A] text-sm mb-1.5 uppercase tracking-wider ${heroLang === 'HI' ? 'tracking-widest' : ''}`}>
+                      {heroLang === 'EN' ? 'Audio & WhatsApp' : 'ऑडियो और व्हाट्सएप'}
+                    </h4>
+                    <p className="text-sm text-[#0D3B2A]/60 leading-relaxed">
+                      {heroLang === 'EN'
+                        ? 'Convenient options for follow-ups and quick, accessible guidance from anywhere in the world.'
+                        : 'दुनिया में कहीं से भी फॉलो-अप और फौरी रहनुमाई (guidance) के लिए बेहतरीन सहूलत।'}
+                    </p>
                   </div>
                 </li>
               </ul>

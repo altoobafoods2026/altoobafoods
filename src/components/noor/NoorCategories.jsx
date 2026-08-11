@@ -118,7 +118,7 @@ export default function NoorCategories({ products = [] }) {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: '-50px' }}
-            className="flex overflow-x-auto pb-4 -mx-6 px-6 lg:mx-0 lg:px-0 lg:grid lg:grid-cols-7 gap-4 sm:gap-6 snap-x snap-mandatory hide-scrollbar scroll-smooth"
+            className="flex overflow-x-auto pb-4 -mx-6 px-6 lg:mx-0 lg:px-0 lg:grid lg:grid-cols-6 gap-4 sm:gap-6 snap-x snap-mandatory hide-scrollbar scroll-smooth justify-center"
           >
             {categories.map((cat, idx) => (
               <motion.div 

@@ -4,7 +4,7 @@ export default function HeroSection({ onBeginJourney, isMuted, toggleMute, video
   return (
     <main
       id="hero-content"
-      className="relative z-10 flex-grow flex flex-col items-center px-6"
+      className="relative z-10 grow flex flex-col items-center px-6"
       style={{
         paddingTop: 'calc(8rem - 75px)'
       }}
@@ -38,7 +38,7 @@ export default function HeroSection({ onBeginJourney, isMuted, toggleMute, video
         {/* Gradient overlays positioned over the video */}
         <div
           id="bg-video-overlay"
-          className="absolute inset-0 bg-gradient-to-b from-brand-cream via-transparent to-brand-cream pointer-events-none"
+          className="absolute inset-0 bg-linear-to-b from-brand-cream via-transparent to-brand-cream pointer-events-none"
           style={{ mixBlendMode: 'normal' }}
         />
       </div>
