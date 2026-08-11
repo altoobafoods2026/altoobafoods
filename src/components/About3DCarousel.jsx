@@ -18,19 +18,13 @@ export default function About3DCarousel({ products = [] }) {
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Preload all product images
-  useEffect(() => {
-    displayImages.forEach(src => {
-      const img = new Image();
-      img.src = src;
-    });
-  }, [displayImages]);
+  // Removed aggressive preloading to improve initial page load speed
 
-  // Fast product rotation cycle (1.3s)
+  // Fast product rotation cycle (2.0s)
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % displayImages.length);
-    }, 1300);
+    }, 2000);
     return () => clearInterval(timer);
   }, [displayImages.length]);
 
@@ -58,7 +52,7 @@ export default function About3DCarousel({ products = [] }) {
   };
 
   return (
-    <div className="relative w-full h-[45vh] lg:h-[75vh] max-h-[750px] flex flex-col items-center justify-end pointer-events-none select-none overflow-visible">
+    <div className="relative w-full h-[40vh] lg:h-[60vh] max-h-[620px] flex flex-col items-center justify-end pointer-events-none select-none overflow-visible">
       <AnimatePresence mode="wait">
           <motion.div
             key={currentIndex}
@@ -90,18 +84,7 @@ export default function About3DCarousel({ products = [] }) {
               <img 
                 src={displayImages[currentIndex]} 
                 alt="Premium Showcase"
-                className={`relative z-10 w-[80%] sm:w-[60%] lg:w-[400px] xl:w-[460px] object-contain object-bottom h-[35vh] sm:h-[42vh] lg:h-[60vh] xl:h-[68vh] max-h-[680px] sepia-[.15] contrast-[1.05] brightness-[0.95] saturate-[1.10] transform-gpu ${
-                  displayImages[currentIndex]?.toLowerCase().includes('kalonji') || 
-                  displayImages[currentIndex]?.toLowerCase().includes('black-seed') 
-                    ? 'translate-y-[22%]' 
-                  : displayImages[currentIndex]?.toLowerCase().includes('talbina') 
-                    ? 'translate-y-[19%]' 
-                  : displayImages[currentIndex]?.toLowerCase().includes('qalbina') 
-                    ? 'translate-y-[16%]' 
-                  : displayImages[currentIndex]?.toLowerCase().includes('tibb') 
-                    ? 'translate-y-[7%]' 
-                  : 'translate-y-[17%]'
-                }`}
+                className="relative z-10 w-[70%] sm:w-[55%] lg:w-[340px] xl:w-[380px] object-contain object-bottom h-[30vh] sm:h-[38vh] lg:h-[52vh] xl:h-[58vh] max-h-[580px] sepia-[.15] contrast-[1.05] brightness-[0.95] saturate-[1.10] transform-gpu translate-y-[10%]"
               />
 
               {/* --- REFLECTION --- */}
@@ -109,18 +92,7 @@ export default function About3DCarousel({ products = [] }) {
               <img 
                 src={displayImages[currentIndex]} 
                 alt="Reflection"
-                className={`absolute top-[88%] z-[-4] w-[80%] sm:w-[60%] lg:w-[400px] xl:w-[460px] object-contain object-top h-[35vh] sm:h-[42vh] lg:h-[60vh] xl:h-[68vh] max-h-[680px] opacity-[0.06] blur-[4px] pointer-events-none ${
-                  displayImages[currentIndex]?.toLowerCase().includes('kalonji') || 
-                  displayImages[currentIndex]?.toLowerCase().includes('black-seed') 
-                    ? 'translate-y-[22%]' 
-                  : displayImages[currentIndex]?.toLowerCase().includes('talbina') 
-                    ? 'translate-y-[19%]' 
-                  : displayImages[currentIndex]?.toLowerCase().includes('qalbina') 
-                    ? 'translate-y-[16%]' 
-                  : displayImages[currentIndex]?.toLowerCase().includes('tibb') 
-                    ? 'translate-y-[7%]' 
-                  : 'translate-y-[17%]'
-                }`}
+                className="absolute top-[88%] z-[-4] w-[70%] sm:w-[55%] lg:w-[340px] xl:w-[380px] object-contain object-top h-[30vh] sm:h-[38vh] lg:h-[52vh] xl:h-[58vh] max-h-[580px] opacity-[0.06] blur-[4px] pointer-events-none translate-y-[10%]"
                 style={{ transform: 'scaleY(-1)' }}
               />
               

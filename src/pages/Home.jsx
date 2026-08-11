@@ -24,8 +24,8 @@ export default function Home() {
 
   // Custom text splitter for character stagger animation
   const splitText = (text, isItalic = false) => {
-    const textColor = isItalic ? 'text-[#738F3A]' : 'text-white';
-    const fontClass = isItalic ? 'font-serif italic font-bold' : 'font-serif font-bold';
+    const textColor = isItalic ? 'text-[#588A3C]' : 'text-white';
+    const fontClass = isItalic ? 'font-serif italic font-extrabold' : 'font-serif font-extrabold';
     
     return text.split('').map((char, index) => (
       <span
@@ -112,12 +112,11 @@ export default function Home() {
         <video
           className="absolute inset-0 w-full h-full object-cover object-bottom z-0"
           src="/Islamic_Altooba_.mp4"
-          poster="/hero_bg.jpg"
           autoPlay
           loop
           muted
           playsInline
-          preload="auto"
+          preload="metadata"
         />
         
         {/* Cinematic Grading Overlays */}
@@ -168,7 +167,7 @@ export default function Home() {
               <div ref={ctaRef} className="mt-5 xl:mt-8 flex justify-center lg:justify-start opacity-0">
                 <button
                   onClick={handleCTAClick}
-                  className="group relative overflow-hidden rounded-full px-8 py-3.5 text-[11px] sm:text-xs font-sans font-extrabold uppercase tracking-[0.15em] bg-gradient-to-r from-[#eec373] via-[#D4A24C] to-[#eec373] text-[#0D3B2A] border-none shadow-[0_8px_25px_rgba(212,162,76,0.4)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  className="group relative overflow-hidden rounded-full px-8 py-3.5 text-[11px] sm:text-xs font-sans font-extrabold uppercase tracking-[0.15em] bg-[#588A3C] text-white border-none shadow-[0_8px_25px_rgba(88,138,60,0.4)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                 >
                   <span className="relative z-10 flex items-center gap-2">
                     EXPLORE COLLECTION
