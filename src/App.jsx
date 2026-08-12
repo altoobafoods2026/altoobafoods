@@ -9,8 +9,9 @@ import ScrollToTop from './components/ScrollToTop';
 import TrustedBy from './components/TrustedBy';
 import CraftedWithCare from './components/CraftedWithCare';
 
-// Lazy load the page components
-const Home = lazy(() => import('./pages/Home'));
+import Home from './pages/Home';
+
+// Lazy load remaining secondary page components
 const Studio = lazy(() => import('./pages/Studio'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
 const Booking = lazy(() => import('./pages/Booking'));
