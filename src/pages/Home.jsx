@@ -139,11 +139,11 @@ export default function Home() {
             >
               <div className="flex flex-wrap justify-center xl:justify-start gap-x-3">
                 <span>Reviving</span>
-                <span className="text-[#738F3A] italic font-serif font-extrabold">Sunnah,</span>
+                <span className="text-[#F59E0B] italic font-serif font-extrabold drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]">Sunnah,</span>
               </div>
               <div className="flex flex-wrap justify-center xl:justify-start gap-x-3 mt-1">
                 <span>restoring</span>
-                <span className="text-[#738F3A] italic font-serif font-extrabold">purity.</span>
+                <span className="text-[#F59E0B] italic font-serif font-extrabold drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]">purity.</span>
               </div>
             </h1>
 
@@ -160,7 +160,7 @@ export default function Home() {
               <div ref={ctaRef} className="mt-4 xl:mt-8 flex justify-center xl:justify-start opacity-0">
                 <button
                   onClick={handleCTAClick}
-                  className="group relative overflow-hidden rounded-full px-8 py-3.5 text-[11px] sm:text-xs font-sans font-extrabold uppercase tracking-[0.15em] bg-[#588A3C] text-white border-none shadow-[0_8px_25px_rgba(88,138,60,0.4)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  className="group relative overflow-hidden rounded-full px-8 py-3.5 text-[11px] sm:text-xs font-sans font-extrabold uppercase tracking-[0.15em] bg-gradient-to-r from-[#eec373] via-[#D4A24C] to-[#eec373] text-[#0D3B2A] border-none shadow-[0_8px_25px_rgba(212,162,76,0.4)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                 >
                   <span className="relative z-10 flex items-center gap-2">
                     EXPLORE COLLECTION

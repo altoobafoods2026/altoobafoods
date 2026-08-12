@@ -1,41 +1,18 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import gsap from 'gsap';
 import { useCartStore } from '../store/cartStore';
 import { useWishlistStore } from '../store/wishlistStore';
 import { useToastStore } from '../store/toastStore';
-import { formatPrice } from '../utils/formatPrice';
-import TrimmedImage from './TrimmedImage';
 
 export default function ProductCard({ product, index = 0 }) {
   const cardRef = useRef(null);
-  const imgRef = useRef(null);
-  const imgContainerRef = useRef(null);
-  const [showHoverImg, setShowHoverImg] = useState(false);
 
   const addItem = useCartStore((state) => state.addItem);
   const toggleWishlist = useWishlistStore((state) => state.toggleItem);
   const isWishlisted = useWishlistStore((state) => state.isWishlisted(product.id));
   const showToast = useToastStore((state) => state.showToast);
 
-  // Alternating background color for image area
-  const isEven = index % 2 === 0;
-  const imageBgColor = isEven ? 'bg-forest-light' : 'bg-warm-light';
-
-  // Removed JS mouse event listeners to eliminate main-thread stuttering during scroll
-
   const hoverImage = product.cardHoverImage || (product.images && product.images.length > 1 ? product.images[1] : null);
-
-  const handleMouseMove = (e) => {
-    if (!hoverImage || !imgContainerRef.current) return;
-    const { left, width } = imgContainerRef.current.getBoundingClientRect();
-    const x = e.clientX - left;
-    setShowHoverImg(x / width > 0.5);
-  };
-
-  const handleMouseLeaveImg = () => {
-    setShowHoverImg(false);
-  };
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -75,16 +52,22 @@ export default function ProductCard({ product, index = 0 }) {
       <Link to={`/product/${product.slug}`} className="flex flex-col flex-grow w-full h-full text-inherit hover:no-underline">
         {/* Image Container with a clean thin border */}
         <div 
-          ref={imgContainerRef}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeaveImg}
           className="relative w-full shrink-0 aspect-[10/11] md:aspect-[4/5] rounded-[12px] sm:rounded-[16px] overflow-hidden bg-white md:mb-5 z-10 shadow-inner border border-gray-100 group/img"
         >
-          <TrimmedImage 
-            src={showHoverImg && hoverImage ? hoverImage : (product.cardImage || product.images[0])} 
+          <img 
+            src={product.cardImage || product.images[0]} 
             alt={product.name} 
-            className="w-full h-full object-contain p-4 transition-transform duration-500 ease-out group-hover/img:scale-110"
+            loading="lazy"
+            className={`w-full h-full object-contain p-4 transition-all duration-500 ease-out group-hover/img:scale-110 ${hoverImage ? 'group-hover/img:opacity-0' : ''}`}
           />
+          {hoverImage && (
+            <img 
+              src={hoverImage} 
+              alt={product.name} 
+              loading="lazy"
+              className="absolute inset-0 w-full h-full object-contain p-4 transition-all duration-500 ease-out opacity-0 group-hover/img:opacity-100 group-hover/img:scale-110 pointer-events-none"
+            />
+          )}
           <div className="absolute inset-0 bg-[#0D3B2A]/0 group-hover:bg-[#0D3B2A]/5 transition-colors duration-500 pointer-events-none" />
           
           {/* Out of Stock Overlay */}

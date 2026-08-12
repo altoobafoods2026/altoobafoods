@@ -100,20 +100,30 @@ export default function Journal() {
       <section className="relative overflow-hidden transition-all duration-500">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 pt-12 sm:pt-20 pb-8 sm:pb-12 relative">
           
-          {/* Language Toggle */}
-          <div className="absolute top-4 right-6 sm:top-8 sm:right-8 flex items-center bg-white/60 backdrop-blur-md rounded-full border border-[#D4A24C]/40 p-1 shadow-sm z-20 transition-all duration-300">
-            <button 
-              onClick={() => setHeroLang('EN')}
-              className={`px-3 py-1 text-[10px] sm:text-xs font-bold font-sans rounded-full transition-all duration-300 ${heroLang === 'EN' ? 'bg-[#0D3B2A] text-[#FAF7F2] shadow-sm' : 'text-[#0D3B2A] hover:bg-[#D4A24C]/20'}`}
-            >
-              EN
-            </button>
-            <button 
-              onClick={() => setHeroLang('HI')}
-              className={`px-3 py-1 text-[10px] sm:text-xs font-bold font-sans rounded-full transition-all duration-300 ${heroLang === 'HI' ? 'bg-[#0D3B2A] text-[#FAF7F2] shadow-sm' : 'text-[#0D3B2A] hover:bg-[#D4A24C]/20'}`}
-            >
-              हिंदी
-            </button>
+          {/* Modern Fixed Bottom-Right Glassmorphism Language Toggle */}
+          <div className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 flex items-center bg-white/95 backdrop-blur-xl border border-[#D4A24C]/40 p-1 sm:p-1.5 rounded-full shadow-[0_12px_35px_rgba(13,59,42,0.18)] z-50 transition-all duration-300">
+            <div className="flex items-center gap-2 sm:gap-2.5 bg-[#FAF7F2] p-1 rounded-full border border-[#D4A24C]/20">
+              <button 
+                onClick={() => setHeroLang('EN')}
+                className={`px-3.5 sm:px-4 py-1.5 text-[10px] sm:text-xs font-sans font-bold tracking-wider rounded-full transition-all duration-300 ${
+                  heroLang === 'EN' 
+                    ? 'bg-gradient-to-r from-[#0D3B2A] to-[#15533d] text-[#FAF7F2] shadow-[0_4px_12px_rgba(13,59,42,0.3)] scale-[1.02]' 
+                    : 'text-[#0D3B2A]/70 hover:text-[#0D3B2A] hover:bg-[#D4A24C]/15'
+                }`}
+              >
+                English
+              </button>
+              <button 
+                onClick={() => setHeroLang('HI')}
+                className={`px-3.5 sm:px-4 py-1.5 text-[10px] sm:text-xs font-sans font-bold tracking-wider rounded-full transition-all duration-300 ${
+                  heroLang === 'HI' 
+                    ? 'bg-gradient-to-r from-[#0D3B2A] to-[#15533d] text-[#FAF7F2] shadow-[0_4px_12px_rgba(13,59,42,0.3)] scale-[1.02]' 
+                    : 'text-[#0D3B2A]/70 hover:text-[#0D3B2A] hover:bg-[#D4A24C]/15'
+                }`}
+              >
+                हिंदी
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">

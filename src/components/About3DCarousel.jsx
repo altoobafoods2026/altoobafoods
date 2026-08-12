@@ -56,7 +56,7 @@ export default function About3DCarousel({ products = [] }) {
       <AnimatePresence mode="wait">
           <motion.div
             key={currentIndex}
-            initial={{ opacity: 0, y: 20, scale: 0.96 }}
+            initial={{ opacity: 0, y: 15, scale: 0.96 }}
             animate={{ 
               opacity: 1, 
               y: 0, 
@@ -64,15 +64,15 @@ export default function About3DCarousel({ products = [] }) {
             }}
             exit={{ opacity: 0, y: 10, scale: 0.96 }}
             transition={{
-              duration: 0.45,
-              ease: [0.22, 1, 0.36, 1], // Apple-style fast ease-out
+              duration: 0.4,
+              ease: [0.22, 1, 0.36, 1],
               exit: { duration: 0.2, ease: 'easeIn' }
             }}
-            className="relative flex items-end justify-center w-full h-full pb-0 pointer-events-auto cursor-pointer"
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 flex items-end justify-center w-full max-w-[400px] h-full pointer-events-auto cursor-pointer"
             style={{ transformOrigin: 'bottom center' }}
             onClick={handleProductClick}
           >
-            {/* Subtle Grounded Micro-motion (Breathing) */}
+            {/* Grounded Micro-motion (Breathing) */}
             <motion.div
               animate={{ y: [0, -2, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
@@ -83,15 +83,17 @@ export default function About3DCarousel({ products = [] }) {
               <img 
                 src={displayImages[currentIndex]} 
                 alt="Premium Showcase"
-                className="relative z-10 w-[75%] sm:w-[65%] lg:w-[340px] xl:w-[380px] object-contain object-bottom h-[32vh] sm:h-[42vh] lg:h-[52vh] xl:h-[58vh] max-h-[580px] transform-gpu translate-y-[10%]"
+                fetchPriority="high"
+                loading="eager"
+                className="relative z-10 w-[75%] sm:w-[65%] lg:w-[340px] xl:w-[380px] object-contain object-bottom h-[32vh] sm:h-[42vh] lg:h-[52vh] xl:h-[58vh] max-h-[580px] translate-y-[10%] mx-auto"
               />
 
               {/* --- REFLECTION --- */}
               <img 
                 src={displayImages[currentIndex]} 
                 alt="Reflection"
-                className="absolute top-[88%] z-[-4] w-[75%] sm:w-[65%] lg:w-[340px] xl:w-[380px] object-contain object-top h-[32vh] sm:h-[42vh] lg:h-[52vh] xl:h-[58vh] max-h-[580px] opacity-[0.05] pointer-events-none translate-y-[10%] transform-gpu"
-                style={{ transform: 'scaleY(-1)' }}
+                className="absolute top-[88%] left-1/2 -translate-x-1/2 z-[-4] w-[75%] sm:w-[65%] lg:w-[340px] xl:w-[380px] object-contain object-top h-[32vh] sm:h-[42vh] lg:h-[52vh] xl:h-[58vh] max-h-[580px] opacity-[0.05] pointer-events-none translate-y-[10%]"
+                style={{ transform: 'translateX(-50%) scaleY(-1)' }}
               />
               
             </motion.div>
