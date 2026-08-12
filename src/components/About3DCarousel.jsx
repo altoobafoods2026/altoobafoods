@@ -80,19 +80,17 @@ export default function About3DCarousel({ products = [] }) {
             >
               
               {/* --- PRODUCT BOTTLE --- */}
-              {/* Mobile: 90% width. Desktop: auto width/tall, viewport relative to prevent cutoff */}
               <img 
                 src={displayImages[currentIndex]} 
                 alt="Premium Showcase"
-                className="relative z-10 w-[75%] sm:w-[65%] lg:w-[340px] xl:w-[380px] object-contain object-bottom h-[32vh] sm:h-[42vh] lg:h-[52vh] xl:h-[58vh] max-h-[580px] sepia-[.15] contrast-[1.05] brightness-[0.95] saturate-[1.10] transform-gpu translate-y-[10%]"
+                className="relative z-10 w-[75%] sm:w-[65%] lg:w-[340px] xl:w-[380px] object-contain object-bottom h-[32vh] sm:h-[42vh] lg:h-[52vh] xl:h-[58vh] max-h-[580px] transform-gpu translate-y-[10%]"
               />
 
               {/* --- REFLECTION --- */}
-              {/* Flipped vertical, highly blurred, low opacity */}
               <img 
                 src={displayImages[currentIndex]} 
                 alt="Reflection"
-                className="absolute top-[88%] z-[-4] w-[75%] sm:w-[65%] lg:w-[340px] xl:w-[380px] object-contain object-top h-[32vh] sm:h-[42vh] lg:h-[52vh] xl:h-[58vh] max-h-[580px] opacity-[0.06] blur-[4px] pointer-events-none translate-y-[10%]"
+                className="absolute top-[88%] z-[-4] w-[75%] sm:w-[65%] lg:w-[340px] xl:w-[380px] object-contain object-top h-[32vh] sm:h-[42vh] lg:h-[52vh] xl:h-[58vh] max-h-[580px] opacity-[0.05] pointer-events-none translate-y-[10%] transform-gpu"
                 style={{ transform: 'scaleY(-1)' }}
               />
               

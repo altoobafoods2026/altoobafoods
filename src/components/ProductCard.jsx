@@ -22,38 +22,7 @@ export default function ProductCard({ product, index = 0 }) {
   const isEven = index % 2 === 0;
   const imageBgColor = isEven ? 'bg-forest-light' : 'bg-warm-light';
 
-  useEffect(() => {
-    const card = cardRef.current;
-    if (!card) return;
-
-    const handleMouseEnter = () => {
-      gsap.to(card, {
-        scale: 1.03,
-        boxShadow: '0 20px 40px rgba(31, 58, 29, 0.08)',
-        borderColor: '#c8a86a',
-        duration: 0.3,
-        ease: 'power2.out'
-      });
-    };
-
-    const handleMouseLeave = () => {
-      gsap.to(card, {
-        scale: 1.0,
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02)',
-        borderColor: '#ddd5c4',
-        duration: 0.3,
-        ease: 'power2.out'
-      });
-    };
-
-    card.addEventListener('mouseenter', handleMouseEnter);
-    card.addEventListener('mouseleave', handleMouseLeave);
-
-    return () => {
-      card.removeEventListener('mouseenter', handleMouseEnter);
-      card.removeEventListener('mouseleave', handleMouseLeave);
-    };
-  }, []);
+  // Removed JS mouse event listeners to eliminate main-thread stuttering during scroll
 
   const hoverImage = product.cardHoverImage || (product.images && product.images.length > 1 ? product.images[1] : null);
 

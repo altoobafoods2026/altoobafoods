@@ -147,7 +147,7 @@ export default function Footer() {
             <span>© {new Date().getFullYear()} AL-TOOBA®. ALL RIGHTS RESERVED.</span>
             <span className="hidden md:inline">|</span>
             <span>
-              DEVELOPED BY <a href="https://sociallyconnect.in" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition-colors font-bold">SOCIALLY CONNECT</a>
+              DEVELOPED BY <a href="https://sociallyconnect.in" target="_blank" rel="noopener noreferrer" className="text-gold underline font-bold transition-colors">SOCIALLY CONNECT</a>
             </span>
           </p>
         </div>

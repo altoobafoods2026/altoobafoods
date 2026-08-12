@@ -116,7 +116,7 @@ export default function ProductDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-10 items-start">
           
           {/* Left Column: Gallery */}
-          <div className="flex flex-col-reverse lg:flex-row gap-4 lg:gap-6">
+          <div className="flex flex-col-reverse lg:flex-row gap-4 lg:gap-6 sticky top-28 self-start">
             
             {/* Thumbnails (Horizontal on mobile, vertical on desktop) */}
             <div className="flex flex-row lg:flex-col items-center group/thumbs w-full lg:w-auto gap-2 lg:gap-3">
@@ -163,7 +163,7 @@ export default function ProductDetail() {
 
             {/* Main Image */}
             <div 
-              className="relative flex-grow bg-[#e6e6e6] rounded-[20px] overflow-hidden flex items-center justify-center cursor-crosshair w-full aspect-square sm:aspect-auto"
+              className="relative flex-grow bg-[#e6e6e6] rounded-[20px] overflow-hidden flex items-center justify-center cursor-crosshair w-full aspect-square"
               onMouseMove={handleMouseMove}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
@@ -242,9 +242,10 @@ export default function ProductDetail() {
 
             {/* Description */}
             <div className="mb-2">
-              <p className={`text-[13px] text-gray-500 font-sans leading-relaxed ${!showFullDesc && 'line-clamp-3'}`}>
-                {product.description || product.shortDesc} Experience the purest prophetic remedy handcrafted with care. Al-Tooba brings you the essence of traditional wellness, sourced globally to ensure the highest standards of purity.
-              </p>
+              <div 
+                className={`text-[13px] text-gray-500 font-sans leading-relaxed [&>p]:mb-3 [&>ul]:list-disc [&>ul]:pl-5 [&>ul>li]:mb-1 [&>h2]:font-bold [&>h2]:text-gray-800 [&>h2]:mb-2 [&>h2]:mt-4 [&>h3]:font-bold [&>h3]:text-gray-800 [&>h3]:mb-2 [&>h3]:mt-4 [&>strong]:font-bold [&>strong]:text-gray-800 ${!showFullDesc ? 'line-clamp-3' : ''}`}
+                dangerouslySetInnerHTML={{ __html: (product.descriptionHtml || product.description || product.shortDesc || '').replace(/<img[^>]*>/gi, '') }}
+              />
             </div>
             
             <button 

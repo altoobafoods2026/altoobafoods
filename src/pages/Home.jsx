@@ -22,20 +22,7 @@ export default function Home() {
   const ctaRef = useRef(null);
   const marqueeRef = useRef(null);
 
-  // Custom text splitter for character stagger animation
-  const splitText = (text, isItalic = false) => {
-    const textColor = isItalic ? 'text-[#588A3C]' : 'text-white';
-    const fontClass = isItalic ? 'font-serif italic font-extrabold' : 'font-serif font-extrabold';
-    
-    return text.split('').map((char, index) => (
-      <span
-        key={index}
-        className={`inline-block hero-char ${textColor} ${fontClass}`}
-      >
-        {char === ' ' ? '\u00A0' : char}
-      </span>
-    ));
-  };
+
 
   useEffect(() => {
     async function loadProducts() {
@@ -51,50 +38,55 @@ export default function Home() {
     loadProducts();
 
     let ctx = gsap.context(() => {
-      // 1. Stagger reveal characters on load
-      const tl = gsap.timeline();
-      tl.fromTo('.hero-char', 
-        { y: 60, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          stagger: 0.02,
-          duration: 0.9,
-          ease: 'power3.out'
-        }
-      );
-
-      // 2. Subtext and CTA fade-in delay
-      if (subtextRef.current && ctaRef.current) {
-        tl.fromTo(
-          subtextRef.current,
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' },
-          '-=0.4'
-        ).fromTo(
-          ctaRef.current,
-          { opacity: 0, scale: 0.95 },
-          { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out' },
-          '-=0.4'
+      // Clean, lightweight fade-in for hero headline
+      if (headlineRef.current) {
+        gsap.fromTo(headlineRef.current,
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out' }
         );
       }
 
-      // 4. Marquee Horizontal Scroll ticker
-      const marquee = marqueeRef.current;
-      if (marquee) {
-        gsap.to(marquee, {
-          x: '-50%',
-          duration: 25,
-          ease: 'linear',
-          repeat: -1
-        });
+      // Subtext and CTA fade-in delay
+      if (subtextRef.current && ctaRef.current) {
+        gsap.fromTo(
+          subtextRef.current,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out', delay: 0.3 }
+        );
+        gsap.fromTo(
+          ctaRef.current,
+          { opacity: 0, scale: 0.95 },
+          { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out', delay: 0.5 }
+        );
       }
     }, containerRef);
 
     return () => {
       ctx.revert();
-      ScrollTrigger.getAll().forEach(t => t.kill());
     };
+  }, []);
+
+  const heroVideoRef = useRef(null);
+  const heroSectionRef = useRef(null);
+
+  useEffect(() => {
+    const video = heroVideoRef.current;
+    const section = heroSectionRef.current;
+    if (!video || !section) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(section);
+    return () => observer.disconnect();
   }, []);
 
   const handleCTAClick = (e) => {
@@ -107,9 +99,10 @@ export default function Home() {
   return (
     <div ref={containerRef} className="relative w-full overflow-hidden">
       {/* 1. Fullscreen Hero Section */}
-      <section className="relative w-full min-h-svh flex flex-col items-center justify-start text-center px-0 md:px-6 pt-[90px] md:pt-[100px] pb-4 md:pb-0 overflow-hidden">
+      <section ref={heroSectionRef} className="relative w-full min-h-svh flex flex-col items-center justify-start text-center px-0 md:px-6 pt-[90px] md:pt-[100px] pb-4 md:pb-0 overflow-hidden">
          {/* Background Video */}
         <video
+          ref={heroVideoRef}
           className="absolute inset-0 w-full h-full object-cover object-bottom z-0"
           src="/Islamic_Altooba_.mp4"
           autoPlay
@@ -145,12 +138,12 @@ export default function Home() {
               className="text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl lg:text-[3.5rem] xl:text-7xl tracking-tight font-serif select-none text-white drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)]"
             >
               <div className="flex flex-wrap justify-center xl:justify-start gap-x-3">
-                <span>{splitText('Reviving', false)}</span>
-                <span className="text-[#738F3A] italic">{splitText('Sunnah,', true)}</span>
+                <span>Reviving</span>
+                <span className="text-[#738F3A] italic font-serif font-extrabold">Sunnah,</span>
               </div>
               <div className="flex flex-wrap justify-center xl:justify-start gap-x-3 mt-1">
-                <span>{splitText('restoring', false)}</span>
-                <span className="text-[#738F3A] italic">{splitText('purity.', true)}</span>
+                <span>restoring</span>
+                <span className="text-[#738F3A] italic font-serif font-extrabold">purity.</span>
               </div>
             </h1>
 

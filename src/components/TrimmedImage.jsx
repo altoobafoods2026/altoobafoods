@@ -24,62 +24,66 @@ export default function TrimmedImage({ src, alt, className, loading }) {
     img.crossOrigin = 'anonymous'; // Important to avoid CORS issues when reading canvas data
     
     img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        ctx.drawImage(img, 0, 0);
-        
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        
-        let top = null, bottom = null, left = null, right = null;
-        
-        // Scan the image for non-transparent pixels
-        for (let y = 0; y < canvas.height; y++) {
-          for (let x = 0; x < canvas.width; x++) {
-            const alpha = data[(y * canvas.width + x) * 4 + 3];
-            // Alpha threshold > 5 to account for slight anti-aliasing or compression artifacts
-            if (alpha > 5) {
-              if (top === null) top = y;
-              bottom = y;
-              if (left === null || x < left) left = x;
-              if (right === null || x > right) right = x;
+      const processImage = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(img, 0, 0);
+          
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imageData.data;
+          
+          let top = null, bottom = null, left = null, right = null;
+          
+          // Scan the image for non-transparent pixels
+          for (let y = 0; y < canvas.height; y++) {
+            for (let x = 0; x < canvas.width; x++) {
+              const alpha = data[(y * canvas.width + x) * 4 + 3];
+              if (alpha > 5) {
+                if (top === null) top = y;
+                bottom = y;
+                if (left === null || x < left) left = x;
+                if (right === null || x > right) right = x;
+              }
             }
           }
-        }
-        
-        // If we found a bounding box, crop it
-        if (top !== null && bottom !== null && left !== null && right !== null) {
-          const trimWidth = right - left + 1;
-          const trimHeight = bottom - top + 1;
           
-          const trimCanvas = document.createElement('canvas');
-          trimCanvas.width = trimWidth;
-          trimCanvas.height = trimHeight;
-          const trimCtx = trimCanvas.getContext('2d');
-          
-          trimCtx.drawImage(
-            canvas,
-            left, top, trimWidth, trimHeight,
-            0, 0, trimWidth, trimHeight
-          );
-          
-          const dataUrl = trimCanvas.toDataURL('image/png');
-          trimCache.set(src, dataUrl);
-          setImgSrc(dataUrl);
-        } else {
-          // If completely transparent or failed finding bounds, fallback to original
+          if (top !== null && bottom !== null && left !== null && right !== null) {
+            const trimWidth = right - left + 1;
+            const trimHeight = bottom - top + 1;
+            
+            const trimCanvas = document.createElement('canvas');
+            trimCanvas.width = trimWidth;
+            trimCanvas.height = trimHeight;
+            const trimCtx = trimCanvas.getContext('2d');
+            
+            trimCtx.drawImage(
+              canvas,
+              left, top, trimWidth, trimHeight,
+              0, 0, trimWidth, trimHeight
+            );
+            
+            const dataUrl = trimCanvas.toDataURL('image/png');
+            trimCache.set(src, dataUrl);
+            setImgSrc(dataUrl);
+          } else {
+            trimCache.set(src, src);
+            setImgSrc(src);
+          }
+        } catch (e) {
+          console.error('Error auto-trimming image:', e);
           trimCache.set(src, src);
           setImgSrc(src);
-        }
-      } catch (e) {
-        console.error('Error auto-trimming image:', e);
-        trimCache.set(src, src);
-        setImgSrc(src);
+        setLoaded(true);
+      };
+
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(processImage, { timeout: 1000 });
+      } else {
+        setTimeout(processImage, 0);
       }
-      setLoaded(true);
     };
     
     img.onerror = () => {

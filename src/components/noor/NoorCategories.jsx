@@ -46,48 +46,16 @@ export default function NoorCategories({ products = [] }) {
         </defs>
       </svg>
 
-      {/* Floating Golden Particles */}
-      <div className="absolute inset-0 pointer-events-none">
-        {[...Array(15)].map((_, i) => (
-          <motion.div
-            key={`particle-${i}`}
-            className="absolute w-1.5 h-1.5 bg-[#D4A24C] rounded-full blur-[1px] opacity-40"
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -30, 0],
-              opacity: [0.2, 0.6, 0.2]
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
-        ))}
-      </div>
+      {/* Background Section Styling */}
 
       <div className="max-w-[1400px] mx-auto px-6 sm:px-8 relative z-10">
         <div className="text-center mb-10">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            className="text-4xl md:text-5xl font-serif text-[#0D3B2A] font-bold mb-4"
-          >
+          <h2 className="text-4xl md:text-5xl font-serif text-[#0D3B2A] font-bold mb-4">
             Shop by Categories
-          </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ delay: 0.1 }}
-            className="text-[#D4A24C] font-sans font-bold tracking-[0.2em] uppercase text-xs md:text-sm"
-          >
+          </h2>
+          <p className="text-[#D4A24C] font-sans font-bold tracking-[0.2em] uppercase text-xs md:text-sm">
             Explore our wide range of Islamic remedies
-          </motion.p>
+          </p>
         </div>
 
         {/* Horizontal scroll container on mobile, 7-column grid on desktop */}
@@ -112,18 +80,13 @@ export default function NoorCategories({ products = [] }) {
             </button>
           </div>
 
-          <motion.div 
+          <div 
             ref={scrollContainerRef}
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: '-50px' }}
             className="flex overflow-x-auto pb-4 -mx-6 px-6 lg:mx-0 lg:px-0 lg:grid lg:grid-cols-6 gap-4 sm:gap-6 snap-x snap-mandatory hide-scrollbar scroll-smooth justify-center"
           >
             {categories.map((cat, idx) => (
-              <motion.div 
+              <div 
                 key={idx}
-                variants={itemVariants}
                 className="relative min-w-[calc(50%-8px)] md:min-w-[260px] lg:min-w-0 aspect-[3/4.6] lg:aspect-[3/4.7] cursor-pointer group snap-center filter drop-shadow-[0_12px_16px_rgba(13,59,42,0.12)] block"
               >
                 <Link to={`/studio?category=${encodeURIComponent(cat.name)}`} className="absolute inset-0 z-50 rounded-xl"></Link>
@@ -161,12 +124,11 @@ export default function NoorCategories({ products = [] }) {
                     fill="none"
                     stroke="#D4A24C"
                     strokeWidth="2"
-                    className="opacity-30 group-hover:opacity-100 transition-opacity duration-500"
-                  />
+                    />
                 </svg>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </div>
 

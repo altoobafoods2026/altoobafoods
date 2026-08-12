@@ -145,11 +145,12 @@ export default function InstagramReels() {
                   isMobile ? 'w-[260px] h-[460px]' : 'w-[340px] h-[600px]'
                 }`}
               >
-                {/* Native video tag is the most premium and cleanest way to display a video */}
+                {/* Native video tag - lazy loaded to prevent initial page load GPU decoding lag */}
                 <video 
                   key={`${short.id}-${isCenter}`}
                   src={short.videoSrc}
                   autoPlay={isCenter}
+                  preload={isCenter ? "metadata" : "none"}
                   loop
                   muted={isMuted}
                   playsInline

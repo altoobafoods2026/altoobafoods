@@ -8,20 +8,6 @@ import { useCartStore } from '../../store/cartStore';
 import { useToastStore } from '../../store/toastStore';
 
 const CursorImageSwap = ({ frontImg, backImg, alt }) => {
-  const [showBack, setShowBack] = useState(false);
-  const containerRef = useRef(null);
-
-  const handleMouseMove = (e) => {
-    if (!containerRef.current) return;
-    const { left, width } = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - left;
-    setShowBack(x / width > 0.5);
-  };
-
-  const handleMouseLeave = () => {
-    setShowBack(false);
-  };
-
   if (!backImg) {
     return (
       <img 
@@ -33,21 +19,16 @@ const CursorImageSwap = ({ frontImg, backImg, alt }) => {
   }
 
   return (
-    <div 
-      ref={containerRef}
-      className="relative w-full h-full cursor-ew-resize overflow-hidden"
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-    >
+    <div className="relative w-full h-full overflow-hidden group/swap">
       <img 
         src={frontImg} 
         alt={alt}
-        className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-500 ease-out ${showBack ? 'opacity-0 scale-110' : 'opacity-100 scale-100 group-hover/img:scale-110'}`}
+        className="absolute inset-0 w-full h-full object-cover object-center transition-all duration-500 ease-out group-hover/swap:opacity-0 group-hover/swap:scale-105 opacity-100 scale-100"
       />
       <img 
         src={backImg}
         alt={`${alt} back`}
-        className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-500 ease-out ${showBack ? 'opacity-100 scale-105' : 'opacity-0 scale-95'}`}
+        className="absolute inset-0 w-full h-full object-cover object-center transition-all duration-500 ease-out opacity-0 group-hover/swap:opacity-100 group-hover/swap:scale-105"
       />
     </div>
   );
@@ -124,12 +105,8 @@ export default function NoorCompleteCollection({ products = [] }) {
         {/* Dynamic Category Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
           {collectionProducts.map((product, idx) => (
-            <motion.div
+            <div
               key={product.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{ delay: idx * 0.1, duration: 0.8, ease: 'easeOut' }}
               className="w-full"
             >
               <TiltCard className="h-full">
@@ -215,7 +192,7 @@ export default function NoorCompleteCollection({ products = [] }) {
 
                 </div>
               </TiltCard>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
