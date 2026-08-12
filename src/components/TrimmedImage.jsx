@@ -76,6 +76,7 @@ export default function TrimmedImage({ src, alt, className, loading }) {
           console.error('Error auto-trimming image:', e);
           trimCache.set(src, src);
           setImgSrc(src);
+        }
         setLoaded(true);
       };
 
