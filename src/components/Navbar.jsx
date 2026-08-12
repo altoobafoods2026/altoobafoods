@@ -93,8 +93,8 @@ export default function Navbar() {
   // Determine navbar styles
   const isTransparent = isHome && !isScrolled;
   const navbarClasses = isTransparent
-    ? 'bg-transparent text-forest border-transparent'
-    : 'bg-parchment text-forest border-b border-[#d6cdb8] shadow-[0_4px_20px_rgba(31,58,29,0.03)]';
+    ? 'bg-gradient-to-b from-black/70 via-black/20 to-transparent border-transparent'
+    : 'bg-[#FAF7F2]/80 backdrop-blur-xl border-b border-white/40 shadow-[0_8px_30px_rgba(0,0,0,0.04)]';
 
   const menuItems = [
     { name: 'HOME', path: '/' },
@@ -113,7 +113,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-6 sm:px-8 py-4 flex items-center justify-between">
           {/* Logo Area */}
           <a href="/" className="flex items-center w-auto transition-opacity hover:opacity-90">
-            <img src={logoSrc} alt="Al-Tooba Logo" className={`h-[58px] sm:h-[70px] w-auto transition-all duration-300 ${isTransparent ? 'drop-shadow-[0_2px_4px_rgba(255,255,255,0.4)]' : ''}`} />
+            <img src={logoSrc} alt="Al-Tooba Logo" className={`h-[58px] sm:h-[70px] w-auto transition-all duration-500 ${isTransparent ? 'drop-shadow-[0_0_15px_rgba(255,255,255,0.85)] brightness-[1.2]' : 'drop-shadow-sm'}`} />
           </a>
 
           {/* Nav Links Center */}

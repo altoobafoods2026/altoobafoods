@@ -128,10 +128,10 @@ export default function Home() {
         <HeroParticles />
 
         {/* Hero Content Wrapper */}
-        <div className="relative z-10 w-full h-full flex-grow max-w-7xl mx-auto px-4 sm:px-8 flex flex-col lg:flex-row items-center justify-start lg:justify-between pt-[15vh] lg:pt-0 pb-[30vh] lg:pb-0">
+        <div className="relative z-10 w-full h-full flex-grow max-w-7xl mx-auto px-4 sm:px-8 flex flex-col xl:flex-row items-center justify-start xl:justify-between pt-[10vh] xl:pt-0 pb-[30vh] xl:pb-0">
           
           {/* Left: Text, CTA & Trust Badges */}
-          <div className="w-full lg:w-[60%] flex flex-col items-center lg:items-start justify-center text-center lg:text-left relative z-30 mt-0">
+          <div className="w-full xl:w-[60%] flex flex-col items-center xl:items-start justify-center text-center xl:text-left relative z-30 mt-0">
             {/* Small Golden Leaf Icon */}
             <div className="mb-2 lg:mb-3 xl:mb-4 opacity-90">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -144,11 +144,11 @@ export default function Home() {
               ref={headlineRef}
               className="text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl lg:text-[3.5rem] xl:text-7xl tracking-tight font-serif select-none text-white drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)]"
             >
-              <div className="flex flex-wrap justify-center lg:justify-start gap-x-3">
+              <div className="flex flex-wrap justify-center xl:justify-start gap-x-3">
                 <span>{splitText('Reviving', false)}</span>
                 <span className="text-[#738F3A] italic">{splitText('Sunnah,', true)}</span>
               </div>
-              <div className="flex flex-wrap justify-center lg:justify-start gap-x-3 mt-1">
+              <div className="flex flex-wrap justify-center xl:justify-start gap-x-3 mt-1">
                 <span>{splitText('restoring', false)}</span>
                 <span className="text-[#738F3A] italic">{splitText('purity.', true)}</span>
               </div>
@@ -164,7 +164,7 @@ export default function Home() {
               </p>
 
               {/* CTA Premium Pill Button */}
-              <div ref={ctaRef} className="mt-5 xl:mt-8 flex justify-center lg:justify-start opacity-0">
+              <div ref={ctaRef} className="mt-4 xl:mt-8 flex justify-center xl:justify-start opacity-0">
                 <button
                   onClick={handleCTAClick}
                   className="group relative overflow-hidden rounded-full px-8 py-3.5 text-[11px] sm:text-xs font-sans font-extrabold uppercase tracking-[0.15em] bg-[#588A3C] text-white border-none shadow-[0_8px_25px_rgba(88,138,60,0.4)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
@@ -181,7 +181,7 @@ export default function Home() {
           </div>
 
           {/* Right: 3D Product Centerpiece */}
-          <div className="w-full lg:w-[45%] flex justify-center absolute bottom-[13vh] lg:bottom-0 left-0 right-0 lg:left-auto lg:right-[5%] z-20 pointer-events-none lg:pointer-events-auto lg:mb-[17.5vh]">
+          <div className="w-full xl:w-[45%] flex justify-center absolute bottom-[8vh] xl:bottom-0 left-0 right-0 xl:left-auto xl:right-[5%] z-20 pointer-events-none xl:pointer-events-auto xl:mb-[17.5vh]">
             <div className="w-full origin-bottom flex justify-center">
                {products.length > 0 && <About3DCarousel products={products} />}
             </div>

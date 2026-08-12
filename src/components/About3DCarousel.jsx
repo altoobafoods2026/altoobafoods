@@ -52,7 +52,7 @@ export default function About3DCarousel({ products = [] }) {
   };
 
   return (
-    <div className="relative w-full h-[40vh] lg:h-[60vh] max-h-[620px] flex flex-col items-center justify-end pointer-events-none select-none overflow-visible">
+    <div className="relative w-full h-[45vh] lg:h-[60vh] max-h-[620px] flex flex-col items-center justify-end pointer-events-none select-none overflow-visible">
       <AnimatePresence mode="wait">
           <motion.div
             key={currentIndex}
@@ -84,7 +84,7 @@ export default function About3DCarousel({ products = [] }) {
               <img 
                 src={displayImages[currentIndex]} 
                 alt="Premium Showcase"
-                className="relative z-10 w-[70%] sm:w-[55%] lg:w-[340px] xl:w-[380px] object-contain object-bottom h-[30vh] sm:h-[38vh] lg:h-[52vh] xl:h-[58vh] max-h-[580px] sepia-[.15] contrast-[1.05] brightness-[0.95] saturate-[1.10] transform-gpu translate-y-[10%]"
+                className="relative z-10 w-[75%] sm:w-[65%] lg:w-[340px] xl:w-[380px] object-contain object-bottom h-[32vh] sm:h-[42vh] lg:h-[52vh] xl:h-[58vh] max-h-[580px] sepia-[.15] contrast-[1.05] brightness-[0.95] saturate-[1.10] transform-gpu translate-y-[10%]"
               />
 
               {/* --- REFLECTION --- */}
@@ -92,7 +92,7 @@ export default function About3DCarousel({ products = [] }) {
               <img 
                 src={displayImages[currentIndex]} 
                 alt="Reflection"
-                className="absolute top-[88%] z-[-4] w-[70%] sm:w-[55%] lg:w-[340px] xl:w-[380px] object-contain object-top h-[30vh] sm:h-[38vh] lg:h-[52vh] xl:h-[58vh] max-h-[580px] opacity-[0.06] blur-[4px] pointer-events-none translate-y-[10%]"
+                className="absolute top-[88%] z-[-4] w-[75%] sm:w-[65%] lg:w-[340px] xl:w-[380px] object-contain object-top h-[32vh] sm:h-[42vh] lg:h-[52vh] xl:h-[58vh] max-h-[580px] opacity-[0.06] blur-[4px] pointer-events-none translate-y-[10%]"
                 style={{ transform: 'scaleY(-1)' }}
               />
               
