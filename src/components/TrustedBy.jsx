@@ -9,6 +9,7 @@ export default function TrustedBy({ productId, productName }) {
   const [rating, setRating] = useState(5);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [judgeMeReviews, setJudgeMeReviews] = useState([]);
+  const [hasFetched, setHasFetched] = useState(false);
   const showToast = useToastStore((state) => state.showToast);
 
   useEffect(() => {
@@ -27,30 +28,40 @@ export default function TrustedBy({ productId, productName }) {
           date: r.created_at
         }));
         setJudgeMeReviews(formattedReviews);
+        setHasFetched(true);
       }
     };
     fetchJudgeMeReviews();
   }, [productId, productName]);
 
   const allReviews = useMemo(() => {
-    const defaultReviews = generateReviews(productId, productName);
-    // Show newest user reviews first
-    return [...judgeMeReviews, ...defaultReviews];
-  }, [productId, productName, judgeMeReviews]);
+    // If Judge.me has real reviews, show only those
+    if (hasFetched && judgeMeReviews.length > 0) {
+      return judgeMeReviews;
+    }
+    // Fallback to sample reviews if no reviews yet
+    return generateReviews(productId, productName);
+  }, [productId, productName, judgeMeReviews, hasFetched]);
 
   const handleNext = () => {
+    if (allReviews.length === 0) return;
     setCurrentIndex((prev) => (prev + 1) % allReviews.length);
   };
 
   const handlePrev = () => {
+    if (allReviews.length === 0) return;
     setCurrentIndex((prev) => (prev - 1 + allReviews.length) % allReviews.length);
   };
 
-  const visibleReviews = [
-    allReviews[currentIndex],
-    allReviews[(currentIndex + 1) % allReviews.length],
-    allReviews[(currentIndex + 2) % allReviews.length],
-  ];
+  const visibleReviews = useMemo(() => {
+    if (allReviews.length === 0) return [];
+    if (allReviews.length <= 3) return allReviews;
+    return [
+      allReviews[currentIndex % allReviews.length],
+      allReviews[(currentIndex + 1) % allReviews.length],
+      allReviews[(currentIndex + 2) % allReviews.length],
+    ];
+  }, [allReviews, currentIndex]);
 
   const handleSubmitReview = async (e) => {
     e.preventDefault();
@@ -174,20 +185,22 @@ export default function TrustedBy({ productId, productName }) {
         </div>
 
         {/* Navigation Buttons */}
-        <div className="flex justify-center items-center gap-6 mt-12">
-          <button 
-            onClick={handlePrev} 
-            className="p-4 rounded-full bg-white text-[#0D3B2A] hover:bg-[#D4A24C] hover:text-white transition-colors border border-[#0D3B2A]/10 shadow-sm cursor-pointer"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
-          </button>
-          <button 
-            onClick={handleNext} 
-            className="p-4 rounded-full bg-white text-[#0D3B2A] hover:bg-[#D4A24C] hover:text-white transition-colors border border-[#0D3B2A]/10 shadow-sm cursor-pointer"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
-          </button>
-        </div>
+        {allReviews.length > 3 && (
+          <div className="flex justify-center items-center gap-6 mt-12">
+            <button 
+              onClick={handlePrev} 
+              className="p-4 rounded-full bg-white text-[#0D3B2A] hover:bg-[#D4A24C] hover:text-white transition-colors border border-[#0D3B2A]/10 shadow-sm cursor-pointer"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <button 
+              onClick={handleNext} 
+              className="p-4 rounded-full bg-white text-[#0D3B2A] hover:bg-[#D4A24C] hover:text-white transition-colors border border-[#0D3B2A]/10 shadow-sm cursor-pointer"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
+            </button>
+          </div>
+        )}
 
       </div>
 

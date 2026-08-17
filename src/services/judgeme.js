@@ -46,7 +46,15 @@ export const getReviews = async (productId) => {
     const data = await response.json();
     
     // The Judge.me API returns reviews in `reviews` array
-    return data.reviews || [];
+    const rawReviews = data.reviews || [];
+
+    // Filter out hidden, spam, or unpublished reviews
+    return rawReviews.filter(r => {
+      if (r.hidden === true || r.hidden === 'true') return false;
+      if (r.curated === 'hidden' || r.curated === 'spam' || r.curated === 0) return false;
+      if (r.published === false || r.published === 'false') return false;
+      return true;
+    });
   } catch (error) {
     console.error('Error fetching Judge.me reviews:', error);
     return [];
