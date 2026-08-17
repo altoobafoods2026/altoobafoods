@@ -222,7 +222,7 @@ export default function Journal() {
                   <div className="w-8 h-8 rounded-full bg-[#D4A24C]/70 flex items-center justify-center text-white text-xs font-bold border-2 border-white">+</div>
                 </div>
                 <div>
-                  <p className="text-sm font-serif font-bold text-[#0D3B2A]">5000+</p>
+                  <p className="text-sm font-serif font-bold text-[#0D3B2A]">{heroLang === 'EN' ? '5 Lakhs+' : '5 लाख+'}</p>
                   <p className="text-[10px] font-sans text-[#0D3B2A]/60 font-semibold">Patients Consulted</p>
                 </div>
               </div>
@@ -285,10 +285,7 @@ export default function Journal() {
               <div className="h-px w-full max-w-md bg-gradient-to-r from-[#D4A24C]/30 to-transparent mb-10"></div>
               
               <ul className="space-y-8 mb-10 max-w-md">
-                <li className="flex items-start gap-5 group">
-                  <div className="w-12 h-12 rounded-2xl bg-white shadow-[0_8px_20px_rgba(13,59,42,0.06)] border border-[#0D3B2A]/5 flex items-center justify-center flex-shrink-0 text-[#D4A24C] group-hover:scale-110 transition-transform duration-500">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
-                  </div>
+                <li className="group">
                   <div>
                     <h4 className={`font-bold font-sans text-[#0D3B2A] text-sm mb-1.5 uppercase tracking-wider ${heroLang === 'HI' ? 'tracking-widest' : ''}`}>
                       {heroLang === 'EN' ? 'Video Consultation' : 'वीडियो मशवरा'}
@@ -300,10 +297,7 @@ export default function Journal() {
                     </p>
                   </div>
                 </li>
-                <li className="flex items-start gap-5 group">
-                  <div className="w-12 h-12 rounded-2xl bg-white shadow-[0_8px_20px_rgba(13,59,42,0.06)] border border-[#0D3B2A]/5 flex items-center justify-center flex-shrink-0 text-[#0D3B2A] group-hover:scale-110 transition-transform duration-500">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M14.25 9.75v-4.5m0 4.5h4.5m-4.5 0 6-6m-3 18c-8.284 0-15-6.716-15-15V4.5A2.25 2.25 0 0 1 4.5 2.25h1.372c.516 0 .966.351 1.091.852l1.106 4.423c.11.44-.054.902-.417 1.173l-1.293.97a1.062 1.062 0 0 0-.38 1.21 12.035 12.035 0 0 0 7.143 7.143c.441.162.928-.004 1.21-.38l.97-1.293a1.125 1.125 0 0 1 1.173-.417l4.423 1.106c.5.125.852.575.852 1.091V19.5a2.25 2.25 0 0 1-2.25 2.25h-2.25Z" /></svg>
-                  </div>
+                <li className="group">
                   <div>
                     <h4 className={`font-bold font-sans text-[#0D3B2A] text-sm mb-1.5 uppercase tracking-wider ${heroLang === 'HI' ? 'tracking-widest' : ''}`}>
                       {heroLang === 'EN' ? 'Audio & WhatsApp' : 'ऑडियो और व्हाट्सएप'}

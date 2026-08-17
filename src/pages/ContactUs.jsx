@@ -20,15 +20,65 @@ export default function ContactUs() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!form.name || !form.name.trim()) {
+      showToast('Please enter your name', 'error');
+      return;
+    }
+
+    // Email validation ONLY IF filled by user
+    if (form.email && form.email.trim() !== '') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(form.email.trim())) {
+        showToast('Please enter a valid email address', 'error');
+        return;
+      }
+    }
+
+    // 10-digit phone number validation
+    const digitsOnly = form.phone ? form.phone.replace(/\D/g, '') : '';
+    if (digitsOnly.length < 10) {
+      showToast('Please enter a valid 10-digit phone number', 'error');
+      return;
+    }
+
+    if (!form.subject || !form.subject.trim()) {
+      showToast('Please enter a subject', 'error');
+      return;
+    }
+
+    if (!form.message || !form.message.trim()) {
+      showToast('Please enter your message', 'error');
+      return;
+    }
+
     setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      showToast('Message sent successfully! We will get back to you soon.');
-      setForm({ name: '', email: '', phone: '', subject: '', message: '' });
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        showToast('Message sent successfully! We will get back to you soon.');
+        setForm({ name: '', email: '', phone: '', subject: '', message: '' });
+      } else {
+        showToast(data.message || 'Failed to send message. Please try again.', 'error');
+      }
+    } catch (error) {
+      console.error('Contact Form Submission Error:', error);
+      showToast('Error sending message. Please try again later.', 'error');
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -129,7 +179,7 @@ export default function ContactUs() {
             className="lg:col-span-3 bg-white rounded-[32px] p-8 sm:p-10 md:p-12 shadow-[0_8px_30px_rgba(13,59,42,0.06)] border border-[#0D3B2A]/5 relative h-full flex flex-col justify-center"
           >
             <h3 className="font-serif text-2xl md:text-3xl font-bold text-[#0D3B2A] mb-8">Send a Message</h3>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} noValidate className="space-y-6">
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="relative group">

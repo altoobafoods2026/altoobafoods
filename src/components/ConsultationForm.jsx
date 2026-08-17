@@ -27,22 +27,50 @@ export default function ConsultationForm({ initialType = 'Video Consultation', r
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!formData.fullName || !formData.fullName.trim()) {
+      showToast('Please enter your full name', 'error');
+      return;
+    }
+
+    const digitsOnly = formData.phone.replace(/\D/g, '');
+    if (digitsOnly.length < 10) {
+      showToast('Please enter a valid 10-digit phone number', 'error');
+      return;
+    }
+
+    if (!formData.description || !formData.description.trim()) {
+      showToast('Please describe your health issue or query', 'error');
+      return;
+    }
+
     setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+
+    try {
+      await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.fullName,
+          email: formData.email || '',
+          phone: formData.phone,
+          subject: `Hakeem Consultation Booking: ${formData.consultationType}`,
+          message: `Consultation Type: ${formData.consultationType}\nAge: ${formData.age || 'N/A'}\nGender: ${formData.gender || 'N/A'}\n\nHealth Issue / Query Description:\n${formData.description || 'None provided'}`
+        }),
+      });
+    } catch (err) {
+      console.error('Consultation Email Dispatch Error:', err);
+    } finally {
       setIsSubmitting(false);
       setIsSuccess(true);
-      
-      // Reset or redirect after success
+
       setTimeout(() => {
-        showToast(`${formData.consultationType} request received for ${formData.fullName}!`);
+        showToast(`${formData.consultationType} booking received for ${formData.fullName}!`);
         if (redirectAfterSuccess) {
           navigate('/consultation');
         } else {
-          // Reset form on same page
           setIsSuccess(false);
           setFormData({
             fullName: '',
@@ -56,7 +84,7 @@ export default function ConsultationForm({ initialType = 'Video Consultation', r
           });
         }
       }, 3000);
-    }, 1500);
+    }
   };
 
   if (isSuccess) {
@@ -93,7 +121,7 @@ export default function ConsultationForm({ initialType = 'Video Consultation', r
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 relative z-10">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4 sm:space-y-6 relative z-10">
         {/* Type of Consultation */}
         <div className="space-y-1.5 sm:space-y-2.5">
           <label className="text-[10px] font-bold font-sans text-[#D4A24C] uppercase tracking-widest ml-1">Consultation Type</label>
@@ -104,9 +132,9 @@ export default function ConsultationForm({ initialType = 'Video Consultation', r
               onChange={handleChange}
               className="w-full bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4.5 text-xs sm:text-sm text-[#FAF7F2] focus:outline-none focus:ring-2 focus:ring-[#D4A24C]/60 focus:border-[#D4A24C]/60 transition-all appearance-none font-medium shadow-[inset_0_2px_10px_rgba(0,0,0,0.1)] hover:bg-white/10 [&>option]:bg-[#0D3B2A] [&>option]:text-[#FAF7F2]"
             >
-              <option value="Video Consultation">📹 Video Consultation (Recommended)</option>
-              <option value="Audio Consultation">📞 Audio Consultation</option>
-              <option value="WhatsApp Consultation">💬 WhatsApp Chat</option>
+              <option value="Video Consultation">Video Consultation (Recommended)</option>
+              <option value="Audio Consultation">Audio Consultation</option>
+              <option value="WhatsApp Consultation">WhatsApp Chat</option>
             </select>
             <div className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 pointer-events-none text-[#D4A24C]">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
@@ -114,9 +142,9 @@ export default function ConsultationForm({ initialType = 'Video Consultation', r
           </div>
         </div>
 
-        {/* Personal Info Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-          <div className="space-y-1.5 sm:space-y-2.5">
+        {/* Personal Info Grid - Row 1: Full Name & Age */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+          <div className="sm:col-span-2 space-y-1.5 sm:space-y-2.5">
             <label className="text-[10px] font-bold font-sans text-[#D4A24C] uppercase tracking-widest ml-1">Full Name</label>
             <input
               required
@@ -129,44 +157,23 @@ export default function ConsultationForm({ initialType = 'Video Consultation', r
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4 sm:gap-5">
-            <div className="space-y-1.5 sm:space-y-2.5">
-              <label className="text-[10px] font-bold font-sans text-[#D4A24C] uppercase tracking-widest ml-1">Age</label>
-              <input
-                required
-                type="number"
-                name="age"
-                min="1"
-                max="120"
-                value={formData.age}
-                onChange={handleChange}
-                className="w-full bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-[#FAF7F2] focus:outline-none focus:ring-2 focus:ring-[#D4A24C]/60 focus:border-[#D4A24C]/60 transition-all shadow-[inset_0_2px_10px_rgba(0,0,0,0.1)] hover:bg-white/10 placeholder:text-[#FAF7F2]/30"
-                placeholder="e.g. 35"
-              />
-            </div>
-            <div className="space-y-1.5 sm:space-y-2.5">
-              <label className="text-[10px] font-bold font-sans text-[#D4A24C] uppercase tracking-widest ml-1">Gender</label>
-              <div className="relative">
-                <select
-                  required
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleChange}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-[#FAF7F2] focus:outline-none focus:ring-2 focus:ring-[#D4A24C]/60 focus:border-[#D4A24C]/60 transition-all appearance-none shadow-[inset_0_2px_10px_rgba(0,0,0,0.1)] hover:bg-white/10 [&>option]:bg-[#0D3B2A] [&>option]:text-[#FAF7F2]"
-                >
-                  <option value="">Select</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                </select>
-                <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#D4A24C]">
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                </div>
-              </div>
-            </div>
+          <div className="space-y-1.5 sm:space-y-2.5">
+            <label className="text-[10px] font-bold font-sans text-[#D4A24C] uppercase tracking-widest ml-1">Age</label>
+            <input
+              required
+              type="number"
+              name="age"
+              min="1"
+              max="120"
+              value={formData.age}
+              onChange={handleChange}
+              className="w-full bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-[#FAF7F2] focus:outline-none focus:ring-2 focus:ring-[#D4A24C]/60 focus:border-[#D4A24C]/60 transition-all shadow-[inset_0_2px_10px_rgba(0,0,0,0.1)] hover:bg-white/10 placeholder:text-[#FAF7F2]/30"
+              placeholder="e.g. 35"
+            />
           </div>
         </div>
 
-        {/* Contact Info */}
+        {/* Contact Info & Gender - Row 2: Phone Number & Gender */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div className="space-y-1.5 sm:space-y-2.5">
             <label className="text-[10px] font-bold font-sans text-[#D4A24C] uppercase tracking-widest ml-1">Phone Number</label>
@@ -174,22 +181,32 @@ export default function ConsultationForm({ initialType = 'Video Consultation', r
               required
               type="tel"
               name="phone"
+              maxLength={15}
               value={formData.phone}
               onChange={handleChange}
               className="w-full bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-[#FAF7F2] focus:outline-none focus:ring-2 focus:ring-[#D4A24C]/60 focus:border-[#D4A24C]/60 transition-all shadow-[inset_0_2px_10px_rgba(0,0,0,0.1)] hover:bg-white/10 placeholder:text-[#FAF7F2]/30"
-              placeholder="+91"
+              placeholder="e.g. 9876543210"
             />
           </div>
+
           <div className="space-y-1.5 sm:space-y-2.5">
-            <label className="text-[10px] font-bold font-sans text-[#D4A24C] uppercase tracking-widest ml-1">Preferred Date</label>
-            <input
-              required
-              type="date"
-              name="preferredDate"
-              value={formData.preferredDate}
-              onChange={handleChange}
-              className="w-full bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-[#FAF7F2] focus:outline-none focus:ring-2 focus:ring-[#D4A24C]/60 focus:border-[#D4A24C]/60 transition-all shadow-[inset_0_2px_10px_rgba(0,0,0,0.1)] hover:bg-white/10 [&::-webkit-calendar-picker-indicator]:invert-[1]"
-            />
+            <label className="text-[10px] font-bold font-sans text-[#D4A24C] uppercase tracking-widest ml-1">Gender</label>
+            <div className="relative">
+              <select
+                required
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                className="w-full bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-[#FAF7F2] focus:outline-none focus:ring-2 focus:ring-[#D4A24C]/60 focus:border-[#D4A24C]/60 transition-all appearance-none shadow-[inset_0_2px_10px_rgba(0,0,0,0.1)] hover:bg-white/10 [&>option]:bg-[#0D3B2A] [&>option]:text-[#FAF7F2]"
+              >
+                <option value="">Select</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+              <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#D4A24C]">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+              </div>
+            </div>
           </div>
         </div>
 
