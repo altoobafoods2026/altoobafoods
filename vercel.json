@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/judgeme-api/:path*",
+      "destination": "/api/judgeme/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
