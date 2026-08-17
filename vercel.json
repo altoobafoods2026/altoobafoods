@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/judgeme-api/:path*",
-      "destination": "/api/judgeme/:path*"
+      "destination": "https://judge.me/api/v1/:path*"
     },
     {
       "source": "/(.*)",

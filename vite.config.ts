@@ -94,6 +94,9 @@ export default defineConfig(() => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    build: {
+      chunkSizeWarningLimit: 1000,
+    },
     server: {
       host: true,
       hmr: process.env.DISABLE_HMR !== 'true',
