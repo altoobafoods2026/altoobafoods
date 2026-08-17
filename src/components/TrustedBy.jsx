@@ -154,27 +154,29 @@ export default function TrustedBy({ productId, productName }) {
               {visibleReviews.map((review, index) => (
                 <div
                   key={review.id}
-                  className={`bg-[#FAF7F2] rounded-3xl p-8 border border-[#0D3B2A]/5 hover:shadow-xl hover:shadow-[#0D3B2A]/5 transition-all duration-300 flex-col h-full ${index === 0 ? 'flex' : 'hidden md:flex'}`}
+                  className={`bg-[#FAF7F2] rounded-3xl p-8 border border-[#0D3B2A]/5 hover:shadow-xl hover:shadow-[#0D3B2A]/5 transition-all duration-300 flex flex-col justify-between h-full min-w-0 overflow-hidden ${index === 0 ? 'flex' : 'hidden md:flex'}`}
                 >
-                  <div className="flex gap-1 mb-6">
-                    {[...Array(review.rating)].map((_, i) => (
-                      <svg key={i} className="w-5 h-5 text-[#D4A24C] fill-current" viewBox="0 0 24 24">
-                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                      </svg>
-                    ))}
+                  <div>
+                    <div className="flex gap-1 mb-6">
+                      {[...Array(review.rating)].map((_, i) => (
+                        <svg key={i} className="w-5 h-5 text-[#D4A24C] fill-current shrink-0" viewBox="0 0 24 24">
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <p className="text-[#0D3B2A]/80 font-sans text-base leading-relaxed mb-8 break-words [overflow-wrap:anywhere] [word-break:break-word]">
+                      "{review.text}"
+                    </p>
                   </div>
-                  <p className="text-[#0D3B2A]/80 font-sans text-base leading-relaxed mb-8 flex-grow">
-                    "{review.text}"
-                  </p>
-                  <div className="mt-auto border-t border-[#0D3B2A]/10 pt-6 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <img src={review.avatar} alt={review.name} className="w-10 h-10 rounded-full object-cover border border-[#0D3B2A]/10" />
-                      <div>
-                        <h4 className="font-sans font-bold text-[#0D3B2A] text-base leading-tight">{review.name}</h4>
-                        <span className="text-[10px] font-sans uppercase tracking-widest text-gray-500">{review.role}</span>
+                  <div className="mt-auto border-t border-[#0D3B2A]/10 pt-6 flex items-center justify-between gap-3 min-w-0">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <img src={review.avatar} alt={review.name} className="w-10 h-10 rounded-full object-cover border border-[#0D3B2A]/10 shrink-0" />
+                      <div className="min-w-0">
+                        <h4 className="font-sans font-bold text-[#0D3B2A] text-base leading-tight truncate">{review.name}</h4>
+                        <span className="text-[10px] font-sans uppercase tracking-widest text-gray-500 block truncate">{review.role}</span>
                       </div>
                     </div>
-                    <span className="text-[9px] font-sans font-bold uppercase tracking-widest bg-[#0D3B2A] text-[#FAF7F2] px-2.5 py-1 rounded-full text-center max-w-[100px] leading-tight flex-shrink-0">
+                    <span className="text-[9px] font-sans font-bold uppercase tracking-widest bg-[#0D3B2A] text-[#FAF7F2] px-2.5 py-1 rounded-full text-center max-w-[120px] truncate leading-tight shrink-0">
                       {review.product}
                     </span>
                   </div>
