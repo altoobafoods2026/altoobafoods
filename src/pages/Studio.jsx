@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Search, X } from 'lucide-react';
 import { getProducts } from '../services/shopify';
 import ProductCard from '../components/ProductCard';
 import ShimmerCard from '../components/ShimmerCard';
@@ -10,6 +11,7 @@ export default function Studio() {
   const location = useLocation();
   const navigate = useNavigate();
   
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortBy, setSortBy] = useState('featured');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -68,10 +70,20 @@ export default function Studio() {
     }
   };
 
-  // Filter products
+  // Filter products by Category AND Search Query
   const filteredProducts = products.filter((p) => {
-    if (selectedCategory === 'All') return true;
-    return p.category === selectedCategory;
+    const q = searchQuery.toLowerCase().trim();
+    
+    const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
+
+    if (!q) return matchesCategory;
+
+    const nameMatch = (p.name && p.name.toLowerCase().includes(q)) || (p.title && p.title.toLowerCase().includes(q));
+    const slugMatch = p.slug && p.slug.toLowerCase().includes(q);
+    const categoryMatch = p.category && p.category.toLowerCase().includes(q);
+    const descMatch = p.description && p.description.toLowerCase().includes(q);
+
+    return matchesCategory && (nameMatch || slugMatch || categoryMatch || descMatch);
   });
 
   // Sort products
@@ -95,6 +107,42 @@ export default function Studio() {
       </div>
 
       <div className="pb-20 px-6 sm:px-8 max-w-7xl mx-auto">
+        
+        {/* Search Bar */}
+        <div className="mb-8 md:mb-10 max-w-2xl mx-auto">
+          <div className="relative flex items-center bg-white rounded-full border border-[#0D3B2A]/10 shadow-[0_4px_20px_rgba(13,59,42,0.04)] focus-within:border-[#D4A24C] focus-within:ring-2 focus-within:ring-[#D4A24C]/30 transition-all duration-300 px-5 py-3.5">
+            <Search className="w-5 h-5 text-[#D4A24C] shrink-0 mr-3.5" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search remedies by name, category, or ingredient..."
+              className="w-full bg-transparent text-sm md:text-base text-[#0D3B2A] placeholder:text-[#0D3B2A]/40 focus:outline-none font-medium"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="p-1 rounded-full text-gray-400 hover:text-[#0D3B2A] hover:bg-gray-100 transition-colors ml-2 cursor-pointer"
+                title="Clear search"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <div className="flex items-center justify-between text-xs text-[#0D3B2A]/70 font-sans font-medium px-4 mt-2.5">
+              <span>Found <strong className="text-[#0D3B2A] font-bold">{sortedProducts.length}</strong> {sortedProducts.length === 1 ? 'remedy' : 'remedies'} for "<span className="text-[#D4A24C] font-semibold">{searchQuery}</span>"</span>
+              <button 
+                onClick={() => setSearchQuery('')} 
+                className="text-[#D4A24C] hover:underline font-semibold cursor-pointer"
+              >
+                Clear search
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Filter & Sort Controls */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-forest/10 pb-8 mb-12">
           {/* Categories Filter Pills */}
@@ -168,12 +216,30 @@ export default function Studio() {
             ))}
           </div>
         ) : sortedProducts.length === 0 ? (
-          <div className="text-center py-24 bg-white/40 border border-forest/5 rounded-3xl backdrop-blur-sm">
-            <svg className="w-16 h-16 text-muted-green mx-auto mb-4 stroke-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 012.008 1.24l.885 1.77a2.25 2.25 0 002.007 1.24h1.98a2.25 2.25 0 002.007-1.24l.885-1.77a2.25 2.25 0 012.007-1.24h3.86m-18 0h18" />
-            </svg>
-            <h3 className="font-serif text-xl font-bold text-forest mb-2">No remedies found</h3>
-            <p className="text-sm text-forest/60">Try selecting another category or check back later.</p>
+          <div className="text-center py-20 bg-white/60 border border-forest/10 rounded-3xl backdrop-blur-sm px-6 max-w-lg mx-auto shadow-sm">
+            <div className="w-16 h-16 rounded-full bg-[#FAF7F2] border border-[#D4A24C]/20 flex items-center justify-center mx-auto mb-4 text-[#D4A24C]">
+              <Search className="w-7 h-7" />
+            </div>
+            <h3 className="font-serif text-xl font-bold text-forest mb-2">
+              {searchQuery ? `No remedies found for "${searchQuery}"` : 'No remedies found'}
+            </h3>
+            <p className="text-sm text-forest/60 mb-6">
+              {searchQuery 
+                ? 'Check your spelling or try searching for another category or ingredient.' 
+                : 'Try selecting another category or check back later.'}
+            </p>
+            {(searchQuery || selectedCategory !== 'All') && (
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedCategory('All');
+                  navigate('/studio');
+                }}
+                className="inline-flex items-center gap-2 bg-[#0D3B2A] text-white px-6 py-2.5 rounded-full text-xs font-sans font-bold uppercase tracking-widest hover:bg-[#D4A24C] transition-colors cursor-pointer"
+              >
+                Clear Filters & Search
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">

@@ -10,7 +10,15 @@ export default function TrustedBy({ productId, productName }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [judgeMeReviews, setJudgeMeReviews] = useState([]);
   const [hasFetched, setHasFetched] = useState(false);
+  const [expandedReviews, setExpandedReviews] = useState({});
   const showToast = useToastStore((state) => state.showToast);
+
+  const toggleExpand = (id) => {
+    setExpandedReviews(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
 
   useEffect(() => {
     const fetchJudgeMeReviews = async () => {
@@ -149,39 +157,59 @@ export default function TrustedBy({ productId, productName }) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -30 }}
               transition={{ duration: 0.4, ease: "easeInOut" }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8"
+              className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start"
             >
-              {visibleReviews.map((review, index) => (
-                <div
-                  key={review.id}
-                  className={`bg-[#FAF7F2] rounded-3xl p-8 border border-[#0D3B2A]/5 hover:shadow-xl hover:shadow-[#0D3B2A]/5 transition-all duration-300 flex flex-col justify-between h-full min-w-0 overflow-hidden ${index === 0 ? 'flex' : 'hidden md:flex'}`}
-                >
-                  <div>
-                    <div className="flex gap-1 mb-6">
-                      {[...Array(review.rating)].map((_, i) => (
-                        <svg key={i} className="w-5 h-5 text-[#D4A24C] fill-current shrink-0" viewBox="0 0 24 24">
-                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                        </svg>
-                      ))}
-                    </div>
-                    <p className="text-[#0D3B2A]/80 font-sans text-base leading-relaxed mb-8 break-words [overflow-wrap:anywhere] [word-break:break-word]">
-                      "{review.text}"
-                    </p>
-                  </div>
-                  <div className="mt-auto border-t border-[#0D3B2A]/10 pt-6 flex items-center justify-between gap-3 min-w-0">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <img src={review.avatar} alt={review.name} className="w-10 h-10 rounded-full object-cover border border-[#0D3B2A]/10 shrink-0" />
-                      <div className="min-w-0">
-                        <h4 className="font-sans font-bold text-[#0D3B2A] text-base leading-tight truncate">{review.name}</h4>
-                        <span className="text-[10px] font-sans uppercase tracking-widest text-gray-500 block truncate">{review.role}</span>
+              {visibleReviews.map((review, index) => {
+                const MAX_CHARS = 85;
+                const isLong = review.text && review.text.length > MAX_CHARS;
+                const isExpanded = !!expandedReviews[review.id];
+                const displayedText = isLong && !isExpanded 
+                  ? review.text.slice(0, MAX_CHARS) + '...' 
+                  : review.text;
+
+                return (
+                  <div
+                    key={review.id}
+                    className={`bg-[#FAF7F2] rounded-3xl p-8 border border-[#0D3B2A]/5 hover:shadow-xl hover:shadow-[#0D3B2A]/5 transition-all duration-300 flex flex-col justify-between self-start min-w-0 min-h-[290px] w-full overflow-hidden ${index === 0 ? 'flex' : 'hidden md:flex'}`}
+                  >
+                    <div>
+                      <div className="flex gap-1 mb-6">
+                        {[...Array(review.rating)].map((_, i) => (
+                          <svg key={i} className="w-5 h-5 text-[#D4A24C] fill-current shrink-0" viewBox="0 0 24 24">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                          </svg>
+                        ))}
+                      </div>
+                      <div className="mb-8">
+                        <p className="text-[#0D3B2A]/80 font-sans text-base leading-relaxed break-words [overflow-wrap:anywhere] [word-break:break-word]">
+                          "{displayedText}"
+                        </p>
+                        {isLong && (
+                          <button
+                            type="button"
+                            onClick={() => toggleExpand(review.id)}
+                            className="mt-2 text-xs font-sans font-bold text-[#D4A24C] hover:text-[#0D3B2A] hover:underline transition-colors cursor-pointer block"
+                          >
+                            {isExpanded ? 'See Less' : 'See More'}
+                          </button>
+                        )}
                       </div>
                     </div>
-                    <span className="text-[9px] font-sans font-bold uppercase tracking-widest bg-[#0D3B2A] text-[#FAF7F2] px-2.5 py-1 rounded-full text-center max-w-[120px] truncate leading-tight shrink-0">
-                      {review.product}
-                    </span>
+                    <div className="mt-auto border-t border-[#0D3B2A]/10 pt-6 flex items-center justify-between gap-3 min-w-0">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <img src={review.avatar} alt={review.name} className="w-10 h-10 rounded-full object-cover border border-[#0D3B2A]/10 shrink-0" />
+                        <div className="min-w-0">
+                          <h4 className="font-sans font-bold text-[#0D3B2A] text-base leading-tight truncate">{review.name}</h4>
+                          <span className="text-[10px] font-sans uppercase tracking-widest text-gray-500 block truncate">{review.role}</span>
+                        </div>
+                      </div>
+                      <span className="text-[9px] font-sans font-bold uppercase tracking-widest bg-[#0D3B2A] text-[#FAF7F2] px-2.5 py-1 rounded-full text-center max-w-[120px] truncate leading-tight shrink-0">
+                        {review.product}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </motion.div>
           </AnimatePresence>
         </div>
