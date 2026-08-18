@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { ShoppingBag, ArrowRight, Gift } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { ShoppingBag, ArrowRight, Sparkles, Gift } from 'lucide-react';
 import { useCartStore } from '../../store/cartStore';
 import { useToastStore } from '../../store/toastStore';
 
@@ -9,61 +9,89 @@ export default function NoorBundles({ products = [] }) {
   const addItem = useCartStore((state) => state.addItem);
   const showToast = useToastStore((state) => state.showToast);
 
-  // Bundle definitions crafted from store's authentic remedies
+  // Filter real Wellness Kits and Combos from Shopify products
+  const kits = products.filter(p => 
+    p.category === 'Wellness Kit' ||
+    p.collections?.some(c => c.toLowerCase().includes('wellness')) ||
+    p.name.toLowerCase().includes('kit') ||
+    p.name.toLowerCase().includes('hamper') ||
+    p.slug.includes('wellness') ||
+    p.slug.includes('kit')
+  );
+
+  // Fallbacks from top store remedies if fewer than 3 kits are in catalog
+  const otherCombos = products.filter(p => 
+    !kits.some(k => k.id === p.id) && (p.slug.includes('talbina') || p.slug.includes('ajwa') || p.slug.includes('shilajit'))
+  );
+
+  const heroProduct = kits[0] || products[0];
+  const stackedProduct1 = kits[1] || otherCombos[0] || products[1];
+  const stackedProduct2 = kits[2] || otherCombos[1] || products[2];
+
+  if (!heroProduct) return null;
+
   const heroBundle = {
-    id: 'bundle-royal-hamper',
-    name: 'Royal Sunnah Gift Hamper',
-    slug: 'buy-talbina-500gm-get-talbina-250gm-free',
-    badge: 'MOST GIFTED',
-    discountBadge: 'SAVE 30%',
-    itemsCount: '7 Products Inside',
-    itemsList: 'Talbina 500g + Kalonji Oil + Ajwa Tonic + Olive Oil + Marzanjosh Tea + Herbal Soaps',
-    price: 2499,
-    mrp: 3499,
-    image: '/bundles/bundle_hero_hamper.jpg',
+    id: heroProduct.id,
+    productRef: heroProduct,
+    name: heroProduct.name,
+    slug: heroProduct.slug,
+    badge: 'WELLNESS KIT',
+    discountBadge: heroProduct.discount > 0 ? `SAVE ${heroProduct.discount}%` : (heroProduct.mrp > heroProduct.price ? `SAVE ${Math.round(((heroProduct.mrp - heroProduct.price) / heroProduct.mrp) * 100)}%` : 'BEST VALUE'),
+    itemsCount: 'Complete Care Bundle',
+    itemsList: heroProduct.shortDesc || heroProduct.description?.substring(0, 95) || 'Authentic Prophetic Wellness Kit with Complete Nutrition & Pure Herbal Care',
+    price: heroProduct.price,
+    mrp: heroProduct.mrp > heroProduct.price ? heroProduct.mrp : heroProduct.price * 1.2,
+    image: (heroProduct.descriptionImages && heroProduct.descriptionImages[0]) || heroProduct.cardImage || heroProduct.images?.[0] || '',
+    inStock: heroProduct.inStock
   };
 
-  const stackedBundles = [
-    {
-      id: 'bundle-immunity-booster',
-      name: 'Immunity Booster Combo',
-      slug: 'black-seed-oil-capsule',
-      badge: 'IMMUNITY DEFENSE',
-      discountBadge: 'SAVE 25%',
-      itemsCount: '3 Products Inside',
-      itemsList: 'Black Seed Oil Capsules + Ajwa Tonic 500ml + Pure Marzanjosh Tea',
-      price: 899,
-      mrp: 1199,
-      image: '/bundles/bundle_immunity_combo.jpg',
-    },
-    {
-      id: 'bundle-family-wellness',
-      name: 'Family Wellness Starter Kit',
-      slug: 'kalonji-shampoo-200ml',
-      badge: 'BEST SELLER',
-      discountBadge: 'SAVE 20%',
-      itemsCount: '4 Products Inside',
-      itemsList: 'Talbina 500g + Kalonji Shampoo + Qalbi Nuskha 500ml + Herbal Oil',
-      price: 1499,
-      mrp: 1899,
-      image: '/bundles/bundle_wellness_kit.jpg',
-    },
-  ];
+  const rawStacked = [stackedProduct1, stackedProduct2].filter(Boolean);
+  const stackedBundles = rawStacked.map((prod, idx) => {
+    let cleanDesc = prod.shortDesc || prod.description || '';
+    if (cleanDesc.startsWith(prod.name)) {
+      cleanDesc = cleanDesc.replace(prod.name, '').trim();
+    }
+    cleanDesc = cleanDesc.replace(/^[•\s\-\:]+/, '').trim();
+    if (!cleanDesc) {
+      cleanDesc = 'Authentic prophetic formula for holistic daily vitality and natural wellness';
+    }
+
+    return {
+      id: prod.id,
+      productRef: prod,
+      name: prod.name,
+      slug: prod.slug,
+      badge: prod.category === 'Wellness Kit' ? 'WELLNESS KIT' : 'SPECIAL VALUE',
+      itemsCount: 'HOLISTIC SUNNAH REMEDY',
+      itemsList: cleanDesc.substring(0, 85),
+      price: prod.price,
+      mrp: prod.mrp > prod.price ? prod.mrp : prod.price * 1.2,
+      image: prod.cardImage || prod.images?.[0] || '',
+      inStock: prod.inStock
+    };
+  });
 
   const handleAddBundle = (e, bundle) => {
     e.preventDefault();
     e.stopPropagation();
 
-    addItem({
-      id: bundle.id,
-      name: bundle.name,
-      price: bundle.price,
-      mrp: bundle.mrp,
-      image: bundle.image,
-      quantity: 1,
-      variantId: `${bundle.id}-default`,
-      isBundle: true
-    });
+    if (bundle.productRef) {
+      if (!bundle.inStock) {
+        showToast('This product is currently out of stock', 'error');
+        return;
+      }
+      addItem(bundle.productRef);
+    } else {
+      addItem({
+        id: bundle.id,
+        name: bundle.name,
+        price: bundle.price,
+        mrp: bundle.mrp,
+        image: bundle.image,
+        quantity: 1,
+        variantId: `${bundle.id}-default`,
+      });
+    }
 
     showToast(`Added "${bundle.name}" to your cart! 🛍️`, 'success');
   };
@@ -76,43 +104,59 @@ export default function NoorBundles({ products = [] }) {
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 relative z-10">
         
-        {/* Header Area */}
-        <div className="text-center mb-8 sm:mb-10 lg:mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-[#0D3B2A]/5 border border-[#0D3B2A]/10 text-[#0D3B2A] text-[10px] sm:text-xs font-sans font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] mb-3 sm:mb-4"
-          >
-            <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#D4A24C]" />
-            <span>Curated Collections & Hampers</span>
-          </motion.div>
+        {/* Header Area with Top Right Action Button */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 lg:mb-14 gap-5 sm:gap-6">
+          <div>
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center px-3.5 sm:px-4 py-1 sm:py-1.5 rounded-full bg-[#0D3B2A]/5 border border-[#0D3B2A]/10 text-[#0D3B2A] text-[10px] sm:text-xs font-sans font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] mb-2 sm:mb-3"
+            >
+              <span>Curated Collections & Hampers</span>
+            </motion.div>
 
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-serif text-[#0D3B2A] font-bold mb-3 sm:mb-4 tracking-tight"
-          >
-            Bundle & Save
-          </motion.h2>
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-serif text-[#0D3B2A] font-bold mb-2 sm:mb-3 tracking-tight"
+            >
+              Wellness Kits & Hampers
+            </motion.h2>
 
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="text-[#0D3B2A]/70 font-sans text-sm md:text-base max-w-xl mx-auto font-medium leading-relaxed"
-          >
-            Thoughtfully crafted bundles & gift hampers tailored for daily health and holistic Sunnah healing.
-          </motion.p>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="text-[#0D3B2A]/70 font-sans text-sm md:text-base max-w-xl font-medium leading-relaxed"
+            >
+              Thoughtfully crafted all-in-one wellness kits & gift hampers tailored for daily health and holistic Sunnah healing.
+            </motion.p>
+          </div>
           
-          <div className="w-14 h-1 bg-[#D4A24C] mx-auto mt-6 rounded-full opacity-60" />
+          {/* Top Right Corner Button */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.25 }}
+            className="shrink-0"
+          >
+            <Link
+              to="/studio?category=Wellness%20Kit"
+              className="inline-flex items-center gap-2 bg-transparent border border-[#D4A24C] text-[#0D3B2A] hover:bg-[#0D3B2A] hover:text-[#FAF7F2] hover:border-transparent px-5 sm:px-8 py-2 sm:py-3.5 rounded-full font-sans font-bold text-[10px] sm:text-xs uppercase tracking-[0.15em] sm:tracking-[0.2em] transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer group/btn"
+            >
+              <span>Explore All Wellness Kits</span>
+              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transform group-hover/btn:translate-x-1 transition-transform text-[#D4A24C]" />
+            </Link>
+          </motion.div>
         </div>
 
-        {/* Asymmetric Grid Layout (Design 2) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
+        {/* Asymmetric Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8 items-stretch">
           
           {/* LEFT: Large Featured Hero Card (7 Cols) */}
           <motion.div
@@ -120,70 +164,55 @@ export default function NoorBundles({ products = [] }) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="lg:col-span-7 flex flex-col"
+            className="lg:col-span-7 flex flex-col h-full"
           >
-            <div className="group relative bg-white rounded-[20px] sm:rounded-[28px] overflow-hidden border border-[#D4A24C]/20 shadow-[0_10px_35px_rgba(13,59,42,0.06)] hover:shadow-[0_20px_50px_rgba(13,59,42,0.12)] transition-all duration-500 flex flex-col justify-between h-full min-h-[360px] sm:min-h-[480px] md:min-h-[540px]">
+            <div className="group relative bg-white rounded-[16px] sm:rounded-[28px] overflow-hidden border border-[#D4A24C]/20 shadow-[0_6px_25px_rgba(13,59,42,0.06)] hover:shadow-[0_20px_50px_rgba(13,59,42,0.12)] transition-all duration-500 flex flex-col justify-between h-full">
               
-              {/* Image Container with Zoom effect */}
-              <div className="relative w-full h-[220px] sm:h-[320px] md:h-[380px] lg:h-[400px] overflow-hidden bg-[#FAF7F2]">
-                <img 
-                  src={heroBundle.image} 
-                  alt={heroBundle.name}
-                  className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
-                
-                {/* Gradient vignette on image bottom */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-
-                {/* Floating Top Badges */}
-                <div className="absolute top-3 left-3 right-3 sm:top-5 sm:left-5 sm:right-5 flex items-center justify-between z-10">
-                  <span className="bg-[#D4A24C] text-[#0D3B2A] text-[9px] sm:text-[11px] md:text-xs font-sans font-bold uppercase tracking-widest px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full shadow-md flex items-center gap-1 sm:gap-1.5">
-                    <Gift className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                    {heroBundle.badge}
-                  </span>
-                  <span className="bg-[#0D3B2A] text-[#FAF7F2] text-[9px] sm:text-[11px] md:text-xs font-sans font-bold uppercase tracking-widest px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md border border-white/20">
-                    {heroBundle.discountBadge}
-                  </span>
-                </div>
-
-                {/* Bottom Overlay Info inside Image area */}
-                <div className="absolute bottom-3 left-3 right-3 sm:bottom-5 sm:left-5 sm:right-5 z-10 text-white">
-                  <div className="inline-block px-2 py-0.5 sm:px-3 sm:py-1 rounded-full bg-white/20 backdrop-blur-md text-[9px] sm:text-[11px] font-sans font-semibold uppercase tracking-wider text-white mb-1.5 sm:mb-2 border border-white/30">
-                    {heroBundle.itemsCount}
-                  </div>
-                  <h3 className="font-serif font-bold text-lg sm:text-2xl md:text-3xl lg:text-4xl text-white drop-shadow-md leading-tight">
-                    {heroBundle.name}
-                  </h3>
-                </div>
+              {/* Clickable Image Container */}
+              <div className="relative w-full flex-1 min-h-[180px] sm:min-h-[260px] overflow-hidden bg-[#FAF7F2] flex items-center justify-center block">
+                <Link to={`/product/${heroBundle.slug}`} className="w-full h-full flex items-center justify-center">
+                  <img 
+                    src={heroBundle.image} 
+                    alt={heroBundle.name}
+                    className="w-full h-full max-h-[240px] sm:max-h-[330px] md:max-h-[350px] object-cover sm:object-contain transform group-hover:scale-105 transition-transform duration-700 ease-out"
+                  />
+                </Link>
               </div>
 
               {/* Bottom Details & CTA Bar */}
-              <div className="p-4 sm:p-6 md:p-8 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-5 border-t border-gray-100 flex-grow">
-                <div className="space-y-1 sm:space-y-1.5 max-w-md">
-                  <p className="text-[10px] sm:text-xs text-[#0D3B2A]/60 font-sans font-semibold uppercase tracking-wider">
-                    Package Inclusions
-                  </p>
-                  <p className="text-xs sm:text-sm text-[#0D3B2A]/80 font-sans line-clamp-2 leading-relaxed">
+              <div className="p-3.5 sm:p-5 md:p-6 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-t border-gray-100 shrink-0">
+                <Link to={`/product/${heroBundle.slug}`} className="space-y-1 max-w-md hover:no-underline">
+                  <span className="inline-block text-[8px] sm:text-[9px] text-[#D4A24C] font-sans font-bold uppercase tracking-widest">
+                    {heroBundle.itemsCount}
+                  </span>
+                  <h3 className="font-serif font-bold text-sm sm:text-xl text-[#0D3B2A] group-hover:text-[#D4A24C] transition-colors leading-tight">
+                    {heroBundle.name}
+                  </h3>
+                  <p className="text-[10px] sm:text-xs text-[#0D3B2A]/70 font-sans line-clamp-1 sm:line-clamp-2 leading-relaxed">
                     {heroBundle.itemsList}
                   </p>
-                  <div className="flex items-baseline gap-2 sm:gap-3 pt-1">
-                    <span className="text-xl sm:text-2xl md:text-3xl font-serif font-bold text-[#0D3B2A]">
+                  <div className="flex items-baseline gap-1.5 sm:gap-2 pt-0.5">
+                    <span className="text-lg sm:text-2xl font-sans font-extrabold text-[#0D3B2A] tracking-tight">
                       ₹{heroBundle.price.toLocaleString('en-IN')}
                     </span>
-                    <span className="text-xs sm:text-sm font-sans text-gray-400 line-through">
-                      ₹{heroBundle.mrp.toLocaleString('en-IN')}
-                    </span>
+                    {heroBundle.mrp && heroBundle.mrp > heroBundle.price && (
+                      <span className="text-[10px] sm:text-sm font-sans font-medium text-gray-400 line-through">
+                        ₹{heroBundle.mrp.toLocaleString('en-IN')}
+                      </span>
+                    )}
                   </div>
-                </div>
+                </Link>
 
                 <div className="flex items-center gap-3 shrink-0">
                   <button
                     onClick={(e) => handleAddBundle(e, heroBundle)}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 sm:gap-2.5 bg-[#0D3B2A] text-white px-5 py-3 sm:px-7 sm:py-3.5 rounded-xl sm:rounded-2xl font-sans font-bold text-[10px] sm:text-xs uppercase tracking-widest hover:bg-[#D4A24C] transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-0.5 cursor-pointer group/btn"
+                    className={`w-full sm:w-auto inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-[#0D3B2A] text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg sm:rounded-2xl font-sans font-bold text-[10px] sm:text-xs uppercase tracking-widest hover:bg-[#D4A24C] transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-0.5 cursor-pointer group/btn ${!heroBundle.inStock ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    <span>Add to Cart</span>
-                    <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transform group-hover/btn:translate-x-1 transition-transform" />
+                    <span>{heroBundle.inStock ? 'Add to Cart' : 'Out of Stock'}</span>
+                    {heroBundle.inStock && (
+                      <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transform group-hover/btn:translate-x-1 transition-transform" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -192,7 +221,7 @@ export default function NoorBundles({ products = [] }) {
           </motion.div>
 
           {/* RIGHT: Two Stacked Horizontal Cards (5 Cols) */}
-          <div className="lg:col-span-5 flex flex-col justify-between gap-6">
+          <div className="lg:col-span-5 flex flex-col justify-between gap-4 sm:gap-6">
             {stackedBundles.map((bundle, idx) => (
               <motion.div
                 key={bundle.id}
@@ -202,52 +231,55 @@ export default function NoorBundles({ products = [] }) {
                 transition={{ duration: 0.6, delay: idx * 0.15 }}
                 className="flex-1"
               >
-                <div className="group bg-white rounded-[16px] sm:rounded-[24px] p-3.5 sm:p-5 md:p-6 border border-[#D4A24C]/15 shadow-[0_6px_25px_rgba(13,59,42,0.04)] hover:shadow-[0_16px_35px_rgba(13,59,42,0.09)] hover:border-[#D4A24C]/40 transition-all duration-400 flex flex-row items-center gap-3 sm:gap-5 md:gap-6 h-full">
+                <div className="group bg-white rounded-[18px] sm:rounded-[24px] p-3.5 sm:p-5 md:p-6 border border-[#D4A24C]/15 shadow-[0_6px_25px_rgba(13,59,42,0.04)] hover:shadow-[0_16px_35px_rgba(13,59,42,0.09)] hover:border-[#D4A24C]/40 transition-all duration-400 flex flex-row items-center gap-3.5 sm:gap-5 md:gap-6 h-full overflow-hidden">
                   
-                  {/* Left: Thumbnail Image */}
-                  <div className="relative w-24 sm:w-32 md:w-40 aspect-square rounded-xl sm:rounded-2xl overflow-hidden bg-[#FAF7F2] shrink-0 border border-gray-100 shadow-inner">
+                  {/* Left: Thumbnail Image with clean framing & padding (+20% size) */}
+                  <Link to={`/product/${bundle.slug}`} className="relative w-24 sm:w-36 md:w-40 aspect-square rounded-xl sm:rounded-2xl overflow-hidden bg-[#FAF7F2] shrink-0 border border-gray-100 shadow-inner flex items-center justify-center p-2 sm:p-3.5">
                     <img 
                       src={bundle.image} 
                       alt={bundle.name}
-                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                     />
-                    <span className="absolute top-2.5 left-2.5 bg-[#0D3B2A] text-[#FAF7F2] text-[10px] font-sans font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">
-                      {bundle.discountBadge}
-                    </span>
-                  </div>
+                  </Link>
 
                   {/* Right: Info and Pricing */}
-                  <div className="flex flex-col justify-between flex-grow w-full space-y-2 sm:space-y-3">
-                    <div>
-                      <span className="text-[8px] sm:text-[10px] font-sans font-bold uppercase tracking-widest text-[#D4A24C] block mb-0.5 sm:mb-1">
+                  <div className="flex flex-col justify-between flex-grow min-w-0 w-full space-y-1.5 sm:space-y-2">
+                    <Link to={`/product/${bundle.slug}`} className="hover:no-underline min-w-0 block">
+                      <span className="text-[8px] sm:text-[9px] font-sans font-bold uppercase tracking-widest text-[#D4A24C] block truncate mb-0.5">
                         {bundle.badge} • {bundle.itemsCount}
                       </span>
-                      <h4 className="font-serif font-bold text-sm sm:text-lg md:text-xl text-[#0D3B2A] group-hover:text-[#D4A24C] transition-colors leading-snug">
+                      <h4 className="font-serif font-bold text-[13px] sm:text-base md:text-lg text-[#0D3B2A] group-hover:text-[#D4A24C] transition-colors leading-snug line-clamp-1 truncate">
                         {bundle.name}
                       </h4>
-                      <p className="text-[10px] sm:text-xs text-[#0D3B2A]/70 font-sans line-clamp-2 mt-1 sm:mt-1.5 leading-relaxed">
+                      <p className="text-[10px] sm:text-xs text-[#0D3B2A]/70 font-sans line-clamp-2 mt-0.5 sm:mt-1 leading-relaxed">
                         {bundle.itemsList}
                       </p>
-                    </div>
+                    </Link>
 
-                    <div className="flex items-center justify-between pt-1.5 sm:pt-2 border-t border-gray-100 gap-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-2 border-t border-gray-100 gap-2">
                       <div className="flex items-baseline gap-1 sm:gap-1.5 shrink-0">
-                        <span className="text-base sm:text-lg md:text-xl font-serif font-bold text-[#0D3B2A]">
+                        <span className="text-base sm:text-lg md:text-xl font-sans font-extrabold text-[#0D3B2A] tracking-tight">
                           ₹{bundle.price.toLocaleString('en-IN')}
                         </span>
-                        <span className="text-[10px] sm:text-xs font-sans text-gray-400 line-through">
-                          ₹{bundle.mrp.toLocaleString('en-IN')}
-                        </span>
+                        {bundle.mrp && bundle.mrp > bundle.price && (
+                          <span className="text-[10px] sm:text-xs font-sans font-medium text-gray-400 line-through">
+                            ₹{bundle.mrp.toLocaleString('en-IN')}
+                          </span>
+                        )}
                       </div>
 
                       <button
                         onClick={(e) => handleAddBundle(e, bundle)}
-                        className="inline-flex items-center justify-center gap-1 sm:gap-1.5 bg-[#0D3B2A] text-white px-2.5 py-2 sm:px-3.5 sm:py-2.5 rounded-lg sm:rounded-xl font-sans font-bold text-xs hover:bg-[#D4A24C] transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer group/btn shrink-0 whitespace-nowrap"
-                        title="Add bundle to cart"
+                        className={`w-full sm:w-auto inline-flex items-center justify-center gap-1.5 bg-[#0D3B2A] text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg sm:rounded-xl font-sans font-bold text-[10px] sm:text-xs hover:bg-[#D4A24C] transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer group/btn shrink-0 ${!bundle.inStock ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        title="Add to cart"
                       >
                         <ShoppingBag className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
-                        <span className="hidden sm:inline text-[11px] uppercase tracking-wider font-bold whitespace-nowrap">Add to Cart</span>
-                        <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 transform group-hover/btn:translate-x-0.5 transition-transform" />
+                        <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold whitespace-nowrap">
+                          {bundle.inStock ? 'Add to Cart' : 'Out of Stock'}
+                        </span>
+                        {bundle.inStock && (
+                          <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 transform group-hover/btn:translate-x-0.5 transition-transform" />
+                        )}
                       </button>
                     </div>
                   </div>

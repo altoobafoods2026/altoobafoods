@@ -14,6 +14,45 @@ const getRawId = (gid) => {
   return decoded.split('/').pop();
 };
 
+let allReviewStatsCache = null;
+
+export const getAllProductReviewStats = async () => {
+  if (allReviewStatsCache) return allReviewStatsCache;
+  try {
+    const url = `/judgeme-api/reviews?api_token=${privateToken}&shop_domain=${shopDomain}&per_page=100`;
+    const response = await fetch(url);
+    if (!response.ok) return {};
+    const data = await response.json();
+    const rawReviews = data.reviews || [];
+
+    const validReviews = rawReviews.filter(r => {
+      if (r.hidden === true || r.hidden === 'true') return false;
+      if (r.curated === 'hidden' || r.curated === 'spam' || r.curated === 0) return false;
+      if (r.published === false || r.published === 'false') return false;
+      return true;
+    });
+
+    const stats = {};
+    validReviews.forEach(r => {
+      const keys = [r.product_handle, r.product_external_id ? String(r.product_external_id) : null].filter(Boolean);
+      keys.forEach(key => {
+        if (!stats[key]) {
+          stats[key] = { count: 0, totalRating: 0, rating: 5.0 };
+        }
+        stats[key].count += 1;
+        stats[key].totalRating += (r.rating || 5);
+        stats[key].rating = +(stats[key].totalRating / stats[key].count).toFixed(1);
+      });
+    });
+
+    allReviewStatsCache = stats;
+    return stats;
+  } catch (error) {
+    console.error('Error fetching all review stats from Judge.me:', error);
+    return {};
+  }
+};
+
 export const getReviews = async (productId) => {
   if (!productId) return [];
   

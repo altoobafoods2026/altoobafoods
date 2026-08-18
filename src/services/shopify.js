@@ -1,3 +1,5 @@
+import { getAllProductReviewStats } from './judgeme';
+
 const domain = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN;
 const storefrontAccessToken = import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN;
 
@@ -27,14 +29,8 @@ async function shopifyFetch({ query, variables }) {
   }
 }
 
-let productsCache = null;
-let productsPromise = null;
-
 export async function getProducts() {
-  if (productsCache) return productsCache;
-  if (productsPromise) return productsPromise;
-
-  productsPromise = (async () => {
+  try {
     const query = `
       {
         products(first: 50) {
@@ -77,7 +73,7 @@ export async function getProducts() {
                   }
                 }
               }
-              collections(first: 5) {
+              collections(first: 15) {
                 edges {
                   node {
                     title
@@ -91,7 +87,10 @@ export async function getProducts() {
       }
     `;
 
-    const response = await shopifyFetch({ query });
+    const [response, reviewStats] = await Promise.all([
+      shopifyFetch({ query }),
+      getAllProductReviewStats()
+    ]);
     
     if (!response.body || !response.body.data) {
       console.error("No data returned from Shopify", response);
@@ -122,7 +121,7 @@ export async function getProducts() {
       const collectionTitles = node.collections?.edges.map(e => e.node.title) || [];
       
       // Website categories to match against
-      const websiteCategories = ['Talbina', 'Skin Care', 'Hair Care', 'Herbal Oil', 'Herbal Tea', 'Vinegars', 'Prophetic Remedies'];
+      const websiteCategories = ['Talbina', 'Skin Care', 'Hair Care', 'Herbal Oil', 'Herbal Tea', 'Vinegars', 'Prophetic Remedies', 'Wellness Kit'];
       
       // Find the exact website category that matches any of the product's collections
       const matchedCategory = websiteCategories.find(cat => 
@@ -137,16 +136,28 @@ export async function getProducts() {
       const finalCategory = overrides[node.handle] || matchedCategory;
       const collectionHandles = node.collections?.edges.map(e => e.node.handle) || [];
 
+      // Real Judge.me review stats
+      const rawId = node.id ? node.id.split('/').pop() : '';
+      const stat = (reviewStats && (reviewStats[node.handle] || reviewStats[rawId])) || null;
+      const realReviewCount = stat ? stat.count : 0;
+      const realRating = stat ? stat.rating : 5.0;
+
+      // Extract description images from descriptionHtml
+      const descImagesMatches = [...(node.descriptionHtml || '').matchAll(/<img[^>]+src=["']([^"']+)["']/g)];
+      const descImages = descImagesMatches.map(m => m[1]);
+
       return {
         id: node.id,
         slug: node.handle,
         name: node.title,
         category: finalCategory,
         collections: collectionHandles,
+        collectionTitles: collectionTitles,
         price: price,
         mrp: mrp,
         discount: discount,
         images: node.images.edges.map(img => img.node.url),
+        descriptionImages: descImages.length > 0 ? descImages : node.images.edges.map(img => img.node.url),
         description: node.description,
         descriptionHtml: node.descriptionHtml,
         // Fallbacks for data that might not be in Shopify yet
@@ -155,8 +166,8 @@ export async function getProducts() {
         benefits: "Good for health",
         howToUse: "Use as directed.",
         badge: "",
-        rating: 5.0,
-        reviewCount: Math.floor(Math.random() * 50) + 10,
+        rating: realRating,
+        reviewCount: realReviewCount,
         inStock: node.variants.edges.some(v => v.node.availableForSale),
         variants: node.variants.edges.map(v => ({
           id: v.node.id,
@@ -166,11 +177,11 @@ export async function getProducts() {
       };
     });
 
-    productsCache = products;
     return products;
-  })();
-
-  return productsPromise;
+  } catch (error) {
+    console.error("Failed to fetch products:", error);
+    return [];
+  }
 }
 
 export async function getProductBySlug(slug) {
@@ -262,6 +273,12 @@ export async function getProductBySlug(slug) {
   const finalCategory = overrides[node.handle] || matchedCategory;
   const collectionHandles = node.collections?.edges.map(e => e.node.handle) || [];
 
+  const reviewStats = await getAllProductReviewStats();
+  const rawId = node.id ? node.id.split('/').pop() : '';
+  const stat = (reviewStats && (reviewStats[node.handle] || reviewStats[rawId])) || null;
+  const realReviewCount = stat ? stat.count : 0;
+  const realRating = stat ? stat.rating : 5.0;
+
   return {
     id: node.id,
     slug: node.handle,
@@ -280,8 +297,8 @@ export async function getProductBySlug(slug) {
     benefits: "Good for health",
     howToUse: "Use as directed.",
     badge: "",
-    rating: 5.0,
-    reviewCount: Math.floor(Math.random() * 50) + 10,
+    rating: realRating,
+    reviewCount: realReviewCount,
     inStock: node.variants.edges.some(v => v.node.availableForSale),
     variants: node.variants.edges.map(v => ({
       id: v.node.id,
@@ -310,6 +327,9 @@ export const getCollectionVideos = async (handle) => {
                 media(first: 1) {
                   edges {
                     node {
+                      previewImage {
+                        url
+                      }
                       ... on Video {
                         sources {
                           url
@@ -348,7 +368,9 @@ export const getCollectionVideos = async (handle) => {
 
       const videos = data.collection.products.edges.map(edge => {
         const mediaEdges = edge.node.media?.edges || [];
-        const videoSources = mediaEdges.length > 0 ? mediaEdges[0].node.sources : null;
+        const mediaNode = mediaEdges.length > 0 ? mediaEdges[0].node : null;
+        const videoSources = mediaNode?.sources;
+        const posterUrl = mediaNode?.previewImage?.url || '';
         
         let videoUrl = '';
         if (videoSources && videoSources.length > 0) {
@@ -363,7 +385,8 @@ export const getCollectionVideos = async (handle) => {
         return {
           id: edge.node.id,
           title: edge.node.title,
-          videoSrc: videoUrl
+          videoSrc: videoUrl,
+          poster: posterUrl
         };
       }).filter(v => v.videoSrc);
 

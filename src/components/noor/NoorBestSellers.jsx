@@ -38,9 +38,21 @@ export default function NoorBestSellers({ products = [] }) {
   const addItem = useCartStore((state) => state.addItem);
   const showToast = useToastStore((state) => state.showToast);
 
-  const topRatedProducts = [...products]
-    .sort((a, b) => b.rating - a.rating)
-    .slice(0, 5);
+  // Filter products that belong to the Shopify "Best Sellers" collection
+  const bestSellerProducts = products.filter(p => {
+    const handles = p.collections || [];
+    const titles = p.collectionTitles || [];
+    return handles.some(h => 
+      h.includes('best-seller') || h.includes('best_seller') || h.includes('bestseller') || h.includes('best-sellers')
+    ) || titles.some(t => 
+      t.toLowerCase().includes('best seller') || t.toLowerCase().includes('bestseller')
+    );
+  });
+
+  // If products are tagged with "Best Sellers" in Shopify, use them; otherwise fallback to top products
+  const displayProducts = bestSellerProducts.length > 0 
+    ? bestSellerProducts.slice(0, 5) 
+    : [...products].sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0) || b.rating - a.rating).slice(0, 5);
 
   return (
     <section className="relative bg-white py-16 lg:py-20 overflow-hidden border-t border-[#FAF7F2]">
@@ -75,22 +87,22 @@ export default function NoorBestSellers({ products = [] }) {
           <div className="w-12 h-0.5 bg-[#D4A24C] mx-auto mt-8 opacity-50" />
         </div>
 
-        {/* grid (1 col on mobile for horizontal cards, 3 on md, 5 on lg desktop) */}
+        {/* grid (1 col on mobile, 3 on md, 5 on lg desktop) */}
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
-          {topRatedProducts.map((product, idx) => (
+          {displayProducts.map((product, idx) => (
             <div
               key={product.id}
               className="w-full"
             >
                 <TiltCard className="h-full">
-                  <div className="group bg-[#FAF7F2] rounded-[16px] sm:rounded-[24px] p-3 flex flex-col h-full border border-[#D4A24C]/10 hover:border-[#D4A24C]/30 shadow-[0_8px_30px_rgba(13,59,42,0.03)] hover:shadow-[0_20px_40px_rgba(13,59,42,0.1)] transition-all duration-500 relative overflow-hidden gap-3 md:gap-0">
+                  <div className="group bg-[#FAF7F2] rounded-[16px] sm:rounded-[20px] p-2.5 sm:p-3 flex flex-col h-full border border-[#D4A24C]/10 hover:border-[#D4A24C]/30 shadow-[0_8px_30px_rgba(13,59,42,0.03)] hover:shadow-[0_20px_40px_rgba(13,59,42,0.1)] transition-all duration-500 relative overflow-hidden gap-2 md:gap-0">
                     
                     {/* Subtle Background Glow */}
                     <div className="absolute inset-0 bg-gradient-to-b from-white/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0" />
 
                     <Link to={`/product/${product.slug}`} className="flex flex-col flex-grow w-full h-full text-inherit hover:no-underline">
-                      {/* Image Container with a clean thin border */}
-                      <div className="relative w-full shrink-0 aspect-[10/11] md:aspect-[4/5] rounded-[12px] sm:rounded-[16px] overflow-hidden bg-white md:mb-5 z-10 shadow-inner border border-gray-100 group/img">
+                      {/* Image Container with compact aspect ratio */}
+                      <div className="relative w-full shrink-0 aspect-[1/1] rounded-[12px] sm:rounded-[14px] overflow-hidden bg-white mb-2 md:mb-3 z-10 shadow-inner border border-gray-100 group/img">
                         <CursorImageSwap 
                           frontImg={product.cardImage || product.images[0]} 
                           backImg={product.cardHoverImage || (product.images && product.images.length > 1 ? product.images[1] : null)} 
@@ -99,11 +111,11 @@ export default function NoorBestSellers({ products = [] }) {
                         <div className="absolute inset-0 bg-[#0D3B2A]/0 group-hover:bg-[#0D3B2A]/5 transition-colors duration-500 pointer-events-none" />
                       </div>
 
-                      {/* Product Details (Right on mobile, Bottom on desktop) */}
-                      <div className="flex flex-col flex-grow z-10 relative py-1">
+                      {/* Product Details */}
+                      <div className="flex flex-col flex-grow z-10 relative py-0.5">
                         
                         {/* Brand and Rating Row */}
-                        <div className="flex flex-wrap items-center justify-between mb-1.5 sm:mb-2 gap-1">
+                        <div className="flex flex-wrap items-center justify-between mb-1 sm:mb-1.5 gap-1">
                           <span className="text-[9px] sm:text-[10px] font-sans font-bold uppercase tracking-widest text-gray-400">AL-TOOBA</span>
                           <div className="flex items-center gap-1 text-[10px] sm:text-xs">
                             <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-[#D4A24C]" viewBox="0 0 24 24">
@@ -116,15 +128,15 @@ export default function NoorBestSellers({ products = [] }) {
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-[14px] sm:text-[17px] font-sans font-bold text-[#0D3B2A] mb-2 sm:mb-3 leading-snug group-hover:text-[#D4A24C] transition-colors duration-300 line-clamp-2 min-h-[44px] sm:min-h-[50px]">
+                        <h3 className="text-[13px] sm:text-[15px] font-sans font-bold text-[#0D3B2A] mb-1.5 sm:mb-2 leading-snug group-hover:text-[#D4A24C] transition-colors duration-300 line-clamp-2 min-h-[36px] sm:min-h-[40px]">
                           {product.name}
                         </h3>
                         
                         {/* Pricing Row */}
-                        <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-3 md:mb-6">
-                          <span className="text-[16px] sm:text-[22px] font-sans font-bold text-[#D4A24C]">₹{product.price.toFixed(2)}</span>
+                        <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-2 sm:mb-3 mt-auto">
+                          <span className="text-[15px] sm:text-[19px] font-sans font-bold text-[#D4A24C]">₹{product.price.toFixed(2)}</span>
                           {product.mrp && product.mrp > product.price && (
-                            <span className="text-[11px] sm:text-sm font-sans text-gray-400 line-through">
+                            <span className="text-[10px] sm:text-xs font-sans text-gray-400 line-through">
                               ₹{product.mrp.toFixed(2)}
                             </span>
                           )}

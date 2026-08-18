@@ -46,7 +46,7 @@ export default function Studio() {
 
   // Set category from URL after products load (or in general)
 
-  const categories = ['All', 'Talbina', 'Skin Care', 'Hair Care', 'Herbal Oil', 'Herbal Tea', 'Vinegars', 'Prophetic Remedies'];
+  const categories = ['All', 'Talbina', 'Skin Care', 'Hair Care', 'Herbal Oil', 'Herbal Tea', 'Vinegars', 'Prophetic Remedies', 'Wellness Kit'];
 
   // Sync category from URL parameter
   useEffect(() => {
@@ -100,7 +100,7 @@ export default function Studio() {
       {/* Page Title with Cinematic Banner - Full Width Edge to Edge */}
       <div className="w-full pt-[72px] sm:pt-[88px] lg:pt-[100px] mb-8 md:mb-12 bg-parchment">
         <img 
-          src="/products_banner.jpg" 
+          src="/products_banner.png" 
           alt="Products Banner" 
           className="w-full h-auto block"
         />

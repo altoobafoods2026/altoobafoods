@@ -208,9 +208,9 @@ export default function Journal() {
             <div className="relative">
               <div className="rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(13,59,42,0.12)] border border-[#0D3B2A]/5">
                 <img
-                  src="/hakeem_consultation.png"
+                  src="/hakeem_consultation.jpg"
                   alt="Hakeem Abdul Qadir Attari consulting a patient"
-                  className="w-full h-[350px] sm:h-[450px] lg:h-[500px] object-cover"
+                  className="w-full h-[380px] sm:h-[480px] lg:h-[530px] object-cover object-top"
                 />
               </div>
 

@@ -196,14 +196,9 @@ export default function ProductDetail() {
             </div>
 
             {/* Title */}
-            <h1 className="text-3xl sm:text-[34px] font-bold text-gray-900 leading-tight mb-2 font-sans tracking-tight">
+            <h1 className="text-3xl sm:text-[34px] font-bold text-gray-900 leading-tight mb-5 font-sans tracking-tight">
               {product.name}
             </h1>
-            
-            <button className="text-[#c8a86a] text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 mb-6 hover:text-[#0D3B2A] transition-colors w-fit">
-              SHOW MORE
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-            </button>
 
             {/* Price Block */}
             <div className="flex items-center gap-4 mb-6">
