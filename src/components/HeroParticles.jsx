@@ -12,7 +12,8 @@ export default function HeroParticles() {
 
     let animationFrameId;
     let particles = [];
-    const particleCount = 35; // Optimized particle count for 60fps performance
+    const isMobile = window.innerWidth < 768;
+    const particleCount = isMobile ? 8 : 30; // Ultra-lightweight on mobile to prevent frame drops
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
@@ -27,10 +28,10 @@ export default function HeroParticles() {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        radius: Math.random() * 3 + 2,
-        speedY: -(Math.random() * 0.4 + 0.1),
+        radius: isMobile ? Math.random() * 2 + 1.5 : Math.random() * 3 + 2,
+        speedY: -(Math.random() * 0.3 + 0.1),
         speedX: Math.random() * 0.2 - 0.1,
-        opacity: Math.random() * 0.4 + 0.2,
+        opacity: Math.random() * 0.35 + 0.15,
       });
     }
 

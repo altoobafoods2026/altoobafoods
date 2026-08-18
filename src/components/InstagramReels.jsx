@@ -150,7 +150,7 @@ export default function InstagramReels() {
                   key={`${short.id}-${isCenter}`}
                   src={short.videoSrc}
                   autoPlay={isCenter}
-                  preload="metadata"
+                  preload={isCenter ? "metadata" : "none"}
                   loop
                   muted={isMuted}
                   playsInline

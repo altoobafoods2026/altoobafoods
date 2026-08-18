@@ -2,11 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { getProducts } from '../services/shopify';
+import { getProducts, getHeroVideo } from '../services/shopify';
 import HeroParticles from '../components/HeroParticles';
 import About3DCarousel from '../components/About3DCarousel';
 import NoorCategories from '../components/noor/NoorCategories';
 import NoorBestSellers from '../components/noor/NoorBestSellers';
+import NoorBundles from '../components/noor/NoorBundles';
 import NoorCompleteCollection from '../components/noor/NoorCompleteCollection';
 import NoorQuoteDivider from '../components/noor/NoorQuoteDivider';
 
@@ -14,28 +15,32 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
   const [products, setProducts] = useState([]);
+  const [heroVideoUrl, setHeroVideoUrl] = useState('/Islamic_Altooba_.mp4');
   const [isLoading, setIsLoading] = useState(true);
 
   const containerRef = useRef(null);
   const headlineRef = useRef(null);
   const subtextRef = useRef(null);
   const ctaRef = useRef(null);
-  const marqueeRef = useRef(null);
-
-
 
   useEffect(() => {
-    async function loadProducts() {
+    async function loadData() {
       try {
-        const fetchedProducts = await getProducts();
+        const [fetchedProducts, fetchedHeroVideo] = await Promise.all([
+          getProducts(),
+          getHeroVideo('hero_section-video')
+        ]);
         setProducts(fetchedProducts);
+        if (fetchedHeroVideo) {
+          setHeroVideoUrl(fetchedHeroVideo);
+        }
       } catch (error) {
-        console.error("Failed to fetch products:", error);
+        console.error("Failed to fetch data:", error);
       } finally {
         setIsLoading(false);
       }
     }
-    loadProducts();
+    loadData();
 
     let ctx = gsap.context(() => {
       // Clean, lightweight fade-in for hero headline
@@ -47,12 +52,14 @@ export default function Home() {
       }
 
       // Subtext and CTA fade-in delay
-      if (subtextRef.current && ctaRef.current) {
+      if (subtextRef.current) {
         gsap.fromTo(
           subtextRef.current,
           { opacity: 0, y: 20 },
           { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out', delay: 0.3 }
         );
+      }
+      if (ctaRef.current) {
         gsap.fromTo(
           ctaRef.current,
           { opacity: 0, scale: 0.95 },
@@ -102,9 +109,10 @@ export default function Home() {
       <section ref={heroSectionRef} className="relative w-full min-h-svh flex flex-col items-center justify-start text-center px-0 md:px-6 pt-[90px] md:pt-[100px] pb-4 md:pb-0 overflow-hidden">
          {/* Background Video */}
         <video
+          key={heroVideoUrl}
           ref={heroVideoRef}
           className="absolute inset-0 w-full h-full object-cover object-bottom z-0"
-          src="/Islamic_Altooba_.mp4"
+          src={heroVideoUrl}
           autoPlay
           loop
           muted
@@ -115,7 +123,7 @@ export default function Home() {
         {/* Cinematic Grading Overlays */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#0D3B2A]/40 via-transparent to-[#0D3B2A]/20 z-0 pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent z-0 pointer-events-none md:block hidden" />
-        <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-[#FAF7F2]/10 to-transparent mix-blend-overlay pointer-events-none" />
+        <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-[#FAF7F2]/10 to-transparent pointer-events-none hidden md:block mix-blend-overlay" />
 
         {/* Floating Golden Particles (Luxury effect) */}
         <HeroParticles />
@@ -156,11 +164,11 @@ export default function Home() {
                 Embrace the healing wisdom of Tibb-e-Nabawi. Premium organic remedies crafted to nourish soul, mind, and body.
               </p>
 
-              {/* CTA Premium Pill Button */}
-              <div ref={ctaRef} className="mt-4 xl:mt-8 flex justify-center xl:justify-start opacity-0">
+              {/* Desktop CTA Premium Pill Button */}
+              <div ref={ctaRef} className="mt-4 xl:mt-8 hidden xl:flex justify-start opacity-0">
                 <button
                   onClick={handleCTAClick}
-                  className="group relative overflow-hidden rounded-full px-8 py-3.5 text-[11px] sm:text-xs font-sans font-extrabold uppercase tracking-[0.15em] bg-gradient-to-r from-[#eec373] via-[#D4A24C] to-[#eec373] text-[#0D3B2A] border-none shadow-[0_8px_25px_rgba(212,162,76,0.4)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  className="group relative overflow-hidden rounded-full px-8 py-3.5 text-xs font-sans font-extrabold uppercase tracking-[0.15em] bg-gradient-to-r from-[#eec373] via-[#D4A24C] to-[#eec373] text-[#0D3B2A] border-none shadow-[0_8px_25px_rgba(212,162,76,0.4)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                 >
                   <span className="relative z-10 flex items-center gap-2">
                     EXPLORE COLLECTION
@@ -185,16 +193,28 @@ export default function Home() {
       </section>
 
       {/* 2. Text Marquee Strip */}
-      <div className="w-full bg-[#203D1E] border-y border-parchment/10 py-4 overflow-hidden relative z-10 select-none">
-        <div ref={marqueeRef} className="flex whitespace-nowrap gap-16 text-parchment/80 font-serif italic text-lg sm:text-xl">
-          {[...Array(6)].map((_, i) => (
-            <span key={i} className="flex items-center gap-6">
-              <span>Nurturing Wellness, Restoring Purity</span>
-              <span className="text-gold font-sans font-bold text-xs uppercase tracking-widest">• AL TOOBA</span>
-              <span>Prophetic Tibb-e-Nabawi Remedies</span>
-              <span className="text-gold font-sans font-bold text-xs uppercase tracking-widest">• 100% ORGANIC</span>
-            </span>
-          ))}
+      <div className="w-full bg-[#203D1E] border-y border-parchment/10 py-3.5 sm:py-4 overflow-hidden relative z-10 select-none [contain:paint]">
+        <div className="flex w-max will-change-transform transform-gpu animate-[marquee_25s_linear_infinite] hover:[animation-play-state:paused]">
+          <div className="flex shrink-0 items-center gap-12 sm:gap-16 text-parchment/80 font-serif italic text-base sm:text-lg md:text-xl pr-12 sm:pr-16">
+            {[...Array(2)].map((_, i) => (
+              <span key={i} className="flex items-center gap-4 sm:gap-6 shrink-0">
+                <span>Nurturing Wellness, Restoring Purity</span>
+                <span className="text-gold font-sans font-bold text-[10px] sm:text-xs uppercase tracking-widest">• AL TOOBA</span>
+                <span>Prophetic Tibb-e-Nabawi Remedies</span>
+                <span className="text-gold font-sans font-bold text-[10px] sm:text-xs uppercase tracking-widest">• 100% ORGANIC</span>
+              </span>
+            ))}
+          </div>
+          <div className="flex shrink-0 items-center gap-12 sm:gap-16 text-parchment/80 font-serif italic text-base sm:text-lg md:text-xl pr-12 sm:pr-16" aria-hidden="true">
+            {[...Array(2)].map((_, i) => (
+              <span key={i} className="flex items-center gap-4 sm:gap-6 shrink-0">
+                <span>Nurturing Wellness, Restoring Purity</span>
+                <span className="text-gold font-sans font-bold text-[10px] sm:text-xs uppercase tracking-widest">• AL TOOBA</span>
+                <span>Prophetic Tibb-e-Nabawi Remedies</span>
+                <span className="text-gold font-sans font-bold text-[10px] sm:text-xs uppercase tracking-widest">• 100% ORGANIC</span>
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -206,10 +226,13 @@ export default function Home() {
         <NoorBestSellers products={regularProducts} />
       </div>
 
-      {/* 5. Complete Collection Section */}
+      {/* 5. Bundle & Save (Asymmetric Grid Section) */}
+      <NoorBundles products={regularProducts} />
+
+      {/* 6. Complete Collection Section */}
       <NoorCompleteCollection products={regularProducts} />
 
-      {/* 6. Brand Value / Hadith Divider */}
+      {/* 7. Brand Value / Hadith Divider */}
       <NoorQuoteDivider />
     </div>
   );

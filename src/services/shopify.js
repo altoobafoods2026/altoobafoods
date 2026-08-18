@@ -101,9 +101,11 @@ export async function getProducts() {
     // Map to our local schema
     const products = response.body.data.products.edges
       .filter(({ node }) => {
-        // Exclude products that are only meant for the videos section
+        // Exclude products that are only meant for the videos or hero section
         const handles = node.collections?.edges.map(e => e.node.handle) || [];
-        return !handles.includes('videos_instagram') && !handles.includes('videos-instagram');
+        if (handles.includes('videos_instagram') || handles.includes('videos-instagram')) return false;
+        if (node.handle.startsWith('hero_section') || node.handle.startsWith('hero-section')) return false;
+        return true;
       })
       .map(({ node }) => {
       const price = parseFloat(node.priceRange.minVariantPrice.amount);
@@ -374,4 +376,84 @@ export const getCollectionVideos = async (handle) => {
   })();
   
   return videosPromise[handle];
+};
+
+let heroVideoCache = null;
+let heroVideoPromise = null;
+
+export const getHeroVideo = async (handle = 'hero_section-video') => {
+  if (heroVideoCache) return heroVideoCache;
+  if (heroVideoPromise) return heroVideoPromise;
+
+  heroVideoPromise = (async () => {
+    const query = `
+      query getHeroVideo($handle: String!) {
+        product(handle: $handle) {
+          id
+          title
+          handle
+          media(first: 5) {
+            edges {
+              node {
+                mediaContentType
+                ... on Video {
+                  id
+                  sources {
+                    url
+                    format
+                    mimeType
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    try {
+      const endpoint = `https://${domain}/api/2024-01/graphql.json`;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Shopify-Storefront-Access-Token': storefrontAccessToken,
+        },
+        body: JSON.stringify({ query, variables: { handle } }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Shopify API error: ${response.status}`);
+      }
+
+      const { data } = await response.json();
+      const mediaEdges = data?.product?.media?.edges || [];
+      const videoNode = mediaEdges.find(e => e.node.mediaContentType === 'VIDEO');
+      const sources = videoNode?.node?.sources || [];
+
+      if (sources.length > 0) {
+        const mp4Sources = sources.filter(s => s.format === 'mp4');
+        if (mp4Sources.length > 0) {
+          const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+          let preferred;
+          if (isMobile) {
+            // On mobile devices, 720p/480p decodes instantly at 60fps with zero frame drops
+            preferred = mp4Sources.find(s => s.url.includes('720p')) || mp4Sources.find(s => s.url.includes('480p')) || mp4Sources[0];
+          } else {
+            // On desktop, 1080p provides maximum crisp fidelity
+            preferred = mp4Sources.find(s => s.url.includes('1080p')) || mp4Sources.find(s => s.url.includes('720p')) || mp4Sources[0];
+          }
+          heroVideoCache = preferred.url;
+          return preferred.url;
+        }
+      }
+
+      return '/Islamic_Altooba_.mp4';
+    } catch (err) {
+      console.error('Error fetching hero video from Shopify:', err);
+      return '/Islamic_Altooba_.mp4';
+    }
+  })();
+
+  return heroVideoPromise;
 };
