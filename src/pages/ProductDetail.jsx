@@ -109,7 +109,7 @@ export default function ProductDetail() {
   };
 
   return (
-    <div className="bg-[#f6f5ef] min-h-screen pt-28 pb-20">
+    <div className="bg-[#f6f5ef] min-h-screen pt-28 pb-0">
       <div className="max-w-6xl mx-auto px-6 sm:px-8">
         
         {/* Main Grid */}
@@ -308,12 +308,12 @@ export default function ProductDetail() {
 
       {/* Related Products */}
       {relatedProducts.length > 0 && (
-        <div className="max-w-6xl mx-auto px-6 sm:px-8 mt-16 mb-8">
-          <div className="flex items-center gap-3 mb-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 mt-16 mb-8">
+          <div className="flex items-center gap-3 mb-6 sm:mb-8">
             <div className="w-8 h-[2px] bg-[#c8a86a]"></div>
-            <h2 className="text-2xl font-bold font-serif text-gray-900 uppercase tracking-wide">You May Also Like</h2>
+            <h2 className="text-xl sm:text-2xl font-bold font-serif text-gray-900 uppercase tracking-wide">You May Also Like</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
             {relatedProducts.map((p, idx) => (
               <ProductCard key={p.id} product={p} index={idx} />
             ))}

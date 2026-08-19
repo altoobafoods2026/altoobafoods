@@ -50,7 +50,7 @@ export default function NoorCompleteCollection({ products = [] }) {
   }
 
   return (
-    <section className="relative bg-[#f4efe6] py-24 overflow-hidden border-t border-[#e8dece]">
+    <section className="relative bg-[#f4efe6] py-8 sm:py-10 md:py-14 overflow-hidden border-t border-[#e8dece]">
       
       {/* Background Mandalas */}
       <div className="absolute top-0 left-0 w-96 h-96 opacity-[0.04] pointer-events-none -translate-x-1/2 -translate-y-1/2">
@@ -63,12 +63,12 @@ export default function NoorCompleteCollection({ products = [] }) {
       <div className="max-w-[1400px] mx-auto px-3 sm:px-6 md:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="text-center mb-8 sm:mb-12 relative z-10 flex flex-col items-center">
+        <div className="text-center mb-6 sm:mb-8 relative z-10 flex flex-col items-center">
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
-            className="text-3xl sm:text-4xl md:text-5xl font-serif text-[#0D3B2A] font-bold mb-2 sm:mb-4"
+            className="text-3xl sm:text-4xl md:text-5xl font-serif text-[#0D3B2A] font-bold mb-2 sm:mb-3"
           >
             Our Complete Collection
           </motion.h2>
@@ -77,7 +77,7 @@ export default function NoorCompleteCollection({ products = [] }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={{ delay: 0.1 }}
-            className="text-[#D4A24C] font-sans font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase text-xs md:text-sm mb-6 sm:mb-8"
+            className="text-[#D4A24C] font-sans font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase text-xs md:text-sm mb-4 sm:mb-6"
           >
             Explore our heritage range
           </motion.p>

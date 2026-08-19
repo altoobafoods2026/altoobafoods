@@ -106,7 +106,7 @@ export default function Studio() {
         />
       </div>
 
-      <div className="pb-20 px-6 sm:px-8 max-w-7xl mx-auto">
+      <div className="pb-20 px-3 sm:px-6 md:px-8 max-w-7xl mx-auto">
         
         {/* Search Bar */}
         <div className="mb-8 md:mb-10 max-w-2xl mx-auto">
@@ -210,7 +210,7 @@ export default function Studio() {
 
         {/* Products Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-6">
             {[...Array(10)].map((_, i) => (
               <ShimmerCard key={i} />
             ))}
@@ -242,7 +242,7 @@ export default function Studio() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-6">
             {sortedProducts.map((product, idx) => (
               <div key={product.id} className="w-full">
                 <ProductCard product={product} index={idx} />

@@ -97,7 +97,7 @@ export default function NoorBundles({ products = [] }) {
   };
 
   return (
-    <section className="relative bg-[#FAF7F2] py-10 sm:py-14 lg:py-24 overflow-hidden border-t border-[#D4A24C]/15">
+    <section className="relative bg-[#FAF7F2] py-8 sm:py-10 md:py-14 overflow-hidden border-t border-[#D4A24C]/15">
       {/* Decorative Subtle Background Accents */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-[#D4A24C]/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#0D3B2A]/5 rounded-full blur-3xl pointer-events-none" />
@@ -105,7 +105,7 @@ export default function NoorBundles({ products = [] }) {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 relative z-10">
         
         {/* Header Area with Top Right Action Button */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 lg:mb-14 gap-5 sm:gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-8 gap-4 sm:gap-6">
           <div>
             <motion.div
               initial={{ opacity: 0, y: 15 }}
@@ -231,9 +231,9 @@ export default function NoorBundles({ products = [] }) {
                 transition={{ duration: 0.6, delay: idx * 0.15 }}
                 className="flex-1"
               >
-                <div className="group bg-white rounded-[18px] sm:rounded-[24px] p-3.5 sm:p-5 md:p-6 border border-[#D4A24C]/15 shadow-[0_6px_25px_rgba(13,59,42,0.04)] hover:shadow-[0_16px_35px_rgba(13,59,42,0.09)] hover:border-[#D4A24C]/40 transition-all duration-400 flex flex-row items-center gap-3.5 sm:gap-5 md:gap-6 h-full overflow-hidden">
+                <div className="group bg-white rounded-[18px] sm:rounded-[24px] p-3.5 sm:p-5 md:p-6 border border-[#D4A24C]/15 shadow-[0_6px_25px_rgba(13,59,42,0.04)] hover:shadow-[0_16px_35px_rgba(13,59,42,0.09)] hover:border-[#D4A24C]/40 transition-all duration-400 flex flex-row items-stretch gap-3.5 sm:gap-5 md:gap-6 h-full overflow-hidden">
                   
-                  {/* Left: Thumbnail Image with clean framing & padding (+20% size) */}
+                  {/* Left: Thumbnail Image */}
                   <Link to={`/product/${bundle.slug}`} className="relative w-24 sm:w-36 md:w-40 aspect-square rounded-xl sm:rounded-2xl overflow-hidden bg-[#FAF7F2] shrink-0 border border-gray-100 shadow-inner flex items-center justify-center p-2 sm:p-3.5">
                     <img 
                       src={bundle.image} 
@@ -242,13 +242,13 @@ export default function NoorBundles({ products = [] }) {
                     />
                   </Link>
 
-                  {/* Right: Info and Pricing */}
-                  <div className="flex flex-col justify-between flex-grow min-w-0 w-full space-y-1.5 sm:space-y-2">
+                  {/* Right: Info, Price, Button — all stacked vertically */}
+                  <div className="flex flex-col justify-between flex-1 min-w-0 overflow-hidden">
                     <Link to={`/product/${bundle.slug}`} className="hover:no-underline min-w-0 block">
                       <span className="text-[8px] sm:text-[9px] font-sans font-bold uppercase tracking-widest text-[#D4A24C] block truncate mb-0.5">
                         {bundle.badge} • {bundle.itemsCount}
                       </span>
-                      <h4 className="font-serif font-bold text-[13px] sm:text-base md:text-lg text-[#0D3B2A] group-hover:text-[#D4A24C] transition-colors leading-snug line-clamp-1 truncate">
+                      <h4 className="font-serif font-bold text-[13px] sm:text-base md:text-lg text-[#0D3B2A] group-hover:text-[#D4A24C] transition-colors leading-snug truncate">
                         {bundle.name}
                       </h4>
                       <p className="text-[10px] sm:text-xs text-[#0D3B2A]/70 font-sans line-clamp-2 mt-0.5 sm:mt-1 leading-relaxed">
@@ -256,32 +256,29 @@ export default function NoorBundles({ products = [] }) {
                       </p>
                     </Link>
 
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-2 border-t border-gray-100 gap-2">
-                      <div className="flex items-baseline gap-1 sm:gap-1.5 shrink-0">
-                        <span className="text-base sm:text-lg md:text-xl font-sans font-extrabold text-[#0D3B2A] tracking-tight">
-                          ₹{bundle.price.toLocaleString('en-IN')}
+                    {/* Price */}
+                    <div className="flex items-baseline gap-1.5 mt-2">
+                      <span className="text-base sm:text-lg md:text-xl font-sans font-extrabold text-[#0D3B2A] tracking-tight">
+                        ₹{bundle.price.toLocaleString('en-IN')}
+                      </span>
+                      {bundle.mrp && bundle.mrp > bundle.price && (
+                        <span className="text-[10px] sm:text-xs font-sans font-medium text-gray-400 line-through">
+                          ₹{bundle.mrp.toLocaleString('en-IN')}
                         </span>
-                        {bundle.mrp && bundle.mrp > bundle.price && (
-                          <span className="text-[10px] sm:text-xs font-sans font-medium text-gray-400 line-through">
-                            ₹{bundle.mrp.toLocaleString('en-IN')}
-                          </span>
-                        )}
-                      </div>
-
-                      <button
-                        onClick={(e) => handleAddBundle(e, bundle)}
-                        className={`w-full sm:w-auto inline-flex items-center justify-center gap-1.5 bg-[#0D3B2A] text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg sm:rounded-xl font-sans font-bold text-[10px] sm:text-xs hover:bg-[#D4A24C] transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer group/btn shrink-0 ${!bundle.inStock ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        title="Add to cart"
-                      >
-                        <ShoppingBag className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
-                        <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold whitespace-nowrap">
-                          {bundle.inStock ? 'Add to Cart' : 'Out of Stock'}
-                        </span>
-                        {bundle.inStock && (
-                          <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 transform group-hover/btn:translate-x-0.5 transition-transform" />
-                        )}
-                      </button>
+                      )}
                     </div>
+
+                    {/* Add to Cart Button — always full width, never overflows */}
+                    <button
+                      onClick={(e) => handleAddBundle(e, bundle)}
+                      className={`w-full mt-2 inline-flex items-center justify-center gap-1.5 bg-[#0D3B2A] text-white px-3 py-2.5 rounded-lg sm:rounded-xl font-sans font-bold text-[10px] sm:text-xs hover:bg-[#D4A24C] transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer group/btn ${!bundle.inStock ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
+                      <span className="uppercase tracking-wider font-bold">{bundle.inStock ? 'Add to Cart' : 'Out of Stock'}</span>
+                      {bundle.inStock && (
+                        <ArrowRight className="w-3.5 h-3.5 shrink-0 transform group-hover/btn:translate-x-0.5 transition-transform" />
+                      )}
+                    </button>
                   </div>
 
                 </div>

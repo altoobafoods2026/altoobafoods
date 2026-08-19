@@ -56,7 +56,7 @@ export default function NoorCategories({ products = [] }) {
   };
 
   return (
-    <section className="relative bg-[#FAF7F2] py-10 sm:py-14 md:py-20 overflow-hidden z-10 border-t border-[#0D3B2A]/5">
+    <section className="relative bg-[#FAF7F2] py-8 sm:py-10 md:py-14 overflow-hidden z-10 border-t border-[#0D3B2A]/5">
       {/* ClipPath Definition for Mehrab (Islamic Arch) shape */}
       <svg width="0" height="0" className="absolute">
         <defs>
@@ -67,8 +67,8 @@ export default function NoorCategories({ products = [] }) {
       </svg>
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 relative z-10">
-        <div className="text-center mb-8 sm:mb-10">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-[#0D3B2A] font-bold mb-2 sm:mb-4">
+        <div className="text-center mb-6 sm:mb-8">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-[#0D3B2A] font-bold mb-2 sm:mb-3">
             Shop by Categories
           </h2>
           <p className="text-[#D4A24C] font-sans font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase text-xs md:text-sm">

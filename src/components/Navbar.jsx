@@ -11,6 +11,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileProductsOpen, setIsMobileProductsOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   
   const location = useLocation();
@@ -22,6 +23,18 @@ export default function Navbar() {
   const isHome = location.pathname === '/';
   const cartCount = useCartStore((state) => state.items.reduce((sum, item) => sum + item.quantity, 0));
   const wishlistCount = useWishlistStore((state) => state.items.length);
+
+  const productCategories = [
+    { name: 'All Products', path: '/studio' },
+    { name: 'Talbina', path: '/studio?category=Talbina' },
+    { name: 'Hair Care', path: '/studio?category=Hair%20Care' },
+    { name: 'Herbal Oil', path: '/studio?category=Herbal%20Oil' },
+    { name: 'Vinegars', path: '/studio?category=Vinegars' },
+    { name: 'Prophetic Remedies', path: '/studio?category=Prophetic%20Remedies' },
+    { name: 'Wellness Kit', path: '/studio?category=Wellness%20Kit' },
+    { name: 'Herbal Tea', path: '/studio?category=Herbal%20Tea' },
+    { name: 'Skin Care', path: '/studio?category=Skin%20Care' },
+  ];
 
   // Monitor scroll for header background toggle and smart hide
   useEffect(() => {
@@ -52,42 +65,51 @@ export default function Navbar() {
     };
   }, []);
 
-  // GSAP animation for mobile menu overlay opening/closing
+  // GSAP animation for mobile menu overlay opening/closing & background scroll lock
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+
       // Fade in overlay
       gsap.to(mobileMenuRef.current, {
         opacity: 1,
         y: 0,
         pointerEvents: 'auto',
-        duration: 0.5,
+        duration: 0.4,
         ease: 'power3.out'
       });
       // Stagger link reveal
       gsap.fromTo(
         linksRef.current,
-        { y: 30, opacity: 0 },
-        { y: 0, opacity: 1, stagger: 0.1, duration: 0.4, delay: 0.2, ease: 'power2.out' }
+        { y: 25, opacity: 0 },
+        { y: 0, opacity: 1, stagger: 0.08, duration: 0.35, delay: 0.15, ease: 'power2.out' }
       );
     } else {
       document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      document.body.style.touchAction = '';
+
       gsap.to(mobileMenuRef.current, {
         opacity: 0,
         y: -20,
         pointerEvents: 'none',
-        duration: 0.4,
+        duration: 0.35,
         ease: 'power3.in'
       });
     }
     return () => {
       document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      document.body.style.touchAction = '';
     };
   }, [isMobileMenuOpen]);
 
   // Close menus on page transitions
   useEffect(() => {
     setIsMobileMenuOpen(false);
+    setIsMobileProductsOpen(false);
   }, [location.pathname]);
 
   // Determine navbar styles
@@ -190,28 +212,89 @@ export default function Navbar() {
       {/* Mobile Menu Overlay */}
       <div
         ref={mobileMenuRef}
-        className="fixed inset-0 z-35 bg-black/10 backdrop-blur-md text-parchment flex flex-col items-center justify-center gap-8 pointer-events-none opacity-0 transform -translate-y-6 overflow-hidden"
+        className="fixed inset-0 z-35 bg-[#0D3B2A]/98 backdrop-blur-2xl text-parchment flex flex-col items-center p-6 pointer-events-none opacity-0 transform -translate-y-6 overflow-y-auto overscroll-contain"
+        style={{ touchAction: 'pan-y' }}
       >
-        {menuItems.map((item, idx) => (
+        <div className="w-full max-w-sm flex flex-col items-center justify-center gap-7 my-auto pt-24 pb-12">
+          {menuItems.map((item, idx) => {
+            if (item.name === 'PRODUCTS') {
+              return (
+                <div 
+                  key={item.name} 
+                  ref={(el) => (linksRef.current[idx] = el)}
+                  className="w-full flex flex-col items-center"
+                >
+                  <button
+                    onClick={() => setIsMobileProductsOpen(!isMobileProductsOpen)}
+                    className="flex items-center justify-center gap-2.5 text-2xl sm:text-3xl font-serif font-bold italic tracking-wide text-white hover:text-[#D4A24C] transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] cursor-pointer"
+                  >
+                    <span>PRODUCTS</span>
+                    <svg
+                      className={`w-5 h-5 text-[#D4A24C] transition-transform duration-300 ${isMobileProductsOpen ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth="2.5"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                  </button>
+
+                  {/* Dropdown Categories Accordion */}
+                  <div
+                    className={`w-full max-w-xs transition-all duration-300 overflow-hidden ${
+                      isMobileProductsOpen ? 'max-h-[500px] opacity-100 mt-4' : 'max-h-0 opacity-0 mt-0'
+                    }`}
+                  >
+                    <div className="bg-black/35 backdrop-blur-md rounded-2xl p-3 border border-white/15 flex flex-col gap-1 shadow-xl">
+                      {productCategories.map((cat) => (
+                        <Link
+                          key={cat.name}
+                          to={cat.path}
+                          onClick={() => {
+                            setIsMobileMenuOpen(false);
+                            setIsMobileProductsOpen(false);
+                          }}
+                          className="text-center py-2 px-3 text-sm sm:text-base font-sans font-medium text-[#FAF7F2]/90 hover:text-[#D4A24C] hover:bg-white/10 rounded-xl transition-all"
+                        >
+                          {cat.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <Link
+                key={item.name}
+                ref={(el) => (linksRef.current[idx] = el)}
+                to={item.path}
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsMobileProductsOpen(false);
+                }}
+                className="text-2xl sm:text-3xl font-serif font-bold italic tracking-wide text-white hover:text-[#D4A24C] hover:scale-105 transition-all duration-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+              >
+                {item.name}
+              </Link>
+            );
+          })}
+
           <Link
-            key={item.name}
-            ref={(el) => (linksRef.current[idx] = el)}
-            to={item.path}
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="text-2xl sm:text-3xl font-serif font-bold italic tracking-wide text-white hover:scale-105 transition-all duration-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+            ref={(el) => (linksRef.current[menuItems.length] = el)}
+            to="/login"
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              setIsMobileProductsOpen(false);
+            }}
+            className="liquid mt-2 rounded-full px-10 py-3 bg-[#D4A24C] text-[#0D3B2A] text-sm font-sans font-bold uppercase tracking-widest transition-all duration-300 shadow-lg border-none"
+            style={{ '--liquid-bg': '#FAF7F2', '--liquid-text': '#0D3B2A' }}
           >
-            {item.name}
+            LOGIN
           </Link>
-        ))}
-        <Link
-          ref={(el) => (linksRef.current[menuItems.length] = el)}
-          to="/login"
-          onClick={() => setIsMobileMenuOpen(false)}
-          className="liquid mt-8 rounded-full px-10 py-3 bg-forest text-parchment text-sm font-sans font-bold uppercase tracking-widest transition-all duration-300 border-none"
-          style={{ '--liquid-bg': '#F5EBD8', '--liquid-text': '#0D3B2A' }}
-        >
-          LOGIN
-        </Link>
+        </div>
       </div>
 
       {/* Cart Slider Drawer */}

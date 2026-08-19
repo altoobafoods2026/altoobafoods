@@ -55,7 +55,7 @@ export default function NoorBestSellers({ products = [] }) {
     : [...products].sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0) || b.rating - a.rating).slice(0, 5);
 
   return (
-    <section className="relative bg-white py-16 lg:py-20 overflow-hidden border-t border-[#FAF7F2]">
+    <section className="relative bg-white py-8 sm:py-10 md:py-14 overflow-hidden border-t border-[#FAF7F2]">
       {/* Decorative Islamic Geometric Motifs (Abstracted via SVG) */}
       <div className="absolute top-0 right-0 w-64 h-64 opacity-5 pointer-events-none">
         <svg viewBox="0 0 100 100" fill="none" stroke="#0D3B2A" strokeWidth="0.5">
@@ -65,13 +65,13 @@ export default function NoorBestSellers({ products = [] }) {
         </svg>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-8">
-        <div className="text-center mb-12 relative z-10">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8">
+        <div className="text-center mb-6 sm:mb-8 relative z-10">
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
-            className="text-4xl md:text-5xl font-serif text-[#0D3B2A] font-bold mb-4"
+            className="text-3xl sm:text-4xl md:text-5xl font-serif text-[#0D3B2A] font-bold mb-2 sm:mb-3"
           >
             Our Best Sellers
           </motion.h2>
@@ -84,7 +84,7 @@ export default function NoorBestSellers({ products = [] }) {
           >
             Handpicked products loved by our customers
           </motion.p>
-          <div className="w-12 h-0.5 bg-[#D4A24C] mx-auto mt-8 opacity-50" />
+          <div className="w-12 h-0.5 bg-[#D4A24C] mx-auto mt-4 opacity-50" />
         </div>
 
         {/* grid (1 col on mobile, 3 on md, 5 on lg desktop) */}
