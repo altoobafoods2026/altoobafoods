@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import TiltCard from './TiltCard';

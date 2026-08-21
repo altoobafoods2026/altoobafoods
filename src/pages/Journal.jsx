@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useToastStore } from '../store/toastStore';
 import ConsultationForm from '../components/ConsultationForm';
 
 export default function Journal() {

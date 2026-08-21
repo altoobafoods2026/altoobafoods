@@ -66,29 +66,33 @@ export default function CartDrawer({ isOpen, onClose }) {
               </button>
             </div>
           ) : (
-            items.map((item, idx) => (
-              <div key={idx} className="flex gap-4 border-b border-forest/5 pb-4">
-                {/* Product Image */}
-                <div className="w-20 h-20 rounded-xl bg-forest-light overflow-hidden flex-shrink-0">
-                  <img src={item.product.images[0]} alt={item.product.name} className="w-full h-full object-cover" />
-                </div>
+            items.map((item, idx) => {
+              const variantObj = item.selectedVariant && item.product.variants?.find(v => (v.name === item.selectedVariant || v.title === item.selectedVariant));
+              const itemThumb = variantObj?.image || item.product.images[0];
 
-                {/* Details */}
-                <div className="flex-grow flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-start gap-2">
-                      <h4 className="font-serif font-bold text-base text-forest leading-tight line-clamp-1">{item.product.name}</h4>
-                      <button
-                        onClick={() => removeItem(item.product.id, item.selectedVariant)}
-                        className="text-[#7a2020] hover:opacity-85 text-xs font-semibold cursor-pointer"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                    {item.selectedVariant && (
-                      <p className="text-xs text-muted-green font-sans mt-0.5">Size: {item.selectedVariant}</p>
-                    )}
+              return (
+                <div key={idx} className="flex gap-4 border-b border-forest/5 pb-4">
+                  {/* Product Image */}
+                  <div className="w-20 h-20 rounded-xl bg-[#FAF7F2] p-1 overflow-hidden flex-shrink-0 flex items-center justify-center border border-forest/5">
+                    <img src={itemThumb} alt={item.product.name} className="w-full h-full object-contain mix-blend-multiply" />
                   </div>
+
+                  {/* Details */}
+                  <div className="flex-grow flex flex-col justify-between">
+                    <div>
+                      <div className="flex justify-between items-start gap-2">
+                        <h4 className="font-serif font-bold text-base text-forest leading-tight line-clamp-1">{item.product.name}</h4>
+                        <button
+                          onClick={() => removeItem(item.product.id, item.selectedVariant)}
+                          className="text-[#7a2020] hover:opacity-85 text-xs font-semibold cursor-pointer"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      {item.selectedVariant && (
+                        <p className="text-xs text-[#c8a86a] font-sans font-bold mt-0.5">Option: {item.selectedVariant}</p>
+                      )}
+                    </div>
 
                   <div className="flex justify-between items-center mt-2">
                     {/* Quantity Selector */}
@@ -112,7 +116,8 @@ export default function CartDrawer({ isOpen, onClose }) {
                   </div>
                 </div>
               </div>
-            ))
+            );
+          })
           )}
         </div>
 

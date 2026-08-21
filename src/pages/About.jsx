@@ -1,18 +1,13 @@
 import { Link } from 'react-router-dom';
 import { 
   Leaf, 
-  Droplet, 
   BookOpen, 
   ShieldCheck, 
   ScrollText, 
-  Sparkles, 
-  CheckCircle2, 
   Award, 
   ArrowRight, 
   UserCheck, 
-  Stethoscope, 
-  HeartHandshake,
-  Star
+  Stethoscope
 } from 'lucide-react';
 
 export default function About() {

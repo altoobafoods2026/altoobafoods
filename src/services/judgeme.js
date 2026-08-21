@@ -64,7 +64,6 @@ export const getReviews = async (productId) => {
     const productRes = await fetch(productUrl);
     
     if (!productRes.ok) {
-      console.log('No internal Judge.me product found yet for this external_id.');
       return [];
     }
     

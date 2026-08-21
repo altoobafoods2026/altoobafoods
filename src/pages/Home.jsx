@@ -5,6 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { getProducts, getHeroVideo } from '../services/shopify';
 import HeroParticles from '../components/HeroParticles';
 import About3DCarousel from '../components/About3DCarousel';
+import SplashScreen from '../components/SplashScreen';
 import NoorCategories from '../components/noor/NoorCategories';
 import NoorBestSellers from '../components/noor/NoorBestSellers';
 import NoorBundles from '../components/noor/NoorBundles';
@@ -105,6 +106,9 @@ export default function Home() {
 
   return (
     <div ref={containerRef} className="relative w-full overflow-hidden">
+      {/* 0. Cinematic Splash Screen (Active until all homepage data is fetched) */}
+      <SplashScreen isLoading={isLoading} />
+
       {/* 1. Fullscreen Hero Section */}
       <section ref={heroSectionRef} className="relative w-full min-h-svh flex flex-col items-center justify-start text-center px-0 md:px-6 pt-[90px] md:pt-[100px] pb-4 md:pb-0 overflow-hidden">
          {/* Background Video */}

@@ -31,11 +31,6 @@ export default function ProductCard({ product, index = 0 }) {
     showToast(isWishlisted ? `Removed ${product.name} from wishlist` : `Added ${product.name} to wishlist`);
   };
 
-  // Badge mapping
-  let badgeClass = 'bg-forest text-parchment';
-  if (product.badge === 'NEW') badgeClass = 'bg-[#2e5c46] text-parchment';
-  if (product.badge === 'LIMITED') badgeClass = 'bg-[#7a2020] text-parchment';
-
   return (
     <div
       ref={cardRef}

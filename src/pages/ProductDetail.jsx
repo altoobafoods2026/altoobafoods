@@ -16,6 +16,7 @@ export default function ProductDetail() {
   const [zoomStyle, setZoomStyle] = useState({ transform: 'scale(1)', transformOrigin: 'center center' });
 
   const [product, setProduct] = useState(null);
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -32,6 +33,11 @@ export default function ProductDetail() {
           return;
         }
         setProduct(fetchedProduct);
+        if (fetchedProduct.variants && fetchedProduct.variants.length > 0) {
+          setSelectedVariant(fetchedProduct.variants[0]);
+        } else {
+          setSelectedVariant(null);
+        }
         setActiveImage(0);
         setQuantity(1);
         setShowFullDesc(false);
@@ -71,11 +77,13 @@ export default function ProductDetail() {
 
   if (!product) return null;
 
-  const currentPrice = product.price;
-  const mrpPrice = product.mrp || product.price * 1.25;
-  const discountPercent = product.discount || Math.round(((mrpPrice - currentPrice) / mrpPrice) * 100);
+  const currentPrice = selectedVariant ? selectedVariant.price : product.price;
+  const mrpPrice = selectedVariant ? (selectedVariant.mrp || selectedVariant.price * 1.25) : (product.mrp || product.price * 1.25);
+  const discountPercent = selectedVariant && selectedVariant.discount !== undefined
+    ? selectedVariant.discount
+    : Math.round(((mrpPrice - currentPrice) / (mrpPrice || 1)) * 100);
 
-  // Ensure maximum 4 images for the gallery without duplication
+  // Ensure maximum 5 images for the gallery without duplication
   const finalImages = product.images.slice(0, 5);
 
   const handleAddToCart = () => {
@@ -84,9 +92,10 @@ export default function ProductDetail() {
       return;
     }
     for (let i = 0; i < quantity; i++) {
-      addItem(product, null);
+      addItem(product, selectedVariant?.title || null);
     }
-    showToast(`Added ${quantity}x ${product.name} to cart`);
+    const variantSuffix = selectedVariant && selectedVariant.title !== 'Default Title' ? ` (${selectedVariant.title})` : '';
+    showToast(`Added ${quantity}x ${product.name}${variantSuffix} to cart`);
   };
 
   const handleMouseMove = (e) => {
@@ -212,6 +221,74 @@ export default function ProductDetail() {
                 Save {discountPercent}%
               </span>
             </div>
+
+            {/* Multi-Weight / Size Variant Selector (RuhaniSouq Style) */}
+            {product.variants && product.variants.length > 1 && product.variants[0].title !== 'Default Title' && (
+              <div className="mb-7 bg-white p-4 sm:p-5 rounded-2xl border border-gray-200/90 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+                <div className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#0D3B2A] mb-3.5 flex items-center justify-between">
+                  <span>
+                    OPTION: <strong className="text-[#0D3B2A] font-extrabold text-[12px] bg-[#FAF7F2] px-2.5 py-0.5 rounded border border-[#0D3B2A]/10 ml-1">{selectedVariant?.title}</strong>
+                  </span>
+                  <span className="text-[10px] text-gray-400 font-medium">{product.variants.length} options available</span>
+                </div>
+
+                <div className="flex flex-wrap gap-3 sm:gap-3.5">
+                  {product.variants.map((v) => {
+                    const isSelected = selectedVariant?.id === v.id;
+                    const vThumb = v.image || product.images[0];
+
+                    return (
+                      <button
+                        key={v.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedVariant(v);
+                          if (v.image) {
+                            const imgIdx = finalImages.findIndex(img => img === v.image);
+                            if (imgIdx > -1) {
+                              setActiveImage(imgIdx);
+                            }
+                          }
+                        }}
+                        className={`flex flex-col items-center justify-between p-3 rounded-2xl border-2 transition-all duration-200 min-w-[96px] sm:min-w-[110px] bg-white cursor-pointer relative ${
+                          isSelected
+                            ? 'border-[#0D3B2A] shadow-[0_6px_20px_rgba(13,59,42,0.18)] bg-[#FAF7F2]/60 ring-2 ring-[#0D3B2A]/20 scale-[1.03]'
+                            : 'border-gray-200 hover:border-gray-400 opacity-80 hover:opacity-100'
+                        }`}
+                      >
+                        {/* Thumbnail Image */}
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 mb-2.5 flex items-center justify-center overflow-hidden rounded-xl bg-[#FAF7F2] p-1">
+                          <img
+                            src={vThumb}
+                            alt={v.title}
+                            className="w-full h-full object-contain mix-blend-multiply transition-transform hover:scale-105"
+                          />
+                        </div>
+
+                        {/* Variant Weight / Name */}
+                        <span className={`text-[12px] sm:text-[13px] font-bold font-sans mb-1 ${
+                          isSelected ? 'text-[#0D3B2A]' : 'text-gray-700'
+                        }`}>
+                          {v.title}
+                        </span>
+
+                        {/* Price & Strikethrough MRP */}
+                        <div className="flex flex-col items-center">
+                          <span className="text-[13px] sm:text-[14px] font-extrabold text-[#0D3B2A] font-sans">
+                            ₹{v.price.toFixed(0)}
+                          </span>
+                          {v.mrp > v.price && (
+                            <span className="text-[10px] text-gray-400 line-through font-medium">
+                              ₹{v.mrp.toFixed(0)}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Feature Grid */}
             <div className="grid grid-cols-2 gap-y-6 gap-x-4 mb-6">

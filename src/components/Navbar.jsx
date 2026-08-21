@@ -4,7 +4,6 @@ import gsap from 'gsap';
 import { useCartStore } from '../store/cartStore';
 import { useWishlistStore } from '../store/wishlistStore';
 import CartDrawer from './CartDrawer';
-import { formatPrice } from '../utils/formatPrice';
 import logoSrc from '../assets/logo.png';
 
 export default function Navbar() {

@@ -4,8 +4,6 @@ import { Search, X } from 'lucide-react';
 import { getProducts } from '../services/shopify';
 import ProductCard from '../components/ProductCard';
 import ShimmerCard from '../components/ShimmerCard';
-import ContactSection from '../components/ContactSection';
-import { useToastStore } from '../store/toastStore';
 
 export default function Studio() {
   const location = useLocation();
@@ -24,8 +22,6 @@ export default function Studio() {
     { value: 'price-high', label: 'Price: High to Low' },
     { value: 'rating', label: 'Top Rated' }
   ];
-
-  const showToast = useToastStore((state) => state.showToast);
 
   // Fetch products from Shopify
   useEffect(() => {

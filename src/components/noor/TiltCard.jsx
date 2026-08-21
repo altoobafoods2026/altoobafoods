@@ -1,6 +1,3 @@
-import { useRef, useState } from 'react';
-import { motion } from 'motion/react';
-
 export default function TiltCard({ children, className }) {
   return (
     <div

@@ -5,15 +5,11 @@ import {
   Clock, 
   AlertCircle, 
   CheckCircle2, 
-  CreditCard, 
-  HelpCircle, 
   PackageX, 
   Mail, 
   Phone, 
   MapPin, 
   ArrowLeft,
-  ArrowRight,
-  ShieldCheck,
   RefreshCw,
   Truck
 } from 'lucide-react';

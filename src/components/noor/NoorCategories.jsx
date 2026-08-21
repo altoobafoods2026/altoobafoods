@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect } from 'react';
-import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 export default function NoorCategories({ products = [] }) {
   // Extract unique categories dynamically and exclude 'Wellness Kit'

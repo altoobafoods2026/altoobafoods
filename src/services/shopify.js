@@ -61,13 +61,19 @@ export async function getProducts() {
                   }
                 }
               }
-              variants(first: 5) {
+              variants(first: 10) {
                 edges {
                   node {
                     id
                     title
                     price {
                       amount
+                    }
+                    compareAtPrice {
+                      amount
+                    }
+                    image {
+                      url
                     }
                     availableForSale
                   }
@@ -173,11 +179,24 @@ export async function getProducts() {
         rating: realRating,
         reviewCount: realReviewCount,
         inStock: node.variants.edges.some(v => v.node.availableForSale),
-        variants: node.variants.edges.map(v => ({
-          id: v.node.id,
-          name: v.node.title,
-          price: parseFloat(v.node.price.amount)
-        }))
+        variants: node.variants.edges.map(v => {
+          const vPrice = parseFloat(v.node.price?.amount || 0);
+          const vMrp = v.node.compareAtPrice?.amount ? parseFloat(v.node.compareAtPrice.amount) : vPrice;
+          let vDiscount = 0;
+          if (vMrp > vPrice) {
+            vDiscount = Math.round(((vMrp - vPrice) / vMrp) * 100);
+          }
+          return {
+            id: v.node.id,
+            title: v.node.title,
+            name: v.node.title,
+            price: vPrice,
+            mrp: vMrp,
+            discount: vDiscount,
+            image: v.node.image?.url || null,
+            availableForSale: v.node.availableForSale
+          };
+        })
       };
     });
 
@@ -217,13 +236,19 @@ export async function getProductBySlug(slug) {
             }
           }
         }
-        variants(first: 5) {
+        variants(first: 10) {
           edges {
             node {
               id
               title
               price {
                 amount
+              }
+              compareAtPrice {
+                amount
+              }
+              image {
+                url
               }
               availableForSale
             }
@@ -308,11 +333,24 @@ export async function getProductBySlug(slug) {
     rating: realRating,
     reviewCount: realReviewCount,
     inStock: node.variants.edges.some(v => v.node.availableForSale),
-    variants: node.variants.edges.map(v => ({
-      id: v.node.id,
-      name: v.node.title,
-      price: parseFloat(v.node.price.amount)
-    }))
+    variants: node.variants.edges.map(v => {
+      const vPrice = parseFloat(v.node.price?.amount || 0);
+      const vMrp = v.node.compareAtPrice?.amount ? parseFloat(v.node.compareAtPrice.amount) : vPrice;
+      let vDiscount = 0;
+      if (vMrp > vPrice) {
+        vDiscount = Math.round(((vMrp - vPrice) / vMrp) * 100);
+      }
+      return {
+        id: v.node.id,
+        title: v.node.title,
+        name: v.node.title,
+        price: vPrice,
+        mrp: vMrp,
+        discount: vDiscount,
+        image: v.node.image?.url || null,
+        availableForSale: v.node.availableForSale
+      };
+    })
   };
 }
 

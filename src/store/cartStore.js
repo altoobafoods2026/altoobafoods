@@ -13,7 +13,7 @@ export const useCartStore = create((set, get) => ({
 
     let price = product.price;
     if (variantName && product.variants) {
-      const variant = product.variants.find(v => v.name === variantName);
+      const variant = product.variants.find(v => v.name === variantName || v.title === variantName);
       if (variant) price = variant.price;
     }
 
