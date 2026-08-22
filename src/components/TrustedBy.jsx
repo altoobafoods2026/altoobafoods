@@ -107,12 +107,6 @@ export default function TrustedBy({ productId, productName }) {
     }
   };
 
-  const averageRating = useMemo(() => {
-    if (allReviews.length === 0) return '4.8';
-    const sum = allReviews.reduce((acc, r) => acc + (r.rating || 5), 0);
-    return (sum / allReviews.length).toFixed(1);
-  }, [allReviews]);
-
   return (
     <section className="bg-[#f6f5ef] pt-8 sm:pt-10 pb-8 sm:pb-10 border-t border-[#D4A24C]/15 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10">

@@ -78,7 +78,7 @@ export default function ContactSection({ title = "Connect With Us", subtitle = "
                   </div>
                   <div className="pt-1">
                     <h4 className="text-[10px] uppercase tracking-widest text-[#D4A24C] font-bold mb-1.5">Apothecary Lab</h4>
-                    <p className="text-[14px] text-white/80 leading-relaxed font-light">Rampur, Uttar Pradesh<br/>India, 244901</p>
+                    <p className="text-[14px] text-white/80 leading-relaxed font-light">Bilaspur Gate, Nainital Road<br/>Rampur, UP</p>
                   </div>
                 </div>
 
@@ -88,8 +88,8 @@ export default function ContactSection({ title = "Connect With Us", subtitle = "
                   </div>
                   <div className="pt-1">
                     <h4 className="text-[10px] uppercase tracking-widest text-[#D4A24C] font-bold mb-1.5">Direct Line</h4>
-                    <a href="tel:+918591916905" className="text-[14px] text-white/80 hover:text-white transition-colors block mb-1 font-light">+91 85919 16905</a>
-                    <a href="https://wa.me/918591916905" target="_blank" rel="noreferrer" className="text-[13px] text-[#D4A24C] hover:text-white transition-colors flex items-center gap-1.5 mt-2">
+                    <a href="tel:+918433284322" className="text-[14px] text-white/80 hover:text-white transition-colors block mb-1 font-light">+91 84332 84322</a>
+                    <a href="https://wa.me/918433284322" target="_blank" rel="noreferrer" className="text-[13px] text-[#D4A24C] hover:text-white transition-colors flex items-center gap-1.5 mt-2">
                       <MessageCircle className="w-4 h-4" /> WhatsApp Support
                     </a>
                   </div>
@@ -101,7 +101,7 @@ export default function ContactSection({ title = "Connect With Us", subtitle = "
                   </div>
                   <div className="pt-1">
                     <h4 className="text-[10px] uppercase tracking-widest text-[#D4A24C] font-bold mb-1.5">Email Support</h4>
-                    <a href="mailto:sales@al-tooba.com" className="text-[14px] text-white/80 hover:text-white transition-colors font-light">sales@al-tooba.com</a>
+                    <a href="mailto:altoobafoods2026@gmail.com" className="text-[14px] text-white/80 hover:text-white transition-colors font-light">altoobafoods2026@gmail.com</a>
                   </div>
                 </div>
               </div>

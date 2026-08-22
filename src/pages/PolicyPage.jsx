@@ -188,7 +188,7 @@ export default function PolicyPage({ title }) {
                       Option 2: Contact Support
                     </h4>
                     <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
-                      Email <a href="mailto:sales@al-tooba.com" className="text-[#D4A24C] font-semibold hover:underline">sales@al-tooba.com</a> with your order number and cancellation request.
+                      Email <a href="mailto:altoobafoods2026@gmail.com" className="text-[#D4A24C] font-semibold hover:underline">altoobafoods2026@gmail.com</a> with your order number and cancellation request.
                     </p>
                   </div>
                 </div>
@@ -272,7 +272,7 @@ export default function PolicyPage({ title }) {
                       Option 2: Contact Support
                     </h4>
                     <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
-                      Reach out to <a href="mailto:sales@al-tooba.com" className="text-[#D4A24C] font-semibold hover:underline">sales@al-tooba.com</a> or call <a href="tel:+918591916905" className="text-[#D4A24C] font-semibold hover:underline">+91 85919 16905</a> immediately for special assistance.
+                      Reach out to <a href="mailto:altoobafoods2026@gmail.com" className="text-[#D4A24C] font-semibold hover:underline">altoobafoods2026@gmail.com</a> or call <a href="tel:+918433284322" className="text-[#D4A24C] font-semibold hover:underline">+91 84332 84322</a> immediately for special assistance.
                     </p>
                   </div>
                 </div>
@@ -290,15 +290,15 @@ export default function PolicyPage({ title }) {
                   </p>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                     <span className="font-bold text-[#0D3B2A] min-w-[90px]">Email:</span>
-                    <a href="mailto:sales@al-tooba.com" className="text-[#D4A24C] font-semibold hover:underline">sales@al-tooba.com</a>
+                    <a href="mailto:altoobafoods2026@gmail.com" className="text-[#D4A24C] font-semibold hover:underline">altoobafoods2026@gmail.com</a>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                     <span className="font-bold text-[#0D3B2A] min-w-[90px]">Phone:</span>
-                    <a href="tel:+918591916905" className="text-[#D4A24C] font-semibold hover:underline">+91 85919 16905</a>
+                    <a href="tel:+918433284322" className="text-[#D4A24C] font-semibold hover:underline">+91 84332 84322</a>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                     <span className="font-bold text-[#0D3B2A] min-w-[90px]">Location:</span>
-                    <span className="text-gray-700">Rampur, Uttar Pradesh, India</span>
+                    <span className="text-gray-700">Bilaspur Gate, Nainital Road, Rampur, UP</span>
                   </div>
                   <div className="pt-2 border-t border-gray-200/60 text-gray-500 text-[11px] sm:text-xs">
                     Response within 24 hours during business days
@@ -412,7 +412,7 @@ export default function PolicyPage({ title }) {
                       Step 1: Request Return
                     </h4>
                     <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
-                      Email <a href="mailto:sales@al-tooba.com" className="text-[#D4A24C] font-semibold hover:underline">sales@al-tooba.com</a> with your order number and reason for return within 3 days of delivery.
+                      Email <a href="mailto:altoobafoods2026@gmail.com" className="text-[#D4A24C] font-semibold hover:underline">altoobafoods2026@gmail.com</a> with your order number and reason for return within 3 days of delivery.
                     </p>
                   </div>
 
@@ -533,15 +533,15 @@ export default function PolicyPage({ title }) {
                   </p>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                     <span className="font-bold text-[#0D3B2A] min-w-[90px]">Email:</span>
-                    <a href="mailto:sales@al-tooba.com" className="text-[#D4A24C] font-semibold hover:underline">sales@al-tooba.com</a>
+                    <a href="mailto:altoobafoods2026@gmail.com" className="text-[#D4A24C] font-semibold hover:underline">altoobafoods2026@gmail.com</a>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                     <span className="font-bold text-[#0D3B2A] min-w-[90px]">Phone:</span>
-                    <a href="tel:+918591916905" className="text-[#D4A24C] font-semibold hover:underline">+91 85919 16905</a>
+                    <a href="tel:+918433284322" className="text-[#D4A24C] font-semibold hover:underline">+91 84332 84322</a>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                     <span className="font-bold text-[#0D3B2A] min-w-[90px]">Location:</span>
-                    <span className="text-gray-700">Rampur, Uttar Pradesh, India</span>
+                    <span className="text-gray-700">Bilaspur Gate, Nainital Road, Rampur, UP</span>
                   </div>
                   <div className="pt-2 border-t border-gray-200/60 text-gray-500 text-[11px] sm:text-xs">
                     Response within 24 hours during business days
@@ -737,15 +737,15 @@ export default function PolicyPage({ title }) {
                   </p>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                     <span className="font-bold text-[#0D3B2A] min-w-[90px]">Email:</span>
-                    <a href="mailto:sales@al-tooba.com" className="text-[#D4A24C] font-semibold hover:underline">sales@al-tooba.com</a>
+                    <a href="mailto:altoobafoods2026@gmail.com" className="text-[#D4A24C] font-semibold hover:underline">altoobafoods2026@gmail.com</a>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                     <span className="font-bold text-[#0D3B2A] min-w-[90px]">Phone:</span>
-                    <a href="tel:+918591916905" className="text-[#D4A24C] font-semibold hover:underline">+91 85919 16905</a>
+                    <a href="tel:+918433284322" className="text-[#D4A24C] font-semibold hover:underline">+91 84332 84322</a>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                     <span className="font-bold text-[#0D3B2A] min-w-[90px]">Location:</span>
-                    <span className="text-gray-700">Rampur, Uttar Pradesh, India</span>
+                    <span className="text-gray-700">Bilaspur Gate, Nainital Road, Rampur, UP</span>
                   </div>
                   <div className="pt-2 border-t border-gray-200/60 text-gray-500 text-[11px] sm:text-xs">
                     Response within 24 hours during business days
@@ -897,15 +897,15 @@ export default function PolicyPage({ title }) {
                 <div className="bg-[#FAF7F2] border border-[#0D3B2A]/5 rounded-2xl p-4 sm:p-6 space-y-2.5 text-xs sm:text-sm">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                     <span className="font-bold text-[#0D3B2A] min-w-[90px]">Email:</span>
-                    <a href="mailto:sales@al-tooba.com" className="text-[#D4A24C] font-semibold hover:underline">sales@al-tooba.com</a>
+                    <a href="mailto:altoobafoods2026@gmail.com" className="text-[#D4A24C] font-semibold hover:underline">altoobafoods2026@gmail.com</a>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                     <span className="font-bold text-[#0D3B2A] min-w-[90px]">Phone:</span>
-                    <a href="tel:+918591916905" className="text-[#D4A24C] font-semibold hover:underline">+91 85919 16905</a>
+                    <a href="tel:+918433284322" className="text-[#D4A24C] font-semibold hover:underline">+91 84332 84322</a>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                     <span className="font-bold text-[#0D3B2A] min-w-[90px]">Location:</span>
-                    <span className="text-gray-700">Rampur, Uttar Pradesh, India</span>
+                    <span className="text-gray-700">Bilaspur Gate, Nainital Road, Rampur, UP</span>
                   </div>
                 </div>
               </section>
@@ -1092,15 +1092,15 @@ export default function PolicyPage({ title }) {
                 <div className="bg-[#FAF7F2] border border-[#0D3B2A]/5 rounded-2xl p-4 sm:p-6 space-y-2.5 text-xs sm:text-sm">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                     <span className="font-bold text-[#0D3B2A] min-w-[90px]">Email:</span>
-                    <a href="mailto:sales@al-tooba.com" className="text-[#D4A24C] font-semibold hover:underline">sales@al-tooba.com</a>
+                    <a href="mailto:altoobafoods2026@gmail.com" className="text-[#D4A24C] font-semibold hover:underline">altoobafoods2026@gmail.com</a>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                     <span className="font-bold text-[#0D3B2A] min-w-[90px]">Phone:</span>
-                    <a href="tel:+918591916905" className="text-[#D4A24C] font-semibold hover:underline">+91 85919 16905</a>
+                    <a href="tel:+918433284322" className="text-[#D4A24C] font-semibold hover:underline">+91 84332 84322</a>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                     <span className="font-bold text-[#0D3B2A] min-w-[90px]">Location:</span>
-                    <span className="text-gray-700">Rampur, Uttar Pradesh, India</span>
+                    <span className="text-gray-700">Bilaspur Gate, Nainital Road, Rampur, UP</span>
                   </div>
                 </div>
               </section>
@@ -1124,11 +1124,11 @@ export default function PolicyPage({ title }) {
                   At Al-Tooba, we are committed to providing the highest quality prophetic herbal remedies and customer care. If you have any urgent questions regarding our policies, please do not hesitate to contact our team.
                 </p>
                 <div className="mt-6 flex flex-col sm:flex-row gap-4">
-                  <a href="mailto:sales@al-tooba.com" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0D3B2A] text-white rounded-full font-bold text-sm tracking-widest uppercase hover:bg-[#D4A24C] transition-colors duration-300">
+                  <a href="mailto:altoobafoods2026@gmail.com" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0D3B2A] text-white rounded-full font-bold text-sm tracking-widest uppercase hover:bg-[#D4A24C] transition-colors duration-300">
                     <Mail className="w-4 h-4" />
                     Email Us
                   </a>
-                  <a href="tel:+918591916905" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-transparent border border-[#0D3B2A]/20 text-[#0D3B2A] rounded-full font-bold text-sm tracking-widest uppercase hover:border-[#0D3B2A] hover:bg-[#0D3B2A]/5 transition-colors duration-300">
+                  <a href="tel:+918433284322" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-transparent border border-[#0D3B2A]/20 text-[#0D3B2A] rounded-full font-bold text-sm tracking-widest uppercase hover:border-[#0D3B2A] hover:bg-[#0D3B2A]/5 transition-colors duration-300">
                     <Phone className="w-4 h-4" />
                     Call Us
                   </a>

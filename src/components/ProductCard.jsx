@@ -1,15 +1,12 @@
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
-import { useWishlistStore } from '../store/wishlistStore';
 import { useToastStore } from '../store/toastStore';
 
 export default function ProductCard({ product, index = 0 }) {
   const cardRef = useRef(null);
 
   const addItem = useCartStore((state) => state.addItem);
-  const toggleWishlist = useWishlistStore((state) => state.toggleItem);
-  const isWishlisted = useWishlistStore((state) => state.isWishlisted(product.id));
   const showToast = useToastStore((state) => state.showToast);
 
   const hoverImage = product.cardHoverImage || (product.images && product.images.length > 1 ? product.images[1] : null);
@@ -23,12 +20,6 @@ export default function ProductCard({ product, index = 0 }) {
     }
     addItem(product);
     showToast(`Added ${product.name} to cart`);
-  };
-
-  const handleWishlistToggle = (e) => {
-    e.preventDefault();
-    toggleWishlist(product);
-    showToast(isWishlisted ? `Removed ${product.name} from wishlist` : `Added ${product.name} to wishlist`);
   };
 
   return (

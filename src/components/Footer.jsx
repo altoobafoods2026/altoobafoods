@@ -118,13 +118,13 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-muted-green">
               <li className="flex flex-col">
                 <span className="text-parchment/60 text-xs mb-1">Apothecary & HQ</span>
-                <span>Rampur, Uttar Pradesh</span>
+                <span>Bilaspur Gate, Nainital Road, Rampur, UP</span>
                 <span>India</span>
               </li>
               <li className="pt-2 flex flex-col">
                 <span className="text-parchment/60 text-xs mb-1">Direct Support</span>
-                <a href="mailto:sales@al-tooba.com" className="hover:text-parchment transition-colors">sales@al-tooba.com</a>
-                <a href="tel:+918591916905" className="hover:text-parchment transition-colors mt-1">+91 8591916905</a>
+                <a href="mailto:altoobafoods2026@gmail.com" className="hover:text-parchment transition-colors">altoobafoods2026@gmail.com</a>
+                <a href="tel:+918433284322" className="hover:text-parchment transition-colors mt-1">+91 8433284322</a>
               </li>
             </ul>
           </div>

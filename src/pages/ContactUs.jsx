@@ -11,9 +11,9 @@ export default function ContactUs() {
 
   const faqs = [
     { q: "How quickly do you respond?", a: "We aim to respond to all inquiries within 2-4 business hours during our regular operating times. For urgent matters, please use our WhatsApp support line." },
-    { q: "Can I contact via WhatsApp?", a: "Yes, absolutely. You can reach our dedicated WhatsApp support line at +91 85919 16905 for quick queries, order updates, or consultations." },
+    { q: "Can I contact via WhatsApp?", a: "Yes, absolutely. You can reach our dedicated WhatsApp support line at +91 84332 84322 for quick queries, order updates, or consultations." },
     { q: "What are your business hours?", a: "Our team is available Monday through Saturday, from 10:00 AM to 7:00 PM (IST). We are closed on Sundays and public holidays." },
-    { q: "Where are you located?", a: "Our primary apothecary lab and fulfillment center is located in Rampur, Uttar Pradesh, India (244901). All our authentic remedies are shipped globally from here." }
+    { q: "Where are you located?", a: "Our primary apothecary lab and fulfillment center is located in Bilaspur Gate, Nainital Road, Rampur, UP. All our authentic remedies are shipped globally from here." }
   ];
 
   const handleInputChange = (e) => {
@@ -133,7 +133,7 @@ export default function ContactUs() {
                   </div>
                   <div className="pt-1">
                     <h4 className="text-[10px] uppercase tracking-widest text-[#D4A24C] font-bold mb-1.5">Apothecary Lab</h4>
-                    <p className="text-[14px] text-white/80 leading-relaxed font-light">Rampur, Uttar Pradesh<br/>India, 244901</p>
+                    <p className="text-[14px] text-white/80 leading-relaxed font-light">Bilaspur Gate, Nainital Road<br/>Rampur, UP</p>
                   </div>
                 </div>
 
@@ -143,8 +143,8 @@ export default function ContactUs() {
                   </div>
                   <div className="pt-1">
                     <h4 className="text-[10px] uppercase tracking-widest text-[#D4A24C] font-bold mb-1.5">Direct Line</h4>
-                    <a href="tel:+918591916905" className="text-[14px] text-white/80 hover:text-white transition-colors block mb-1 font-light">+91 85919 16905</a>
-                    <a href="https://wa.me/918591916905" target="_blank" rel="noreferrer" className="text-[13px] text-[#D4A24C] hover:text-white transition-colors flex items-center gap-1.5 mt-2">
+                    <a href="tel:+918433284322" className="text-[14px] text-white/80 hover:text-white transition-colors block mb-1 font-light">+91 84332 84322</a>
+                    <a href="https://wa.me/918433284322" target="_blank" rel="noreferrer" className="text-[13px] text-[#D4A24C] hover:text-white transition-colors flex items-center gap-1.5 mt-2">
                       <MessageSquare className="w-4 h-4" /> WhatsApp Support
                     </a>
                   </div>
@@ -156,7 +156,7 @@ export default function ContactUs() {
                   </div>
                   <div className="pt-1">
                     <h4 className="text-[10px] uppercase tracking-widest text-[#D4A24C] font-bold mb-1.5">Email Support</h4>
-                    <a href="mailto:sales@al-tooba.com" className="text-[14px] text-white/80 hover:text-white transition-colors font-light">sales@al-tooba.com</a>
+                    <a href="mailto:altoobafoods2026@gmail.com" className="text-[14px] text-white/80 hover:text-white transition-colors font-light">altoobafoods2026@gmail.com</a>
                   </div>
                 </div>
 
@@ -226,6 +226,60 @@ export default function ContactUs() {
             </form>
           </motion.div>
         </div>
+      </section>
+
+      {/* OFFICIAL BUSINESS INFORMATION */}
+      <section className="max-w-4xl mx-auto px-6 sm:px-8 mb-20">
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+          <div className="bg-white rounded-[28px] border border-[#0D3B2A]/8 shadow-[0_4px_30px_rgba(13,59,42,0.04)] overflow-hidden">
+            {/* Header */}
+            <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-gray-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#FAF7F2] flex items-center justify-center">
+                  <ShieldCheck className="w-5 h-5 text-[#D4A24C]" />
+                </div>
+                <div>
+                  <span className="text-[10px] sm:text-[11px] font-sans font-bold uppercase tracking-[0.2em] text-[#D4A24C] block">Government Registered</span>
+                  <h3 className="font-serif font-bold text-[17px] sm:text-[20px] text-[#0D3B2A]">Official Business Information</h3>
+                </div>
+              </div>
+              <span className="hidden sm:inline-flex items-center px-4 py-1.5 rounded-full border border-[#0D3B2A]/15 text-[10px] font-sans font-bold uppercase tracking-widest text-[#0D3B2A]">Active / Regular</span>
+            </div>
+            {/* Info Grid */}
+            <div className="px-6 sm:px-8 py-6 sm:py-8">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 mb-8">
+                <div>
+                  <span className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-[#D4A24C] block mb-1.5">Legal Name</span>
+                  <p className="text-[14px] sm:text-[15px] font-sans font-bold text-[#0D3B2A]">AL TOOBA PROPHETIC REMEDIES PRIVATE LIMITED</p>
+                </div>
+                <div>
+                  <span className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-[#D4A24C] block mb-1.5">Trade Name</span>
+                  <p className="text-[14px] sm:text-[15px] font-sans font-bold text-[#0D3B2A]">AL TOOBA PROPHETIC REMEDIES PRIVATE LIMITED</p>
+                </div>
+                <div>
+                  <span className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-[#D4A24C] block mb-1.5">Business Type</span>
+                  <p className="text-[14px] sm:text-[15px] font-sans font-bold text-[#0D3B2A]">Private Limited Company</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 mb-8">
+                <div>
+                  <span className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-[#D4A24C] block mb-1.5">Registration Type</span>
+                  <p className="text-[14px] sm:text-[15px] font-sans font-bold text-[#0D3B2A]">Regular</p>
+                </div>
+                <div>
+                  <span className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-[#D4A24C] block mb-1.5">Registration Number (GSTIN)</span>
+                  <p className="text-[15px] font-sans font-extrabold text-[#0D3B2A] tracking-wider">09ABDCA1871E1ZU</p>
+                </div>
+              </div>
+              <div className="pt-6 border-t border-gray-100">
+                <span className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-[#D4A24C] block mb-1.5">Principal Place of Business / Registered Address</span>
+                <p className="text-[14px] font-sans text-gray-600 leading-relaxed">
+                  AQSA MASJID ROAD, NEAR TASLEEM BHAI HOUSE, AQSA MASJID, NANKAR, Rampur, Uttar Pradesh, 244901
+                </p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </section>
 
       {/* TRUST SECTION */}

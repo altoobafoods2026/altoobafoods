@@ -271,7 +271,7 @@ export default function Cart() {
                   <h3 className="font-serif font-bold text-xl text-parchment mb-4">Apothecary Lab</h3>
                   <p className="text-sm text-parchment/75 leading-relaxed font-sans">
                     Al-Tooba® Prophetic Remedies Pvt. Ltd.<br />
-                    Rampur, Uttar Pradesh,<br />
+                    Bilaspur Gate, Nainital Road, Rampur, UP<br />
                     India
                   </p>
                 </div>
@@ -282,18 +282,18 @@ export default function Cart() {
                     <li className="flex items-start gap-2">
                       <span className="text-gold font-bold mt-0.5">📞</span>
                       <div className="flex flex-col gap-1">
-                        <span>+91 8591916905</span>
+                        <span>+91 8433284322</span>
                         <span>+91 8433439628</span>
                         <span>+91 8433284322</span>
                       </div>
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="text-gold font-bold">✉️</span>
-                      <a href="mailto:sales@al-tooba.com" className="hover:text-gold transition-colors">sales@al-tooba.com</a>
+                      <a href="mailto:altoobafoods2026@gmail.com" className="hover:text-gold transition-colors">altoobafoods2026@gmail.com</a>
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="text-gold font-bold">💬</span>
-                      <span>WhatsApp: +91 8591916905</span>
+                      <span>WhatsApp: +91 8433284322</span>
                     </li>
                   </ul>
                 </div>
@@ -313,7 +313,7 @@ export default function Cart() {
                   <span className="text-xl mb-2 block">🕋</span>
                   <h4 className="font-serif font-bold text-parchment mb-1 text-sm">International Orders</h4>
                   <p className="text-xs text-parchment/70 font-sans leading-relaxed">
-                    We ship to Saudi Arabia, UAE, UK, and USA. International inquiries can be forwarded to <a href="mailto:sales@al-tooba.com" className="font-bold text-parchment hover:text-gold">sales@al-tooba.com</a>.
+                    We ship to Saudi Arabia, UAE, UK, and USA. International inquiries can be forwarded to <a href="mailto:altoobafoods2026@gmail.com" className="font-bold text-parchment hover:text-gold">altoobafoods2026@gmail.com</a>.
                   </p>
                 </div>
               </div>

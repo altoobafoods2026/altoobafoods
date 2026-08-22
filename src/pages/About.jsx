@@ -233,7 +233,7 @@ export default function About() {
               </h2>
 
               <p className="text-sm text-[#FAF7F2]/80 leading-relaxed font-sans">
-                Operating from our traditional apothecary in Rampur, Uttar Pradesh, Hakeem Abdul Qadir Attari has dedicated his life to reviving authentic Tibb-e-Nabawi (Prophetic Medicine) and pure natural remedies. Every batch of Al-Tooba oils, talbina, and herbal extracts is prepared under strict Sunnah guidelines and traditional purity standards.
+                Operating from our traditional apothecary in Bilaspur Gate, Nainital Road, Rampur, UP, Hakeem Abdul Qadir Attari has dedicated his life to reviving authentic Tibb-e-Nabawi (Prophetic Medicine) and pure natural remedies. Every batch of Al-Tooba oils, talbina, and herbal extracts is prepared under strict Sunnah guidelines and traditional purity standards.
               </p>
 
               <p className="text-sm text-[#FAF7F2]/80 leading-relaxed font-sans">
@@ -249,7 +249,7 @@ export default function About() {
                   <span>Book 1-on-1 Consultation</span>
                 </Link>
                 <a
-                  href="https://wa.me/918591916905"
+                  href="https://wa.me/918433284322"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-full px-6 py-3 border border-white/30 text-white hover:bg-white/10 text-xs font-sans font-bold uppercase tracking-wider transition-colors"
