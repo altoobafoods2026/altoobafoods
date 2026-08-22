@@ -146,9 +146,9 @@ export default function Footer() {
           <p className="text-[11px] text-[#5a8060] font-sans font-semibold tracking-wider flex flex-wrap items-center justify-center md:justify-start gap-2">
             <span>© {new Date().getFullYear()} AL-TOOBA®. ALL RIGHTS RESERVED.</span>
             <span className="hidden md:inline">|</span>
-            <span>
+           { /*<span>
               DEVELOPED BY <a href="https://sociallyconnect.in" target="_blank" rel="noopener noreferrer" className="text-gold underline font-bold transition-colors">SOCIALLY CONNECT</a>
-            </span>
+            </span>*/ }
           </p>
         </div>
       </div>
