@@ -34,6 +34,20 @@ const AnimatedText = ({ text, className, dir = 'ltr', delay = 0, triggerAnimatio
   );
 };
 
+// Static version of the text component for precise invisible sizing
+const StaticText = ({ text, className, dir = 'ltr' }) => {
+  const words = text.split(' ');
+  return (
+    <div className={`flex flex-wrap justify-center gap-x-3 gap-y-2 ${className}`} dir={dir}>
+      {words.map((word, index) => (
+        <div key={index} className="inline-block overflow-hidden py-3 -my-3 px-2 -mx-2">
+          <span className="inline-block origin-bottom">{word}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export default function NoorQuoteDivider() {
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true, margin: '-100px' });
@@ -50,11 +64,8 @@ export default function NoorQuoteDivider() {
   useEffect(() => {
     let cycleTimer;
     if (isInView) {
-      // First animation takes ~1.5s total. Wait 2 seconds after it completes.
       const initialTimer = setTimeout(() => {
         setLang('hi');
-        
-        // Then continuously cycle every 5 seconds
         cycleTimer = setInterval(() => {
           setLang(prev => prev === 'en' ? 'hi' : 'en');
         }, 5000);
@@ -77,20 +88,13 @@ export default function NoorQuoteDivider() {
         className="absolute inset-0 z-0 overflow-hidden bg-[#FAF7F2]"
         style={{ y }}
       >
-        {/* Subtle Light Overlay for Text Readability */}
         <div className="absolute inset-0 bg-white/40 z-10" />
-        
-        {/* Vignette Gradient for Depth and Seamless Blending */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#FAF7F2] via-transparent to-[#FAF7F2] z-20 opacity-90" />
-        
-        {/* New User Uploaded Image */}
         <img 
           src="/quote_bg_user.jpg" 
           alt="Islamic Architecture & Herbal Medicine" 
           className="w-full h-[150%] object-cover object-center opacity-80"
         />
-        
-        {/* Subtle Ambient Glow behind text */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-white rounded-full blur-[100px] opacity-60 pointer-events-none z-20" />
       </motion.div>
 
@@ -108,27 +112,48 @@ export default function NoorQuoteDivider() {
           delay={0}
         />
 
-        {/* Translation Wrapper (Fixed height to prevent layout jumps during swap) */}
-        <div className="h-auto min-h-[80px] md:min-h-[110px] flex items-center justify-center w-full">
-          <AnimatePresence mode="wait">
-            {lang === 'en' ? (
-              <AnimatedText 
-                key="en"
-                text='"There is no disease that Allah has created, except that He also has created its treatment."'
-                className="font-serif italic text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#0D3B2A] leading-[1.3] font-normal drop-shadow-sm"
-                triggerAnimation={true}
-                delay={0}
-              />
-            ) : (
-              <AnimatedText 
-                key="hi"
-                text='"अल्लाह ने कोई ऐसी बीमारी पैदा नहीं की, जिसका इलाज भी पैदा न किया हो।"'
-                className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#0D3B2A] leading-[1.4] font-medium drop-shadow-sm"
-                triggerAnimation={true}
-                delay={0}
-              />
-            )}
-          </AnimatePresence>
+        {/* Translation Wrapper (Grid stack prevents layout jumps during swap) */}
+        {/* Using items-start ensures the top line of text always stays at the exact same Y position */}
+        <div className="relative grid items-start justify-center w-full min-h-[140px] sm:min-h-[160px] md:min-h-[180px]">
+          
+          {/* Invisible sizing block containing both texts to force container height precisely */}
+          <div className="col-start-1 row-start-1 invisible opacity-0 pointer-events-none select-none grid w-full">
+             <div className="col-start-1 row-start-1 w-full">
+               <StaticText 
+                 text='"अल्लाह ने कोई ऐसी बीमारी पैदा नहीं की, जिसका इलाज भी पैदा न किया हो।"'
+                 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#0D3B2A] leading-[1.4] font-medium drop-shadow-sm"
+               />
+             </div>
+             <div className="col-start-1 row-start-1 w-full">
+               <StaticText 
+                 text='"There is no disease that Allah has created, except that He also has created its treatment."'
+                 className="font-serif italic text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#0D3B2A] leading-[1.3] font-normal drop-shadow-sm"
+               />
+             </div>
+          </div>
+
+          {/* Actual visible animated text */}
+          <div className="col-start-1 row-start-1 w-full flex items-start justify-center h-full">
+            <AnimatePresence mode="wait">
+              {lang === 'en' ? (
+                <AnimatedText 
+                  key="en"
+                  text='"There is no disease that Allah has created, except that He also has created its treatment."'
+                  className="font-serif italic text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#0D3B2A] leading-[1.3] font-normal drop-shadow-sm"
+                  triggerAnimation={true}
+                  delay={0}
+                />
+              ) : (
+                <AnimatedText 
+                  key="hi"
+                  text='"अल्लाह ने कोई ऐसी बीमारी पैदा नहीं की, जिसका इलाज भी पैदा न किया हो।"'
+                  className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#0D3B2A] leading-[1.4] font-medium drop-shadow-sm"
+                  triggerAnimation={true}
+                  delay={0}
+                />
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
         {/* Detailed Reference */}
