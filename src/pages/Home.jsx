@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { getProducts, getHeroVideo } from '../services/shopify';
+import { getProducts, getHeroVideo, getCachedProductsSync } from '../services/shopify';
 import HeroParticles from '../components/HeroParticles';
 import About3DCarousel from '../components/About3DCarousel';
 import SplashScreen from '../components/SplashScreen';
@@ -15,7 +15,7 @@ import NoorQuoteDivider from '../components/noor/NoorQuoteDivider';
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState(() => getCachedProductsSync() || []);
   const [heroVideoUrl, setHeroVideoUrl] = useState('/Islamic_Altooba_.mp4');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -25,24 +25,48 @@ export default function Home() {
   const ctaRef = useRef(null);
 
   useEffect(() => {
+    let isMounted = true;
+    const startTime = Date.now();
+    const MIN_SPLASH_TIME = 800; // 0.8s smooth cinematic brand intro
+
     async function loadData() {
       try {
         const [fetchedProducts, fetchedHeroVideo] = await Promise.all([
           getProducts(),
           getHeroVideo('hero_section-video')
         ]);
-        setProducts(fetchedProducts);
-        if (fetchedHeroVideo) {
-          setHeroVideoUrl(fetchedHeroVideo);
+        if (isMounted) {
+          setProducts(fetchedProducts);
+          if (fetchedHeroVideo) {
+            setHeroVideoUrl(fetchedHeroVideo);
+          }
         }
       } catch (error) {
         console.error("Failed to fetch data:", error);
       } finally {
-        setIsLoading(false);
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, MIN_SPLASH_TIME - elapsed);
+        setTimeout(() => {
+          if (isMounted) {
+            setIsLoading(false);
+          }
+        }, remaining);
       }
     }
     loadData();
 
+    // Fallback safeguard: Never hold splash screen for more than 1.8s
+    const fallbackTimer = setTimeout(() => {
+      if (isMounted) setIsLoading(false);
+    }, 1800);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(fallbackTimer);
+    };
+  }, []);
+
+  useEffect(() => {
     let ctx = gsap.context(() => {
       // Clean, lightweight fade-in for hero headline
       if (headlineRef.current) {
@@ -186,7 +210,7 @@ export default function Home() {
           </div>
 
           {/* Right: 3D Product Centerpiece */}
-          <div className="w-full xl:w-[45%] flex justify-center absolute bottom-[8vh] xl:bottom-0 left-0 right-0 xl:left-auto xl:right-[5%] z-20 pointer-events-none xl:pointer-events-auto xl:mb-[17.5vh]">
+          <div className="w-full xl:w-[52%] flex justify-center absolute bottom-[2vh] xl:bottom-0 left-0 right-0 xl:left-auto xl:right-[1%] z-20 pointer-events-none xl:pointer-events-auto xl:mb-[3vh]">
             <div className="w-full origin-bottom flex justify-center">
                {products.length > 0 && <About3DCarousel products={products} />}
             </div>

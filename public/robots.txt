@@ -1,0 +1,26 @@
+# Robots.txt for Al-Tooba Prophetic Remedies
+# https://altoobafoods.com
+
+User-agent: *
+Allow: /
+Allow: /studio
+Allow: /product/
+Allow: /about
+Allow: /consultation
+Allow: /contact-us
+Allow: /booking
+Allow: /journal/
+Allow: /privacy-policy
+Allow: /terms-conditions
+Allow: /shipping-policy
+Allow: /return-refund
+Allow: /cancellation-policy
+
+# Disallow cart, checkout, login
+Disallow: /cart
+Disallow: /checkout
+Disallow: /login
+Disallow: /wishlist
+
+# Sitemap
+Sitemap: https://altoobafoods.com/sitemap.xml

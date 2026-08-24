@@ -37,12 +37,15 @@ export default function NoorCategories({ products = [] }) {
     }
   }, [categories.length]);
 
-  // Preload all category images into browser GPU cache immediately so swiping has 0 blank flash
+  // Preload and decode all category images into browser cache immediately so swiping has 0 blank flash
   useEffect(() => {
     categories.forEach(cat => {
       if (cat.bg) {
         const img = new Image();
         img.src = cat.bg;
+        if (img.decode) {
+          img.decode().catch(() => {});
+        }
       }
     });
   }, [categories.length]);
@@ -129,12 +132,12 @@ export default function NoorCategories({ products = [] }) {
 
           <div 
             ref={scrollContainerRef}
-            className="flex overflow-x-auto pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 lg:grid lg:grid-cols-6 gap-4 sm:gap-5 md:gap-6 snap-x snap-mandatory hide-scrollbar scroll-smooth [overscroll-behavior-x:contain] transform-gpu"
+            className="flex overflow-x-auto pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 lg:grid lg:grid-cols-6 gap-4 sm:gap-5 md:gap-6 snap-x snap-mandatory hide-scrollbar scroll-smooth [overscroll-behavior-x:contain] [content-visibility:visible] [-webkit-overflow-scrolling:touch]"
           >
             {categories.map((cat, idx) => (
               <div 
                 key={idx}
-                className="relative min-w-[170px] sm:min-w-[200px] md:min-w-[220px] lg:min-w-0 aspect-[3/4.4] lg:aspect-[3/4.7] cursor-pointer group snap-center filter drop-shadow-[0_10px_15px_rgba(13,59,42,0.12)] block transform-gpu [backface-visibility:hidden]"
+                className="relative min-w-[170px] sm:min-w-[200px] md:min-w-[220px] lg:min-w-0 aspect-[3/4.4] lg:aspect-[3/4.7] cursor-pointer group snap-center filter drop-shadow-[0_10px_15px_rgba(13,59,42,0.12)] block shrink-0 lg:shrink [content-visibility:visible]"
               >
                 <Link to={`/studio?category=${encodeURIComponent(cat.name)}`} className="absolute inset-0 z-50 rounded-xl"></Link>
                 

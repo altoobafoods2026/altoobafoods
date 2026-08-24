@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getProductBySlug, getProducts } from '../services/shopify';
+import { getProductBySlug, getProducts, getCachedProductBySlugSync, getCachedProductsSync } from '../services/shopify';
 import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
 import TrustedBy from '../components/TrustedBy';
@@ -15,17 +15,22 @@ export default function ProductDetail() {
   const [isZooming, setIsZooming] = useState(false);
   const [zoomStyle, setZoomStyle] = useState({ transform: 'scale(1)', transformOrigin: 'center center' });
 
-  const [product, setProduct] = useState(null);
-  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [product, setProduct] = useState(() => getCachedProductBySlugSync(slug));
+  const [selectedVariant, setSelectedVariant] = useState(() => {
+    const cached = getCachedProductBySlugSync(slug);
+    return cached?.variants?.[0] || null;
+  });
   const [relatedProducts, setRelatedProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => !getCachedProductBySlugSync(slug));
 
   const addItem = useCartStore((state) => state.addItem);
   const showToast = useToastStore((state) => state.showToast);
 
   useEffect(() => {
     async function loadProduct() {
-      setIsLoading(true);
+      if (!product) {
+        setIsLoading(true);
+      }
       try {
         const fetchedProduct = await getProductBySlug(slug);
         if (!fetchedProduct) {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Search, X } from 'lucide-react';
-import { getProducts } from '../services/shopify';
+import { getProducts, getCachedProductsSync } from '../services/shopify';
 import ProductCard from '../components/ProductCard';
 import ShimmerCard from '../components/ShimmerCard';
 
@@ -13,8 +13,17 @@ export default function Studio() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortBy, setSortBy] = useState('featured');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [products, setProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [products, setProducts] = useState(() => {
+    const cached = getCachedProductsSync();
+    if (cached && cached.length > 0) {
+      return cached.filter(p => !(p.collections && p.collections.includes('hero-section-3d-images')));
+    }
+    return [];
+  });
+  const [isLoading, setIsLoading] = useState(() => {
+    const cached = getCachedProductsSync();
+    return !(cached && cached.length > 0);
+  });
 
   const sortOptions = [
     { value: 'featured', label: 'Featured' },
@@ -26,7 +35,9 @@ export default function Studio() {
   // Fetch products from Shopify
   useEffect(() => {
     async function loadProducts() {
-      setIsLoading(true);
+      if (products.length === 0) {
+        setIsLoading(true);
+      }
       try {
         const fetchedProducts = await getProducts();
         const regularProducts = fetchedProducts.filter(p => !(p.collections && p.collections.includes('hero-section-3d-images')));
@@ -96,7 +107,7 @@ export default function Studio() {
       {/* Page Title with Cinematic Banner - Full Width Edge to Edge */}
       <div className="w-full pt-[72px] sm:pt-[88px] lg:pt-[100px] mb-8 md:mb-12 bg-parchment">
         <img 
-          src="/products_banner.png" 
+          src="/products_banner.jpeg" 
           alt="Products Banner" 
           className="w-full h-auto block"
         />

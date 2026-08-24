@@ -3,6 +3,39 @@ import { getAllProductReviewStats } from './judgeme';
 const domain = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN;
 const storefrontAccessToken = import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN;
 
+// In-memory cache & Session storage sync helpers for instant 0ms loads
+let productsMemoryCache = null;
+let productsCacheTimestamp = 0;
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+export function getCachedProductsSync() {
+  if (productsMemoryCache && Date.now() - productsCacheTimestamp < CACHE_TTL) {
+    return productsMemoryCache;
+  }
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      const stored = sessionStorage.getItem('altooba_products_cache');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Date.now() - parsed.timestamp < CACHE_TTL) {
+          productsMemoryCache = parsed.data;
+          productsCacheTimestamp = parsed.timestamp;
+          return parsed.data;
+        }
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
+export function getCachedProductBySlugSync(slug) {
+  const cached = getCachedProductsSync();
+  if (cached && cached.length > 0) {
+    return cached.find(p => p.slug === slug) || null;
+  }
+  return null;
+}
+
 async function shopifyFetch({ query, variables }) {
   const endpoint = `https://${domain}/api/2024-01/graphql.json`;
 
@@ -29,7 +62,14 @@ async function shopifyFetch({ query, variables }) {
   }
 }
 
-export async function getProducts() {
+export async function getProducts(forceRefresh = false) {
+  if (!forceRefresh) {
+    const cached = getCachedProductsSync();
+    if (cached && cached.length > 0) {
+      return cached;
+    }
+  }
+
   try {
     const query = `
       {
@@ -93,14 +133,21 @@ export async function getProducts() {
       }
     `;
 
+    // Fast non-blocking review stats promise (300ms max timeout so reviews never slow down page load)
+    const reviewStatsPromise = Promise.race([
+      getAllProductReviewStats(),
+      new Promise(res => setTimeout(() => res(null), 300))
+    ]);
+
     const [response, reviewStats] = await Promise.all([
       shopifyFetch({ query }),
-      getAllProductReviewStats()
+      reviewStatsPromise
     ]);
     
     if (!response.body || !response.body.data) {
       console.error("No data returned from Shopify", response);
-      return [];
+      const staleCache = getCachedProductsSync();
+      return staleCache || [];
     }
 
     // Map to our local schema
@@ -200,14 +247,32 @@ export async function getProducts() {
       };
     });
 
+    // Save to memory cache and sessionStorage for instant future renders
+    productsMemoryCache = products;
+    productsCacheTimestamp = Date.now();
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        sessionStorage.setItem('altooba_products_cache', JSON.stringify({
+          timestamp: Date.now(),
+          data: products
+        }));
+      }
+    } catch (e) {}
+
     return products;
   } catch (error) {
     console.error("Failed to fetch products:", error);
-    return [];
+    const staleCache = getCachedProductsSync();
+    return staleCache || [];
   }
 }
 
 export async function getProductBySlug(slug) {
+  // Fast path: check sync cache first
+  const syncCached = getCachedProductBySlugSync(slug);
+  if (syncCached) {
+    return syncCached;
+  }
   const query = `
     query getProduct($handle: String!) {
       product(handle: $handle) {
