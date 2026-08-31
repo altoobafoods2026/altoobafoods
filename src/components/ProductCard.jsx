@@ -76,9 +76,11 @@ export default function ProductCard({ product, index = 0 }) {
               <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-[#D4A24C]" viewBox="0 0 24 24">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
               </svg>
-              <span className="font-sans font-medium text-gray-500">{product.rating || '4.8'}</span>
-              <span className="text-gray-300 mx-0.5 hidden sm:inline">|</span>
-              <span className="font-sans text-gray-400 hidden sm:inline">{product.reviewCount || '38'}</span>
+              <span className="font-sans font-medium text-gray-500">{product.rating}</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-gray-50/50 group-hover:bg-gray-100 transition-colors">
+              <MessageSquare className="w-3 h-3 text-gray-400 group-hover:text-[#0D3B2A] transition-colors" />
+              <span className="font-sans text-gray-400 hidden sm:inline">{product.reviewCount}</span>
             </div>
           </div>
 
