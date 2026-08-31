@@ -92,42 +92,5 @@ function getTemplatesForProduct(productName) {
 }
 
 export function generateReviews(productId, productName) {
-  const seed = hashString(productId || productName || "default");
-  const templates = getTemplatesForProduct(productName);
-  
-  const reviews = [];
-  // Generate 85 to 110 deterministic verified reviews per product
-  const numReviews = 85 + (seed % 35);
-  
-  for (let i = 0; i < numReviews; i++) {
-    const nameIndex = (seed + i * 7) % indianReviewerNames.length;
-    const avatarIndex = (seed + i * 3) % avatars.length;
-    const templateIndex = (seed + i * 5) % templates.length;
-    
-    // Spread dates over the last 150 days
-    const daysAgo = Math.floor((i / numReviews) * 140) + ((seed + i) % 7) + 1;
-    const date = new Date();
-    date.setDate(date.getDate() - daysAgo);
-    
-    // 88% 5-star, 12% 4-star => Rating is strictly between 4.8 and 4.9 stars (Never below 4.5!)
-    const isFiveStar = (i % 8) !== 0;
-    const rating = isFiveStar ? 5 : 4;
-    
-    let text = templates[templateIndex].replace(/{product}/g, productName || "this product");
-    
-    reviews.push({
-      id: `gen-${productId}-${i}`,
-      productId: productId,
-      name: indianReviewerNames[nameIndex],
-      role: "Verified Buyer",
-      rating: rating,
-      text: text,
-      product: productName,
-      avatar: avatars[avatarIndex],
-      date: date.toISOString(),
-      isGenerated: true
-    });
-  }
-  
-  return reviews;
+  return [];
 }

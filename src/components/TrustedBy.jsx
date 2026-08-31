@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useToastStore } from '../store/toastStore';
 import { getReviews, submitReview } from '../services/judgeme';
-import { generateReviews } from '../utils/generateReviews';
 
 export default function TrustedBy({ productId, productName }) {
   const [showModal, setShowModal] = useState(false);
@@ -43,12 +42,8 @@ export default function TrustedBy({ productId, productName }) {
   }, [productId, productName]);
 
   const allReviews = useMemo(() => {
-    const generated = generateReviews(productId, productName);
-    if (hasFetched && judgeMeReviews.length > 0) {
-      return [...judgeMeReviews, ...generated];
-    }
-    return generated;
-  }, [productId, productName, judgeMeReviews, hasFetched]);
+    return judgeMeReviews;
+  }, [judgeMeReviews]);
 
   const handleNext = () => {
     if (allReviews.length === 0) return;
@@ -184,57 +179,63 @@ export default function TrustedBy({ productId, productName }) {
                 transition={{ duration: 0.4, ease: "easeInOut" }}
                 className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 items-stretch"
               >
-                {visibleReviews.map((review, index) => {
-                  const MAX_CHARS = 120;
-                  const isLong = review.text && review.text.length > MAX_CHARS;
-                  const isExpanded = !!expandedReviews[review.id];
-                  const displayedText = isLong && !isExpanded 
-                    ? review.text.slice(0, MAX_CHARS) + '...' 
-                    : review.text;
+                {visibleReviews.length === 0 ? (
+                  <div className="col-span-1 md:col-span-3 text-center py-10 bg-white rounded-3xl border border-[#D4A24C]/20 p-8 shadow-sm">
+                    <p className="text-gray-500 font-sans text-sm sm:text-base">No reviews yet. Be the first to share your experience!</p>
+                  </div>
+                ) : (
+                  visibleReviews.map((review, index) => {
+                    const MAX_CHARS = 120;
+                    const isLong = review.text && review.text.length > MAX_CHARS;
+                    const isExpanded = !!expandedReviews[review.id];
+                    const displayedText = isLong && !isExpanded 
+                      ? review.text.slice(0, MAX_CHARS) + '...' 
+                      : review.text;
 
-                  return (
-                    <div
-                      key={review.id}
-                      className={`bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-7 md:p-8 border border-[#D4A24C]/20 shadow-[0_6px_24px_rgba(13,59,42,0.05)] hover:shadow-xl hover:shadow-[#0D3B2A]/5 transition-all duration-300 flex flex-col justify-between min-w-0 min-h-[250px] sm:min-h-[270px] md:min-h-[280px] w-full overflow-hidden ${index === 0 ? 'flex' : 'hidden md:flex'}`}
-                    >
-                      <div>
-                        <div className="flex gap-1 mb-4 sm:mb-5">
-                          {[...Array(review.rating)].map((_, i) => (
-                            <svg key={i} className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-[#D4A24C] fill-current shrink-0" viewBox="0 0 24 24">
-                              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                            </svg>
-                          ))}
-                        </div>
-                        <div className="mb-6 sm:mb-7">
-                          <p className="text-[#0D3B2A]/85 font-sans text-sm sm:text-[15px] leading-relaxed break-words [overflow-wrap:anywhere] [word-break:break-word]">
-                            &quot;{displayedText}&quot;
-                          </p>
-                          {isLong && (
-                            <button
-                              type="button"
-                              onClick={() => toggleExpand(review.id)}
-                              className="mt-2 text-xs font-sans font-bold text-[#D4A24C] hover:text-[#0D3B2A] hover:underline transition-colors cursor-pointer block"
-                            >
-                              {isExpanded ? 'See Less' : 'See More'}
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      <div className="mt-auto border-t border-[#0D3B2A]/10 pt-4 sm:pt-5 flex items-center justify-between gap-3 min-w-0">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <img src={review.avatar} alt={review.name} className="w-10 h-10 rounded-full object-cover border border-[#0D3B2A]/10 shrink-0" />
-                          <div className="min-w-0">
-                            <h4 className="font-sans font-bold text-[#0D3B2A] text-sm sm:text-base leading-tight truncate">{review.name}</h4>
-                            <span className="text-[10px] font-sans uppercase tracking-widest text-gray-500 block truncate">{review.role}</span>
+                    return (
+                      <div
+                        key={review.id}
+                        className={`bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-7 md:p-8 border border-[#D4A24C]/20 shadow-[0_6px_24px_rgba(13,59,42,0.05)] hover:shadow-xl hover:shadow-[#0D3B2A]/5 transition-all duration-300 flex flex-col justify-between min-w-0 min-h-[250px] sm:min-h-[270px] md:min-h-[280px] w-full overflow-hidden ${index === 0 ? 'flex' : 'hidden md:flex'}`}
+                      >
+                        <div>
+                          <div className="flex gap-1 mb-4 sm:mb-5">
+                            {[...Array(review.rating)].map((_, i) => (
+                              <svg key={i} className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-[#D4A24C] fill-current shrink-0" viewBox="0 0 24 24">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                              </svg>
+                            ))}
+                          </div>
+                          <div className="mb-6 sm:mb-7">
+                            <p className="text-[#0D3B2A]/85 font-sans text-sm sm:text-[15px] leading-relaxed break-words [overflow-wrap:anywhere] [word-break:break-word]">
+                              &quot;{displayedText}&quot;
+                            </p>
+                            {isLong && (
+                              <button
+                                type="button"
+                                onClick={() => toggleExpand(review.id)}
+                                className="mt-2 text-xs font-sans font-bold text-[#D4A24C] hover:text-[#0D3B2A] hover:underline transition-colors cursor-pointer block"
+                              >
+                                {isExpanded ? 'See Less' : 'See More'}
+                              </button>
+                            )}
                           </div>
                         </div>
-                        <span className="text-[8px] sm:text-[9px] font-sans font-bold uppercase tracking-widest bg-[#0D3B2A] text-[#FAF7F2] px-2.5 py-1 rounded-full text-center max-w-[120px] truncate leading-tight shrink-0">
-                          {review.product}
-                        </span>
+                        <div className="mt-auto border-t border-[#0D3B2A]/10 pt-4 sm:pt-5 flex items-center justify-between gap-3 min-w-0">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <img src={review.avatar} alt={review.name} className="w-10 h-10 rounded-full object-cover border border-[#0D3B2A]/10 shrink-0" />
+                            <div className="min-w-0">
+                              <h4 className="font-sans font-bold text-[#0D3B2A] text-sm sm:text-base leading-tight truncate">{review.name}</h4>
+                              <span className="text-[10px] font-sans uppercase tracking-widest text-gray-500 block truncate">{review.role}</span>
+                            </div>
+                          </div>
+                          <span className="text-[8px] sm:text-[9px] font-sans font-bold uppercase tracking-widest bg-[#0D3B2A] text-[#FAF7F2] px-2.5 py-1 rounded-full text-center max-w-[120px] truncate leading-tight shrink-0">
+                            {review.product}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </motion.div>
             </AnimatePresence>
           </div>
