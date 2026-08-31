@@ -189,15 +189,12 @@ export async function getProducts(forceRefresh = false) {
       const finalCategory = overrides[node.handle] || matchedCategory;
       const collectionHandles = node.collections?.edges.map(e => e.node.handle) || [];
 
-      // Real Judge.me review stats with 80+ baseline guarantee (Rating strictly 4.5 - 5.0)
+      // Real Judge.me review stats
       const rawId = node.id ? node.id.split('/').pop() : '';
       const stat = (reviewStats && (reviewStats[node.handle] || reviewStats[rawId])) || null;
-      const seedNum = (rawId ? parseInt(rawId.slice(-4)) : 100) || 100;
-      const baselineCount = 85 + (seedNum % 45); // 85 to 129 reviews
-      const baselineRating = +(4.7 + ((seedNum % 3) * 0.1)).toFixed(1); // 4.7, 4.8, or 4.9 stars
       
-      const realReviewCount = stat && stat.count >= 80 ? stat.count : baselineCount;
-      const realRating = stat && stat.rating >= 4.5 ? stat.rating : baselineRating;
+      const realReviewCount = stat ? stat.count : 0;
+      const realRating = stat ? stat.rating : 0;
 
       // Extract description images from descriptionHtml
       const descImagesMatches = [...(node.descriptionHtml || '').matchAll(/<img[^>]+src=["']([^"']+)["']/g)];
@@ -370,12 +367,9 @@ export async function getProductBySlug(slug) {
   const reviewStats = await getAllProductReviewStats();
   const rawId = node.id ? node.id.split('/').pop() : '';
   const stat = (reviewStats && (reviewStats[node.handle] || reviewStats[rawId])) || null;
-  const seedNum = (rawId ? parseInt(rawId.slice(-4)) : 100) || 100;
-  const baselineCount = 85 + (seedNum % 45); // 85 to 129 reviews
-  const baselineRating = +(4.7 + ((seedNum % 3) * 0.1)).toFixed(1); // 4.7, 4.8, or 4.9 stars
   
-  const realReviewCount = stat && stat.count >= 80 ? stat.count : baselineCount;
-  const realRating = stat && stat.rating >= 4.5 ? stat.rating : baselineRating;
+  const realReviewCount = stat ? stat.count : 0;
+  const realRating = stat ? stat.rating : 0;
 
   return {
     id: node.id,
