@@ -29,14 +29,19 @@ const nonMuslimNames = [
   "Priya Deshmukh", "Vikas Nair", "Swati Chawla", "Karan Agarwal", "Divya Pillai"
 ];
 
+// Words that should NEVER appear in Non-Muslim reviews
+const islamicTerms = ['sunnah', 'allah', 'mashaallah', 'prophetic', 'tibb', 'nabawi', 'abba', 'quran'];
+
 // 50% Conversational Hindi/Hinglish Reviews Categorized
 const hindiReviewTemplates = {
   talbina: [
-    "MashaAllah roz subah garam doodh aur shehed ke saath leta hoon, din bhar bohot energetic feel hota hai.",
+    "Roz subah garam doodh aur shehed ke saath leta hoon, din bhar bohot energetic feel hota hai.",
     "Ekdam pure Barley Talbina hai. Koi milawat ya artificial chini nahi hai. Bohot lajawab taste hai.",
     "Ghar mein sabhi log use kar rahe hain, pet aur hazme ke liye bohot faydedar hai.",
-    "Sunnah diet ka best part hai. Taste bhi badiya hai aur quality bhi number 1.",
-    "Roz lene se susti aur weakness ekdam khatam ho gayi. Bahut hi badiya product hai."
+    "Traditional superfood hai. Taste bhi badiya hai aur quality bhi number 1.",
+    "Roz lene se susti aur weakness ekdam khatam ho gayi. Bahut hi badiya product hai.",
+    "MashaAllah roz subah garam doodh aur shehed ke saath leta hoon, din bhar bohot energetic feel hota hai.", // For Muslim reviewers
+    "Sunnah diet ka best part hai. Taste bhi badiya hai aur quality bhi number 1." // For Muslim reviewers
   ],
   hair: [
     "3 hafte use karne ke baad baal jhadna 90% kam ho gaya hai. Baal kafi ghane aur soft lagne lage hain.",
@@ -60,13 +65,13 @@ const hindiReviewTemplates = {
   wellness: [
     "15 din use karne ke baad body ka stamina aur active feeling bohot badh gayi hai.",
     "Natural herbs ka pure combination hai. Physical weakness door karne ke liye best formulation hai.",
-    "Authentic prophetic herbs hain. Pehle se kafi behtar lag raha hai daily energy level.",
+    "Natural health supplement hai. Pehle se kafi behtar lag raha hai daily energy level.",
     "Ghar ke elders ke liye mangwaya tha, unki health aur weakness mein bohot fayda mila."
   ],
   general: [
     "Bahut hi badiya product hai, packaging bhi 10/10 thi aur delivery 3 din mein ho gayi.",
     "Aam bolchal mein kahun toh lajawab product hai. Rozana ki routine mein shamil kar liya hai.",
-    "Mene apne abba ke liye mangwaya tha, unhe kafi aaram mila hai. Very satisfied!",
+    "Mene apne family ke liye mangwaya tha, unhe kafi aaram mila hai. Very satisfied!",
     "Shuru mein thoda doubt tha par use karne ke baad sach mein pureness feel hui. Shukriya!",
     "Product ki packing aur bottle ki quality bohot premium hai. Result bhi 1 hafte mein dikha."
   ]
@@ -75,11 +80,12 @@ const hindiReviewTemplates = {
 // English Review Templates per category
 const englishReviewTemplates = {
   talbina: [
-    "Having this Talbina every morning with warm milk and honey. Kept me energetic and light throughout the day.",
-    "Sunnah superfood at its purest. Finely ground, fresh aroma, and wholesome taste.",
+    "Having this Barley Talbina every morning with warm milk and honey. Kept me energetic and light throughout the day.",
+    "Organic superfood at its purest. Finely ground, fresh aroma, and wholesome taste.",
     "My whole family loves this. Great nutritional support for bones, gut health, and general weakness.",
     "Authentic Barley Talbina with zero artificial sugar or preservatives. Pure traditional nourishment.",
-    "Extremely gentle on stomach and boosts daily stamina noticeably. 5 stars!"
+    "Extremely gentle on stomach and boosts daily stamina noticeably. 5 stars!",
+    "Authentic Sunnah superfood at its purest. Finely ground, fresh aroma, and wholesome taste." // For Muslim reviewers
   ],
   hair: [
     "After using for 3 weeks, my hair fall stopped almost completely. Hair feels much thicker and healthier!",
@@ -112,8 +118,8 @@ const englishReviewTemplates = {
     "It's exactly what I was looking for. Will definitely reorder soon.",
     "Completely transformed my daily wellness experience. Excellent quality and fast shipping.",
     "Al-Tooba's purity is unmatched. Beautiful packaging and top-tier product quality.",
-    "May Allah bless the team for providing authentic prophetic remedies.",
-    "Genuine formulation with no artificial fillers. Exceeded all my expectations."
+    "Genuine formulation with no artificial fillers. Exceeded all my expectations.",
+    "May Allah bless the team for providing authentic remedies." // For Muslim reviewers
   ]
 };
 
@@ -121,7 +127,7 @@ function getRandomElement(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function getReviewTemplate(productTitle, isHindi) {
+function getReviewTemplate(productTitle, isHindi, isMuslim) {
   const title = productTitle.toLowerCase();
   let categoryKey = 'general';
   
@@ -134,7 +140,17 @@ function getReviewTemplate(productTitle, isHindi) {
   }
 
   const pool = isHindi ? hindiReviewTemplates[categoryKey] : englishReviewTemplates[categoryKey];
-  return getRandomElement(pool);
+  
+  // Filter pool for Non-Muslim reviewers to make 100% SURE no Islamic/Prophetic words are present
+  let validPool = pool;
+  if (!isMuslim) {
+    validPool = pool.filter(text => {
+      const lower = text.toLowerCase();
+      return !islamicTerms.some(term => lower.includes(term));
+    });
+  }
+
+  return getRandomElement(validPool.length > 0 ? validPool : pool);
 }
 
 async function main() {
@@ -170,7 +186,7 @@ async function main() {
       
       // Exactly 50% Hindi/Hinglish reviews
       const isHindi = i % 2 === 0; // Alternates for exact 50% split per product!
-      const body = getReviewTemplate(prod.title, isHindi);
+      const body = getReviewTemplate(prod.title, isHindi, isMuslim);
       
       const title = isHindi ? "Bahut Badiya Product" : (body.split('.')[0] || "Great Quality");
       
@@ -197,7 +213,7 @@ async function main() {
   // Save CSV file
   const csvPath = path.join(process.cwd(), 'judge_me_reviews_bulk.csv');
   fs.writeFileSync(csvPath, csvLines.join('\n'), 'utf8');
-  console.log(`Saved ${totalReviews} reviews (50% Hindi, 50% English) to ${csvPath}`);
+  console.log(`Saved ${totalReviews} clean reviews to ${csvPath}`);
 }
 
 main().catch(console.error);
