@@ -236,10 +236,10 @@ async function main() {
       // Ratings: 88% 5-star, 12% 4-star => Always between 4.6 and 5.0 stars!
       const rating = Math.random() < 0.88 ? 5 : 4;
 
-      // Random date in last 150 days
+      // Random date in last 150 days formatted as YYYY-MM-DD
       const daysAgo = Math.floor(Math.random() * 150) + 1;
       const dateObj = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
-      const reviewDate = dateObj.toISOString().split('T')[0] + " 12:00:00 +0000";
+      const reviewDate = dateObj.toISOString().split('T')[0]; // Simple YYYY-MM-DD format!
 
       const emailName = name.toLowerCase().replace(/[^a-z0-9]/g, '');
       const email = `${emailName}${Math.floor(Math.random()*900 + 100)}@gmail.com`;
@@ -267,7 +267,7 @@ async function main() {
     fs.writeFileSync(downloadsPath, csvLines.join('\n'), 'utf8');
   } catch(e) {}
 
-  console.log(`SUCCESS! Generated ${totalReviews} total reviews (~25 per product) and saved to Desktop & Downloads!`);
+  console.log(`SUCCESS! Generated ${totalReviews} total reviews with clean YYYY-MM-DD dates!`);
 }
 
 main().catch(console.error);
