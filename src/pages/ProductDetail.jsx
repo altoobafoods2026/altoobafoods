@@ -346,7 +346,7 @@ export default function ProductDetail() {
             </button>
 
             {/* Quantity and Action Row */}
-            <div className="flex flex-col gap-3.5 mb-6">
+            <div className="flex flex-col gap-3.5 mb-5">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                 <div className="flex items-center gap-4 shrink-0">
                   <span className="text-[11px] font-bold tracking-widest text-gray-900 uppercase">QUANTITY:</span>
