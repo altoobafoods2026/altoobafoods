@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { getCarouselMetaobjectImages } from '../services/shopify';
+import { getCarouselMetaobjectData } from '../services/shopify';
 
-export default function About3DCarousel({ products = [] }) {
+export default function About3DCarousel() {
   const navigate = useNavigate();
-  const [metaImages, setMetaImages] = useState([]);
+  const [slides, setSlides] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
-    getCarouselMetaobjectImages().then((imgs) => {
-      if (isMounted && imgs && imgs.length > 0) {
-        setMetaImages(imgs);
+    getCarouselMetaobjectData().then((data) => {
+      if (isMounted && data && data.length > 0) {
+        setSlides(data);
       }
     });
     return () => { isMounted = false; };
   }, []);
 
-  const displayImages = metaImages;
+  const displayImages = slides.map(s => s.image);
 
   // Fast product rotation cycle (2.0s)
   useEffect(() => {
@@ -30,8 +30,14 @@ export default function About3DCarousel({ products = [] }) {
   }, [displayImages.length]);
 
   const handleProductClick = () => {
-    window.scrollTo(0, 0);
-    navigate('/studio');
+    const activeSlide = slides[currentIndex];
+    if (activeSlide && activeSlide.slug) {
+      window.scrollTo(0, 0);
+      navigate(`/product/${activeSlide.slug}`);
+    } else {
+      window.scrollTo(0, 0);
+      navigate('/studio');
+    }
   };
 
   return (

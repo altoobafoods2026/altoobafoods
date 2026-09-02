@@ -655,7 +655,7 @@ export const getHeroVideo = async () => {
 let carouselMetaobjectCache = null;
 let carouselMetaobjectPromise = null;
 
-export const getCarouselMetaobjectImages = async () => {
+export const getCarouselMetaobjectData = async () => {
   if (carouselMetaobjectCache) return carouselMetaobjectCache;
   if (carouselMetaobjectPromise) return carouselMetaobjectPromise;
 
@@ -678,6 +678,11 @@ export const getCarouselMetaobjectImages = async () => {
                           url
                         }
                       }
+                      ... on Product {
+                        id
+                        handle
+                        title
+                      }
                     }
                   }
                 }
@@ -694,14 +699,22 @@ export const getCarouselMetaobjectImages = async () => {
       if (edges.length > 0) {
         const fields = edges[0].node.fields || [];
         const imagesField = fields.find(f => f.key === 'images');
-        const refEdges = imagesField?.references?.edges || [];
-        const imageUrls = refEdges
-          .map(e => e.node?.image?.url)
-          .filter(Boolean);
+        const productsField = fields.find(f => f.key === 'products');
 
-        if (imageUrls.length > 0) {
-          carouselMetaobjectCache = imageUrls;
-          return imageUrls;
+        const imageEdges = imagesField?.references?.edges || [];
+        const productEdges = productsField?.references?.edges || [];
+
+        const imageUrls = imageEdges.map(e => e.node?.image?.url).filter(Boolean);
+        const productHandles = productEdges.map(e => e.node?.handle).filter(Boolean);
+
+        const slides = imageUrls.map((url, index) => ({
+          image: url,
+          slug: productHandles[index] || '',
+        }));
+
+        if (slides.length > 0) {
+          carouselMetaobjectCache = slides;
+          return slides;
         }
       }
       return [];
@@ -712,5 +725,10 @@ export const getCarouselMetaobjectImages = async () => {
   })();
 
   return carouselMetaobjectPromise;
+};
+
+export const getCarouselMetaobjectImages = async () => {
+  const data = await getCarouselMetaobjectData();
+  return data.map(item => item.image);
 };
 
