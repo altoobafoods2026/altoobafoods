@@ -509,27 +509,28 @@ export const getCollectionVideos = async (handle) => {
 let heroVideoCache = null;
 let heroVideoPromise = null;
 
-export const getHeroVideo = async (handle = 'hero_section-video') => {
+export const getHeroVideo = async () => {
   if (heroVideoCache) return heroVideoCache;
   if (heroVideoPromise) return heroVideoPromise;
 
   heroVideoPromise = (async () => {
     const query = `
-      query getHeroVideo($handle: String!) {
-        product(handle: $handle) {
-          id
-          title
-          handle
-          media(first: 5) {
-            edges {
-              node {
-                mediaContentType
-                ... on Video {
-                  id
-                  sources {
-                    url
-                    format
-                    mimeType
+      query getHeroVideoMetaobject {
+        metaobjects(type: "hero_video", first: 1) {
+          edges {
+            node {
+              id
+              type
+              handle
+              fields {
+                key
+                reference {
+                  ... on Video {
+                    sources {
+                      url
+                      format
+                      mimeType
+                    }
                   }
                 }
               }
@@ -540,45 +541,29 @@ export const getHeroVideo = async (handle = 'hero_section-video') => {
     `;
 
     try {
-      const endpoint = `https://${domain}/api/2024-01/graphql.json`;
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Shopify-Storefront-Access-Token': storefrontAccessToken,
-        },
-        body: JSON.stringify({ query, variables: { handle } }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Shopify API error: ${response.status}`);
-      }
-
-      const { data } = await response.json();
-      const mediaEdges = data?.product?.media?.edges || [];
-      const videoNode = mediaEdges.find(e => e.node.mediaContentType === 'VIDEO');
-      const sources = videoNode?.node?.sources || [];
-
-      if (sources.length > 0) {
+      const response = await shopifyFetch({ query });
+      const edges = response?.body?.data?.metaobjects?.edges || [];
+      if (edges.length > 0) {
+        const fields = edges[0].node.fields || [];
+        const videoField = fields.find(f => f.key === 'desktop_video');
+        const sources = videoField?.reference?.sources || [];
         const mp4Sources = sources.filter(s => s.format === 'mp4');
+
         if (mp4Sources.length > 0) {
           const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
           let preferred;
           if (isMobile) {
-            // On mobile devices, 720p/480p decodes instantly at 60fps with zero frame drops
             preferred = mp4Sources.find(s => s.url.includes('720p')) || mp4Sources.find(s => s.url.includes('480p')) || mp4Sources[0];
           } else {
-            // On desktop, 1080p provides maximum crisp fidelity
             preferred = mp4Sources.find(s => s.url.includes('1080p')) || mp4Sources.find(s => s.url.includes('720p')) || mp4Sources[0];
           }
           heroVideoCache = preferred.url;
           return preferred.url;
         }
       }
-
       return '/Islamic_Altooba_.mp4';
     } catch (err) {
-      console.error('Error fetching hero video from Shopify:', err);
+      console.error('Error fetching hero video Metaobject:', err);
       return '/Islamic_Altooba_.mp4';
     }
   })();

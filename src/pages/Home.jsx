@@ -33,7 +33,7 @@ export default function Home() {
       try {
         const [fetchedProducts, fetchedHeroVideo] = await Promise.all([
           getProducts(),
-          getHeroVideo('hero_section-video')
+          getHeroVideo()
         ]);
         if (isMounted) {
           setProducts(fetchedProducts);
