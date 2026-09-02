@@ -27,22 +27,12 @@ export default function ProductDetail() {
   const showToast = useToastStore((state) => state.showToast);
 
   useEffect(() => {
-    let isMounted = true;
     async function loadProduct() {
-      const cached = getCachedProductBySlugSync(slug);
-      if (cached) {
-        setProduct(cached);
-        setSelectedVariant(cached.variants?.[0] || null);
-        setIsLoading(false);
-      } else {
-        setProduct(null);
-        setSelectedVariant(null);
+      if (!product) {
         setIsLoading(true);
       }
-
       try {
         const fetchedProduct = await getProductBySlug(slug);
-        if (!isMounted) return;
         if (!fetchedProduct) {
           navigate('/studio');
           return;
@@ -56,7 +46,6 @@ export default function ProductDetail() {
         setActiveImage(0);
         setQuantity(1);
         setShowFullDesc(false);
-        setIsLoading(false);
         
         // Force scroll to top after DOM update
         setTimeout(() => {
@@ -65,13 +54,10 @@ export default function ProductDetail() {
 
         // Load related products
         const allProducts = await getProducts();
-        if (!isMounted) return;
-        const related = (allProducts || [])
+        const related = allProducts
           .filter(p => 
-            p && p.category && fetchedProduct.category &&
             p.category === fetchedProduct.category && 
             p.id !== fetchedProduct.id &&
-            p.name &&
             !p.name.toLowerCase().includes('al-rayhan') &&
             !p.name.toLowerCase().includes('tulsi')
           )
@@ -80,11 +66,10 @@ export default function ProductDetail() {
       } catch (error) {
         console.error("Failed to load product:", error);
       } finally {
-        if (isMounted) setIsLoading(false);
+        setIsLoading(false);
       }
     }
     loadProduct();
-    return () => { isMounted = false; };
   }, [slug, navigate]);
 
   if (isLoading) {
@@ -97,14 +82,14 @@ export default function ProductDetail() {
 
   if (!product) return null;
 
-  const currentPrice = selectedVariant ? selectedVariant.price : (product.price || 0);
-  const mrpPrice = selectedVariant ? (selectedVariant.mrp || selectedVariant.price * 1.25) : (product.mrp || (product.price || 0) * 1.25);
+  const currentPrice = selectedVariant ? selectedVariant.price : product.price;
+  const mrpPrice = selectedVariant ? (selectedVariant.mrp || selectedVariant.price * 1.25) : (product.mrp || product.price * 1.25);
   const discountPercent = selectedVariant && selectedVariant.discount !== undefined
     ? selectedVariant.discount
     : Math.round(((mrpPrice - currentPrice) / (mrpPrice || 1)) * 100);
 
   // Ensure maximum 5 images for the gallery without duplication
-  const finalImages = (product.images || []).slice(0, 5);
+  const finalImages = product.images.slice(0, 5);
 
   const handleAddToCart = () => {
     if (!product.inStock) {
@@ -116,6 +101,18 @@ export default function ProductDetail() {
     }
     const variantSuffix = selectedVariant && selectedVariant.title !== 'Default Title' ? ` (${selectedVariant.title})` : '';
     showToast(`Added ${quantity}x ${product.name}${variantSuffix} to cart`);
+  };
+
+  const handleBuyNow = () => {
+    if (!product.inStock) {
+      showToast('Product is out of stock', 'error');
+      return;
+    }
+    for (let i = 0; i < quantity; i++) {
+      addItem(product, selectedVariant?.title || null);
+    }
+    window.scrollTo(0, 0);
+    navigate('/checkout');
   };
 
   const handleMouseMove = (e) => {
@@ -349,39 +346,54 @@ export default function ProductDetail() {
             </button>
 
             {/* Quantity and Action Row */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-6">
-              <div className="flex items-center gap-4 shrink-0">
-                <span className="text-[11px] font-bold tracking-widest text-gray-900 uppercase">QUANTITY:</span>
-                <div className="flex items-center justify-between border border-gray-300 rounded-full px-4 py-1.5 bg-white min-w-[100px]">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="text-gray-500 hover:text-black font-bold focus:outline-none w-6 h-6 flex items-center justify-center text-lg"
-                  >
-                    -
-                  </button>
-                  <span className="font-sans font-bold text-black px-2 text-sm">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="text-gray-500 hover:text-black font-bold focus:outline-none w-6 h-6 flex items-center justify-center text-lg"
-                  >
-                    +
-                  </button>
+            <div className="flex flex-col gap-3.5 mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <div className="flex items-center gap-4 shrink-0">
+                  <span className="text-[11px] font-bold tracking-widest text-gray-900 uppercase">QUANTITY:</span>
+                  <div className="flex items-center justify-between border border-gray-300 rounded-full px-4 py-1.5 bg-white min-w-[100px]">
+                    <button
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="text-gray-500 hover:text-black font-bold focus:outline-none w-6 h-6 flex items-center justify-center text-lg cursor-pointer"
+                    >
+                      -
+                    </button>
+                    <span className="font-sans font-bold text-black px-2 text-sm">{quantity}</span>
+                    <button
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="text-gray-500 hover:text-black font-bold focus:outline-none w-6 h-6 flex items-center justify-center text-lg cursor-pointer"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
+
+                {/* Add to Cart Button */}
+                <button
+                  onClick={handleAddToCart}
+                  disabled={!product.inStock}
+                  className="w-full sm:flex-1 bg-white text-[#153423] border-2 border-[#153423] hover:bg-[#153423] hover:text-white transition-all duration-300 py-3.5 rounded-[14px] font-sans font-bold text-[12px] uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed shadow-sm cursor-pointer flex items-center justify-center gap-2"
+                >
+                  {product.inStock ? 'Add to Cart' : 'Out of Stock'}
+                  {product.inStock && (
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                      <line x1="3" y1="6" x2="21" y2="6"></line>
+                      <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                  )}
+                </button>
               </div>
 
+              {/* Instant Checkout / Buy Now Button */}
               <button
-                onClick={handleAddToCart}
+                onClick={handleBuyNow}
                 disabled={!product.inStock}
-                className="w-full sm:flex-1 bg-[#153423] text-white hover:bg-[#F7EFE0] hover:text-[#153423] transition-colors py-3.5 rounded-[14px] font-sans font-bold text-[12px] uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed shadow-md cursor-pointer flex items-center justify-center gap-2"
+                className="w-full bg-[#153423] hover:bg-[#1f4a33] text-[#FAF7F2] transition-all duration-300 py-4 rounded-[14px] font-sans font-bold text-[13px] uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_16px_rgba(21,52,35,0.2)] hover:shadow-lg hover:scale-[1.008] active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2.5"
               >
-                {product.inStock ? 'Add to Cart' : 'Out of Stock'}
-                {product.inStock && (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                  </svg>
-                )}
+                <span>Proceed to Checkout</span>
+                <svg className="w-4 h-4 text-[#D4A24C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
               </button>
             </div>
 
