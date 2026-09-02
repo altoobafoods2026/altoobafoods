@@ -27,12 +27,22 @@ export default function ProductDetail() {
   const showToast = useToastStore((state) => state.showToast);
 
   useEffect(() => {
+    let isMounted = true;
     async function loadProduct() {
-      if (!product) {
+      const cached = getCachedProductBySlugSync(slug);
+      if (cached) {
+        setProduct(cached);
+        setSelectedVariant(cached.variants?.[0] || null);
+        setIsLoading(false);
+      } else {
+        setProduct(null);
+        setSelectedVariant(null);
         setIsLoading(true);
       }
+
       try {
         const fetchedProduct = await getProductBySlug(slug);
+        if (!isMounted) return;
         if (!fetchedProduct) {
           navigate('/studio');
           return;
@@ -46,6 +56,7 @@ export default function ProductDetail() {
         setActiveImage(0);
         setQuantity(1);
         setShowFullDesc(false);
+        setIsLoading(false);
         
         // Force scroll to top after DOM update
         setTimeout(() => {
@@ -54,10 +65,13 @@ export default function ProductDetail() {
 
         // Load related products
         const allProducts = await getProducts();
-        const related = allProducts
+        if (!isMounted) return;
+        const related = (allProducts || [])
           .filter(p => 
+            p && p.category && fetchedProduct.category &&
             p.category === fetchedProduct.category && 
             p.id !== fetchedProduct.id &&
+            p.name &&
             !p.name.toLowerCase().includes('al-rayhan') &&
             !p.name.toLowerCase().includes('tulsi')
           )
@@ -66,10 +80,11 @@ export default function ProductDetail() {
       } catch (error) {
         console.error("Failed to load product:", error);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     }
     loadProduct();
+    return () => { isMounted = false; };
   }, [slug, navigate]);
 
   if (isLoading) {
@@ -82,14 +97,14 @@ export default function ProductDetail() {
 
   if (!product) return null;
 
-  const currentPrice = selectedVariant ? selectedVariant.price : product.price;
-  const mrpPrice = selectedVariant ? (selectedVariant.mrp || selectedVariant.price * 1.25) : (product.mrp || product.price * 1.25);
+  const currentPrice = selectedVariant ? selectedVariant.price : (product.price || 0);
+  const mrpPrice = selectedVariant ? (selectedVariant.mrp || selectedVariant.price * 1.25) : (product.mrp || (product.price || 0) * 1.25);
   const discountPercent = selectedVariant && selectedVariant.discount !== undefined
     ? selectedVariant.discount
     : Math.round(((mrpPrice - currentPrice) / (mrpPrice || 1)) * 100);
 
   // Ensure maximum 5 images for the gallery without duplication
-  const finalImages = product.images.slice(0, 5);
+  const finalImages = (product.images || []).slice(0, 5);
 
   const handleAddToCart = () => {
     if (!product.inStock) {

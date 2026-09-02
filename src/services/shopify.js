@@ -1,4 +1,4 @@
-import { getAllProductReviewStats } from './judgeme';
+import { getAllProductReviewStats } from './judgeme.js';
 
 const domain = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN;
 const storefrontAccessToken = import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN;
@@ -384,7 +384,7 @@ export async function getProductBySlug(slug) {
     descriptionImages: node.images.edges.map(img => img.node.url), // Using same images as fallback
     description: node.description,
     descriptionHtml: node.descriptionHtml,
-    shortDesc: node.description.substring(0, 100) + '...',
+    shortDesc: node.description ? (node.description.substring(0, 100) + '...') : '',
     ingredients: "Natural Ingredients",
     benefits: "Good for health",
     howToUse: "Use as directed.",
