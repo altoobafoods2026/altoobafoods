@@ -17,7 +17,10 @@ gsap.registerPlugin(ScrollTrigger);
 export default function Home() {
   const [products, setProducts] = useState(() => getCachedProductsSync() || []);
   const [heroVideoUrl, setHeroVideoUrl] = useState('/Islamic_Altooba_.mp4');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => {
+    const cached = getCachedProductsSync();
+    return !(cached && cached.length > 0);
+  });
 
   const containerRef = useRef(null);
   const headlineRef = useRef(null);
@@ -27,7 +30,7 @@ export default function Home() {
   useEffect(() => {
     let isMounted = true;
     const startTime = Date.now();
-    const MIN_SPLASH_TIME = 800; // 0.8s smooth cinematic brand intro
+    const MIN_SPLASH_TIME = 200; // Ultra-fast non-blocking FCP
 
     async function loadData() {
       try {
@@ -55,10 +58,10 @@ export default function Home() {
     }
     loadData();
 
-    // Fallback safeguard: Never hold splash screen for more than 1.8s
+    // Fallback safeguard: Never hold splash screen for more than 600ms
     const fallbackTimer = setTimeout(() => {
       if (isMounted) setIsLoading(false);
-    }, 1800);
+    }, 600);
 
     return () => {
       isMounted = false;

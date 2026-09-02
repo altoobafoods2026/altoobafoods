@@ -37,19 +37,6 @@ export default function NoorCategories({ products = [] }) {
     }
   }, [categories.length]);
 
-  // Preload and decode all category images into browser cache immediately so swiping has 0 blank flash
-  useEffect(() => {
-    categories.forEach(cat => {
-      if (cat.bg) {
-        const img = new Image();
-        img.src = cat.bg;
-        if (img.decode) {
-          img.decode().catch(() => {});
-        }
-      }
-    });
-  }, [categories.length]);
-
   const scroll = (direction) => {
     if (scrollContainerRef.current) {
       const scrollAmount = direction === 'left' ? -220 : 220;
@@ -151,8 +138,7 @@ export default function NoorCategories({ products = [] }) {
                     <img 
                       src={cat.bg} 
                       alt={cat.name}
-                      loading="eager"
-                      fetchPriority="high"
+                      loading="lazy"
                       decoding="async"
                       className="w-[100%] h-[85%] object-contain object-bottom group-hover:scale-110 transition-transform duration-[1.5s] ease-out opacity-100 drop-shadow-[0_12px_12px_rgba(0,0,0,0.14)] pb-7 sm:pb-8"
                     />

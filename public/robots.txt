@@ -1,5 +1,5 @@
 # Robots.txt for Al-Tooba Prophetic Remedies
-# https://altoobafoods.com
+# https://www.altoobafoods.com
 
 User-agent: *
 Allow: /
@@ -23,4 +23,4 @@ Disallow: /login
 Disallow: /wishlist
 
 # Sitemap
-Sitemap: https://altoobafoods.com/sitemap.xml
+Sitemap: https://www.altoobafoods.com/sitemap.xml

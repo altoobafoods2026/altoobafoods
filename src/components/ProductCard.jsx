@@ -45,6 +45,7 @@ export default function ProductCard({ product, index = 0 }) {
             src={product.cardImage || product.images[0]} 
             alt={product.name} 
             loading="lazy"
+            decoding="async"
             className={`w-full h-full object-contain p-2 sm:p-3 transition-all duration-500 ease-out group-hover/img:scale-110 ${hoverImage ? 'group-hover/img:opacity-0' : ''}`}
           />
           {hoverImage && (
@@ -52,6 +53,7 @@ export default function ProductCard({ product, index = 0 }) {
               src={hoverImage} 
               alt={product.name} 
               loading="lazy"
+              decoding="async"
               className="absolute inset-0 w-full h-full object-contain p-2 sm:p-3 transition-all duration-500 ease-out opacity-0 group-hover/img:opacity-100 group-hover/img:scale-110 pointer-events-none"
             />
           )}

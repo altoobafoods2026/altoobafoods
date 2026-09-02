@@ -3,14 +3,15 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Toast from './components/Toast';
-import TestimonialSection from './components/TestimonialSection';
-import InstagramReels from './components/InstagramReels';
 import ScrollToTop from './components/ScrollToTop';
-import CraftedWithCare from './components/CraftedWithCare';
 
 import Home from './pages/Home';
 
-// Lazy load remaining secondary page components
+// Lazy load secondary page components & below-the-fold global sections
+const TestimonialSection = lazy(() => import('./components/TestimonialSection'));
+const InstagramReels = lazy(() => import('./components/InstagramReels'));
+const CraftedWithCare = lazy(() => import('./components/CraftedWithCare'));
+
 const Studio = lazy(() => import('./pages/Studio'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
 const Booking = lazy(() => import('./pages/Booking'));
@@ -51,11 +52,11 @@ const GlobalSections = () => {
   }
   
   return (
-    <>
+    <Suspense fallback={null}>
       <TestimonialSection />
       <InstagramReels />
       <CraftedWithCare />
-    </>
+    </Suspense>
   );
 };
 
