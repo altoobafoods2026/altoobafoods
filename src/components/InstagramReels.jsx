@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { getCollectionVideos } from '../services/shopify';
+import { getInstagramReelMetaobjectVideos } from '../services/shopify';
 
 export default function InstagramReels() {
   const [currentIndex, setCurrentIndex] = useState(2);
@@ -50,7 +50,7 @@ export default function InstagramReels() {
 
   useEffect(() => {
     const fetchVideos = async () => {
-      const videos = await getCollectionVideos('videos_instagram');
+      const videos = await getInstagramReelMetaobjectVideos();
       setShorts(videos);
       if (videos.length > 0) {
         // Set the center video based on how many we got

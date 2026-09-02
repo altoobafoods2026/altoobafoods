@@ -506,6 +506,87 @@ export const getCollectionVideos = async (handle) => {
   return videosPromise[handle];
 };
 
+let reelsMetaobjectCache = null;
+let reelsMetaobjectPromise = null;
+
+export const getInstagramReelMetaobjectVideos = async () => {
+  if (reelsMetaobjectCache) return reelsMetaobjectCache;
+  if (reelsMetaobjectPromise) return reelsMetaobjectPromise;
+
+  reelsMetaobjectPromise = (async () => {
+    const query = `
+      query getInstaReelsMetaobject {
+        metaobjects(type: "insta_reels", first: 1) {
+          edges {
+            node {
+              id
+              type
+              handle
+              fields {
+                key
+                references(first: 20) {
+                  edges {
+                    node {
+                      ... on Video {
+                        id
+                        sources {
+                          url
+                          format
+                          mimeType
+                        }
+                        previewImage {
+                          url
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    try {
+      const response = await shopifyFetch({ query });
+      const edges = response?.body?.data?.metaobjects?.edges || [];
+      if (edges.length > 0) {
+        const fields = edges[0].node.fields || [];
+        const reelsField = fields.find(f => f.key === 'reels_section');
+        const refEdges = reelsField?.references?.edges || [];
+        const videos = refEdges.map((e, index) => {
+          const node = e.node;
+          const sources = node?.sources || [];
+          const mp4Sources = sources.filter(s => s.format === 'mp4');
+          let videoUrl = '';
+          if (mp4Sources.length > 0) {
+            const preferred = mp4Sources.find(s => s.url.includes('720p')) || mp4Sources.find(s => s.url.includes('1080p')) || mp4Sources[0];
+            videoUrl = preferred.url;
+          }
+          return {
+            id: node?.id || `reel-${index}`,
+            title: `Reel ${index + 1}`,
+            videoSrc: videoUrl,
+            poster: node?.previewImage?.url || ''
+          };
+        }).filter(v => v.videoSrc);
+
+        if (videos.length > 0) {
+          reelsMetaobjectCache = videos;
+          return videos;
+        }
+      }
+      return [];
+    } catch (err) {
+      console.error('Error fetching Instagram Reels Metaobject:', err);
+      return [];
+    }
+  })();
+
+  return reelsMetaobjectPromise;
+};
+
 let heroVideoCache = null;
 let heroVideoPromise = null;
 
