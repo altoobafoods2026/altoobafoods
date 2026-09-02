@@ -50,9 +50,9 @@ export default function Footer() {
 
           {/* Column 2: Shop & Explore */}
           <div className="flex flex-col space-y-4">
-            <h4 className="text-xs font-sans font-bold uppercase tracking-[0.18em] text-parchment hover:text-gold transition-colors">
+            <h3 className="text-xs font-sans font-bold uppercase tracking-[0.18em] text-parchment hover:text-gold transition-colors">
               <Link to="/studio">Shop & Explore</Link>
-            </h4>
+            </h3>
             <ul className="space-y-3 text-sm flex flex-col">
               <li>
                 <Link to="/studio" className="hover:text-parchment transition-colors text-muted-green">All Remedies</Link>
@@ -83,9 +83,9 @@ export default function Footer() {
 
           {/* Column 3: Our Heritage */}
           <div className="flex flex-col space-y-4">
-            <h4 className="text-xs font-sans font-bold uppercase tracking-[0.18em] text-parchment hover:text-gold transition-colors">
+            <h3 className="text-xs font-sans font-bold uppercase tracking-[0.18em] text-parchment hover:text-gold transition-colors">
               <Link to="/about">Our Heritage</Link>
-            </h4>
+            </h3>
             <ul className="space-y-3 text-sm">
               <li>
                 <Link to="/about" className="hover:text-parchment transition-colors">
@@ -112,9 +112,9 @@ export default function Footer() {
 
           {/* Column 4: Contact Us */}
           <div className="flex flex-col space-y-4">
-            <h4 className="text-xs font-sans font-bold uppercase tracking-[0.18em] text-parchment hover:text-gold transition-colors">
+            <h3 className="text-xs font-sans font-bold uppercase tracking-[0.18em] text-parchment hover:text-gold transition-colors">
               <Link to="/contact-us">Contact Us</Link>
-            </h4>
+            </h3>
             <ul className="space-y-3 text-sm text-muted-green">
               <li className="flex flex-col">
                 <span className="text-parchment/60 text-xs mb-1">Apothecary & HQ</span>

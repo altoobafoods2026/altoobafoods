@@ -1,5 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { optimizeShopifyImage } from '../../utils/imageOptimizer';
+
 export default function NoorCategories({ products = [] }) {
   // Extract unique categories dynamically and exclude 'Wellness Kit'
   const uniqueCategories = [...new Set(products.map(p => p.category))]
@@ -60,7 +62,7 @@ export default function NoorCategories({ products = [] }) {
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-[#0D3B2A] font-bold mb-2 sm:mb-3">
             Shop by Categories
           </h2>
-          <p className="text-[#D4A24C] font-sans font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase text-xs md:text-sm">
+          <p className="text-[#8A5E12] font-sans font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase text-xs md:text-sm">
             Explore our wide range of Islamic remedies
           </p>
         </div>
@@ -73,6 +75,7 @@ export default function NoorCategories({ products = [] }) {
             {/* Left Scroll Button */}
             <button 
               onClick={() => scroll('left')}
+              aria-label="Scroll categories left"
               className="bg-white/90 backdrop-blur border border-[#D4A24C]/30 text-[#0D3B2A] w-10 h-10 rounded-full flex items-center justify-center shadow-sm hover:bg-[#D4A24C] hover:text-white transition-colors cursor-pointer"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
@@ -81,6 +84,7 @@ export default function NoorCategories({ products = [] }) {
             {/* Right Scroll Button */}
             <button 
               onClick={() => scroll('right')}
+              aria-label="Scroll categories right"
               className="bg-white/90 backdrop-blur border border-[#D4A24C]/30 text-[#0D3B2A] w-10 h-10 rounded-full flex items-center justify-center shadow-sm hover:bg-[#D4A24C] hover:text-white transition-colors cursor-pointer"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
@@ -126,7 +130,11 @@ export default function NoorCategories({ products = [] }) {
                 key={idx}
                 className="relative min-w-[170px] sm:min-w-[200px] md:min-w-[220px] lg:min-w-0 aspect-[3/4.4] lg:aspect-[3/4.7] cursor-pointer group snap-center filter drop-shadow-[0_10px_15px_rgba(13,59,42,0.12)] block shrink-0 lg:shrink [content-visibility:visible]"
               >
-                <Link to={`/studio?category=${encodeURIComponent(cat.name)}`} className="absolute inset-0 z-50 rounded-xl"></Link>
+                <Link 
+                  to={`/studio?category=${encodeURIComponent(cat.name)}`} 
+                  aria-label={`Explore ${cat.name} collection`}
+                  className="absolute inset-0 z-50 rounded-xl"
+                ></Link>
                 
                 {/* Clipped Card Body */}
                 <div 
@@ -136,7 +144,7 @@ export default function NoorCategories({ products = [] }) {
                   {/* Cinematic Image Area */}
                   <div className="absolute inset-0 bg-transparent flex items-center justify-center pt-2">
                     <img 
-                      src={cat.bg} 
+                      src={optimizeShopifyImage(cat.bg, 350)} 
                       alt={cat.name}
                       loading="lazy"
                       decoding="async"

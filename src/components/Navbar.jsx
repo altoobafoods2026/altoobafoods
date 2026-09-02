@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import gsap from 'gsap';
 import { useCartStore } from '../store/cartStore';
 import { useWishlistStore } from '../store/wishlistStore';
 import CartDrawer from './CartDrawer';
@@ -64,39 +63,16 @@ export default function Navbar() {
     };
   }, []);
 
-  // GSAP animation for mobile menu overlay opening/closing & background scroll lock
+  // CSS-based animation for mobile menu overlay opening/closing & background scroll lock
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
       document.documentElement.style.overflow = 'hidden';
       document.body.style.touchAction = 'none';
-
-      // Fade in overlay
-      gsap.to(mobileMenuRef.current, {
-        opacity: 1,
-        y: 0,
-        pointerEvents: 'auto',
-        duration: 0.4,
-        ease: 'power3.out'
-      });
-      // Stagger link reveal
-      gsap.fromTo(
-        linksRef.current,
-        { y: 25, opacity: 0 },
-        { y: 0, opacity: 1, stagger: 0.08, duration: 0.35, delay: 0.15, ease: 'power2.out' }
-      );
     } else {
       document.body.style.overflow = '';
       document.documentElement.style.overflow = '';
       document.body.style.touchAction = '';
-
-      gsap.to(mobileMenuRef.current, {
-        opacity: 0,
-        y: -20,
-        pointerEvents: 'none',
-        duration: 0.35,
-        ease: 'power3.in'
-      });
     }
     return () => {
       document.body.style.overflow = '';
@@ -211,7 +187,9 @@ export default function Navbar() {
       {/* Mobile Menu Overlay */}
       <div
         ref={mobileMenuRef}
-        className="fixed inset-0 z-35 bg-[#0D3B2A]/98 backdrop-blur-2xl text-parchment flex flex-col items-center p-6 pointer-events-none opacity-0 transform -translate-y-6 overflow-y-auto overscroll-contain"
+        className={`fixed inset-0 z-35 bg-[#0D3B2A]/98 backdrop-blur-2xl text-parchment flex flex-col items-center p-6 overflow-y-auto overscroll-contain transition-all duration-400 ease-out ${
+          isMobileMenuOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-5 pointer-events-none'
+        }`}
         style={{ touchAction: 'pan-y' }}
       >
         <div className="w-full max-w-sm flex flex-col items-center justify-center gap-7 my-auto pt-24 pb-12">
@@ -221,7 +199,10 @@ export default function Navbar() {
                 <div 
                   key={item.name} 
                   ref={(el) => (linksRef.current[idx] = el)}
-                  className="w-full flex flex-col items-center"
+                  className={`w-full flex flex-col items-center transition-all duration-350 ease-out ${
+                    isMobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+                  }`}
+                  style={{ transitionDelay: isMobileMenuOpen ? `${150 + idx * 80}ms` : '0ms' }}
                 >
                   <button
                     onClick={() => setIsMobileProductsOpen(!isMobileProductsOpen)}
@@ -274,7 +255,10 @@ export default function Navbar() {
                   setIsMobileMenuOpen(false);
                   setIsMobileProductsOpen(false);
                 }}
-                className="text-2xl sm:text-3xl font-serif font-bold italic tracking-wide text-white hover:text-[#D4A24C] hover:scale-105 transition-all duration-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+                className={`text-2xl sm:text-3xl font-serif font-bold italic tracking-wide text-white hover:text-[#D4A24C] hover:scale-105 transition-all duration-350 ease-out drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${
+                  isMobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+                }`}
+                style={{ transitionDelay: isMobileMenuOpen ? `${150 + idx * 80}ms` : '0ms' }}
               >
                 {item.name}
               </Link>

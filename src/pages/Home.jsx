@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { getProducts, getHeroVideo, getCachedProductsSync } from '../services/shopify';
+import { getProducts, getHeroVideo, getCachedProductsSync, getCachedHeroVideoSync } from '../services/shopify';
 import HeroParticles from '../components/HeroParticles';
 import About3DCarousel from '../components/About3DCarousel';
 import SplashScreen from '../components/SplashScreen';
@@ -12,20 +10,15 @@ import NoorBundles from '../components/noor/NoorBundles';
 import NoorCompleteCollection from '../components/noor/NoorCompleteCollection';
 import NoorQuoteDivider from '../components/noor/NoorQuoteDivider';
 
-gsap.registerPlugin(ScrollTrigger);
-
 export default function Home() {
   const [products, setProducts] = useState(() => getCachedProductsSync() || []);
-  const [heroVideoUrl, setHeroVideoUrl] = useState('/Islamic_Altooba_.mp4');
+  const [heroVideoUrl, setHeroVideoUrl] = useState(() => getCachedHeroVideoSync() || null);
   const [isLoading, setIsLoading] = useState(() => {
     const cached = getCachedProductsSync();
     return !(cached && cached.length > 0);
   });
 
   const containerRef = useRef(null);
-  const headlineRef = useRef(null);
-  const subtextRef = useRef(null);
-  const ctaRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -69,38 +62,6 @@ export default function Home() {
     };
   }, []);
 
-  useEffect(() => {
-    let ctx = gsap.context(() => {
-      // Clean, lightweight fade-in for hero headline
-      if (headlineRef.current) {
-        gsap.fromTo(headlineRef.current,
-          { opacity: 0, y: 30 },
-          { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out' }
-        );
-      }
-
-      // Subtext and CTA fade-in delay
-      if (subtextRef.current) {
-        gsap.fromTo(
-          subtextRef.current,
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out', delay: 0.3 }
-        );
-      }
-      if (ctaRef.current) {
-        gsap.fromTo(
-          ctaRef.current,
-          { opacity: 0, scale: 0.95 },
-          { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out', delay: 0.5 }
-        );
-      }
-    }, containerRef);
-
-    return () => {
-      ctx.revert();
-    };
-  }, []);
-
   const heroVideoRef = useRef(null);
   const heroSectionRef = useRef(null);
 
@@ -138,18 +99,22 @@ export default function Home() {
 
       {/* 1. Fullscreen Hero Section */}
       <section ref={heroSectionRef} className="relative w-full min-h-svh flex flex-col items-center justify-start text-center px-0 md:px-6 pt-[90px] md:pt-[100px] pb-4 md:pb-0 overflow-hidden">
-         {/* Background Video */}
-        <video
-          key={heroVideoUrl}
-          ref={heroVideoRef}
-          className="absolute inset-0 w-full h-full object-cover object-bottom z-0"
-          src={heroVideoUrl}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="metadata"
-        />
+         {/* Background Video or Theme Placeholder */}
+        {heroVideoUrl ? (
+          <video
+            key={heroVideoUrl}
+            ref={heroVideoRef}
+            className="absolute inset-0 w-full h-full object-cover object-bottom z-0"
+            src={heroVideoUrl}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-[#0D3B2A] z-0" />
+        )}
         
         {/* Cinematic Grading Overlays */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#0D3B2A]/40 via-transparent to-[#0D3B2A]/20 z-0 pointer-events-none" />
@@ -173,8 +138,7 @@ export default function Home() {
             </div>
             {/* Premium Headline */}
             <h1
-              ref={headlineRef}
-              className="text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl lg:text-[3.5rem] xl:text-7xl tracking-tight font-serif select-none text-white drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)]"
+              className="text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl lg:text-[3.5rem] xl:text-7xl tracking-tight font-serif select-none text-white drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)] animate-[heroFadeUp_1s_ease-out_both]"
             >
               <div className="flex flex-wrap justify-center xl:justify-start gap-x-3">
                 <span>Reviving</span>
@@ -189,14 +153,13 @@ export default function Home() {
             {/* Short Luxury Description */}
             <div className="max-w-[400px] w-full mt-3 md:mt-4 xl:mt-6">
               <p
-                ref={subtextRef}
-                className="text-sm md:text-base text-white/95 leading-snug font-sans opacity-0 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)] font-medium"
+                className="text-sm md:text-base text-white/95 leading-snug font-sans drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)] font-medium animate-[heroFadeUp_0.8s_ease-out_0.3s_both]"
               >
                 Embrace the healing wisdom of Tibb-e-Nabawi. Premium organic remedies crafted to nourish soul, mind, and body.
               </p>
 
               {/* Desktop CTA Premium Pill Button */}
-              <div ref={ctaRef} className="mt-4 xl:mt-8 hidden xl:flex justify-start opacity-0">
+              <div className="mt-4 xl:mt-8 hidden xl:flex justify-start animate-[heroFadeScale_0.6s_ease-out_0.5s_both]">
                 <button
                   onClick={handleCTAClick}
                   className="group relative overflow-hidden rounded-full px-8 py-3.5 text-xs font-sans font-extrabold uppercase tracking-[0.15em] bg-gradient-to-r from-[#eec373] via-[#D4A24C] to-[#eec373] text-[#0D3B2A] border-none shadow-[0_8px_25px_rgba(212,162,76,0.4)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"

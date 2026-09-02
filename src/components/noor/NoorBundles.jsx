@@ -4,6 +4,7 @@ import { ShoppingBag, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCartStore } from '../../store/cartStore';
 import { useToastStore } from '../../store/toastStore';
+import { optimizeShopifyImage } from '../../utils/imageOptimizer';
 
 export default function NoorBundles({ products = [] }) {
   const addItem = useCartStore((state) => state.addItem);
@@ -172,31 +173,32 @@ export default function NoorBundles({ products = [] }) {
               <div className="relative w-full flex-1 min-h-[180px] sm:min-h-[260px] overflow-hidden bg-[#FAF7F2] flex items-center justify-center block">
                 <Link to={`/product/${heroBundle.slug}`} className="w-full h-full flex items-center justify-center">
                   <img 
-                    src={heroBundle.image} 
+                    src={optimizeShopifyImage(heroBundle.image, 600)} 
                     alt={heroBundle.name}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full max-h-[240px] sm:max-h-[330px] md:max-h-[350px] object-cover sm:object-contain transform group-hover:scale-105 transition-transform duration-700 ease-out"
                   />
                 </Link>
               </div>
 
-              {/* Bottom Details & CTA Bar */}
-              <div className="p-3.5 sm:p-5 md:p-6 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-t border-gray-100 shrink-0">
-                <Link to={`/product/${heroBundle.slug}`} className="space-y-1 max-w-md hover:no-underline">
-                  <span className="inline-block text-[8px] sm:text-[9px] text-[#D4A24C] font-sans font-bold uppercase tracking-widest">
-                    {heroBundle.itemsCount}
-                  </span>
-                  <h3 className="font-serif font-bold text-sm sm:text-xl text-[#0D3B2A] group-hover:text-[#D4A24C] transition-colors leading-tight">
+              {/* Bottom Info Bar */}
+              <div className="p-4 sm:p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-gray-100 bg-white">
+                <Link to={`/product/${heroBundle.slug}`} className="flex-1 hover:no-underline min-w-0">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-serif font-bold text-[#0D3B2A] group-hover:text-[#8A5E12] transition-colors leading-snug truncate">
                     {heroBundle.name}
                   </h3>
-                  <p className="text-[10px] sm:text-xs text-[#0D3B2A]/70 font-sans line-clamp-1 sm:line-clamp-2 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#0D3B2A]/70 font-sans line-clamp-2 mt-1 leading-relaxed">
                     {heroBundle.itemsList}
                   </p>
-                  <div className="flex items-baseline gap-1.5 sm:gap-2 pt-0.5">
-                    <span className="text-lg sm:text-2xl font-sans font-extrabold text-[#0D3B2A] tracking-tight">
+                  
+                  {/* Price */}
+                  <div className="flex items-baseline gap-2 mt-2 sm:mt-3">
+                    <span className="text-xl sm:text-2xl font-sans font-extrabold text-[#0D3B2A] tracking-tight">
                       ₹{heroBundle.price.toLocaleString('en-IN')}
                     </span>
-                    {heroBundle.mrp && heroBundle.mrp > heroBundle.price && (
-                      <span className="text-[10px] sm:text-sm font-sans font-medium text-gray-400 line-through">
+                    {heroBundle.mrp > heroBundle.price && (
+                      <span className="text-xs sm:text-sm font-sans font-medium text-gray-500 line-through">
                         ₹{heroBundle.mrp.toLocaleString('en-IN')}
                       </span>
                     )}
@@ -206,7 +208,7 @@ export default function NoorBundles({ products = [] }) {
                 <div className="flex items-center gap-3 shrink-0">
                   <button
                     onClick={(e) => handleAddBundle(e, heroBundle)}
-                    className={`w-full sm:w-auto inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-[#0D3B2A] text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg sm:rounded-2xl font-sans font-bold text-[10px] sm:text-xs uppercase tracking-widest hover:bg-[#D4A24C] transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-0.5 cursor-pointer group/btn ${!heroBundle.inStock ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`w-full sm:w-auto inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-[#0D3B2A] text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg sm:rounded-2xl font-sans font-bold text-[10px] sm:text-xs uppercase tracking-widest hover:bg-[#8A5E12] transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-0.5 cursor-pointer group/btn ${!heroBundle.inStock ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span>{heroBundle.inStock ? 'Add to Cart' : 'Out of Stock'}</span>
@@ -236,8 +238,10 @@ export default function NoorBundles({ products = [] }) {
                   {/* Left: Thumbnail Image */}
                   <Link to={`/product/${bundle.slug}`} className="relative w-24 sm:w-36 md:w-40 aspect-square rounded-xl sm:rounded-2xl overflow-hidden bg-[#FAF7F2] shrink-0 border border-gray-100 shadow-inner flex items-center justify-center p-2 sm:p-3.5">
                     <img 
-                      src={bundle.image} 
+                      src={optimizeShopifyImage(bundle.image, 350)} 
                       alt={bundle.name}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                     />
                   </Link>
@@ -245,7 +249,7 @@ export default function NoorBundles({ products = [] }) {
                   {/* Right: Info, Price, Button — all stacked vertically */}
                   <div className="flex flex-col justify-between flex-1 min-w-0 overflow-hidden">
                     <Link to={`/product/${bundle.slug}`} className="hover:no-underline min-w-0 block">
-                      <span className="text-[8px] sm:text-[9px] font-sans font-bold uppercase tracking-widest text-[#D4A24C] block truncate mb-0.5">
+                      <span className="text-[8px] sm:text-[9px] font-sans font-bold uppercase tracking-widest text-[#8A5E12] block truncate mb-0.5">
                         {bundle.badge} • {bundle.itemsCount}
                       </span>
                       <h4 className="font-serif font-bold text-[13px] sm:text-base md:text-lg text-[#0D3B2A] group-hover:text-[#D4A24C] transition-colors leading-snug truncate">

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { getCarouselMetaobjectData } from '../services/shopify';
+import { optimizeShopifyImage } from '../utils/imageOptimizer';
 
 export default function About3DCarousel() {
   const navigate = useNavigate();
@@ -70,17 +71,20 @@ export default function About3DCarousel() {
               
               {/* --- PRODUCT BOTTLE (Extra Large HD Display) --- */}
               <img 
-                src={displayImages[currentIndex]} 
+                src={optimizeShopifyImage(displayImages[currentIndex], 800)} 
                 alt="Premium Showcase"
                 fetchPriority="high"
                 loading="eager"
+                decoding="async"
                 className="relative z-10 w-[135%] sm:w-[125%] lg:w-[730px] xl:w-[810px] object-contain object-bottom h-[64vh] sm:h-[75vh] lg:h-[88vh] xl:h-[94vh] max-h-[960px] mx-auto drop-shadow-[0_25px_45px_rgba(0,0,0,0.4)] translate-y-[15%]"
               />
 
               {/* --- REFLECTION --- */}
               <img 
-                src={displayImages[currentIndex]} 
+                src={optimizeShopifyImage(displayImages[currentIndex], 400)} 
                 alt="Reflection"
+                loading="lazy"
+                decoding="async"
                 className="absolute top-[92%] left-1/2 -translate-x-1/2 z-[-4] w-[135%] sm:w-[125%] lg:w-[730px] xl:w-[810px] object-contain object-top h-[64vh] sm:h-[75vh] lg:h-[88vh] xl:h-[94vh] max-h-[960px] opacity-[0.07] pointer-events-none translate-y-[15%]"
                 style={{ transform: 'translateX(-50%) scaleY(-1)' }}
               />

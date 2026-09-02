@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { MessageSquare } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
+import { optimizeShopifyImage } from '../utils/imageOptimizer';
 
 export default function ProductCard({ product, index = 0 }) {
   const cardRef = useRef(null);
@@ -32,7 +33,7 @@ export default function ProductCard({ product, index = 0 }) {
       <div className="absolute inset-0 bg-gradient-to-b from-white/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0" />
 
       {/* Category Ribbon on Right Edge */}
-      <div className="absolute right-0 top-2.5 md:top-4 z-20 bg-[#F2E8D5] text-[#D4A24C] flex items-center justify-center py-0.5 px-2 md:px-2.5 rounded-l-[6px] md:rounded-l-[8px] shadow-sm">
+      <div className="absolute right-0 top-2.5 md:top-4 z-20 bg-[#F2E8D5] text-[#8A5E12] flex items-center justify-center py-0.5 px-2 md:px-2.5 rounded-l-[6px] md:rounded-l-[8px] shadow-sm">
         <span className="text-[8px] md:text-[10px] font-sans font-extrabold uppercase tracking-widest leading-none">{product.category || 'Product'}</span>
       </div>
 
@@ -42,7 +43,7 @@ export default function ProductCard({ product, index = 0 }) {
           className="relative w-full shrink-0 aspect-[10/11] md:aspect-[1/1] rounded-[12px] sm:rounded-[14px] overflow-hidden bg-white md:mb-3 z-10 shadow-inner border border-gray-100 group/img"
         >
           <img 
-            src={product.cardImage || product.images[0]} 
+            src={optimizeShopifyImage(product.cardImage || product.images[0], 400)} 
             alt={product.name} 
             loading="lazy"
             decoding="async"
@@ -50,7 +51,7 @@ export default function ProductCard({ product, index = 0 }) {
           />
           {hoverImage && (
             <img 
-              src={hoverImage} 
+              src={optimizeShopifyImage(hoverImage, 400)} 
               alt={product.name} 
               loading="lazy"
               decoding="async"
@@ -74,29 +75,31 @@ export default function ProductCard({ product, index = 0 }) {
           
           {/* Brand and Rating Row */}
           <div className="flex flex-wrap items-center justify-between mb-1 sm:mb-1.5 gap-1">
-            <span className="text-[9px] sm:text-[10px] font-sans font-bold uppercase tracking-widest text-gray-400">AL-TOOBA</span>
+            <span className="text-[9px] sm:text-[10px] font-sans font-bold uppercase tracking-widest text-gray-500">AL-TOOBA</span>
             <div className="flex items-center gap-1 text-[10px] sm:text-xs">
-              <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-[#D4A24C]" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-[#8A5E12]" viewBox="0 0 24 24">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
               </svg>
-              <span className="font-sans font-medium text-gray-500">{product.rating}</span>
+              <span className="font-sans font-medium text-gray-700">{Number(product.rating || 5.0).toFixed(1)}</span>
             </div>
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-gray-50/50 group-hover:bg-gray-100 transition-colors">
-              <MessageSquare className="w-3 h-3 text-gray-400 group-hover:text-[#0D3B2A] transition-colors" />
-              <span className="font-sans text-gray-400 hidden sm:inline">{product.reviewCount}</span>
-            </div>
+            {product.reviewCount > 0 && (
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-gray-50/50 group-hover:bg-gray-100 transition-colors">
+                <MessageSquare className="w-3 h-3 text-gray-400 group-hover:text-[#0D3B2A] transition-colors" />
+                <span className="font-sans text-gray-400 text-[10px] sm:text-xs">{product.reviewCount}</span>
+              </div>
+            )}
           </div>
 
           {/* Title */}
-          <h3 className="text-[13px] sm:text-[15px] font-sans font-bold text-[#0D3B2A] mb-1.5 sm:mb-2 leading-snug group-hover:text-[#D4A24C] transition-colors duration-300 line-clamp-2 min-h-[36px] sm:min-h-[40px]">
+          <h3 className="text-[13px] sm:text-[15px] font-sans font-bold text-[#0D3B2A] mb-1.5 sm:mb-2 leading-snug group-hover:text-[#8A5E12] transition-colors duration-300 line-clamp-2 min-h-[36px] sm:min-h-[40px]">
             {product.name}
           </h3>
           
           {/* Pricing Row */}
           <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-2 sm:mb-3 mt-auto">
-            <span className="text-[15px] sm:text-[19px] font-sans font-bold text-[#D4A24C]">₹{product.price.toFixed(2)}</span>
+            <span className="text-[15px] sm:text-[19px] font-sans font-bold text-[#8A5E12]">₹{product.price.toFixed(2)}</span>
             {product.mrp && product.mrp > product.price && (
-              <span className="text-[10px] sm:text-xs font-sans text-gray-400 line-through">
+              <span className="text-[10px] sm:text-xs font-sans text-gray-500 line-through">
                 ₹{product.mrp.toFixed(2)}
               </span>
             )}

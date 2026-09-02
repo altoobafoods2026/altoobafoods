@@ -3,12 +3,8 @@ import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
 import './index.css';
 
-// Lenis Smooth Scroll & GSAP ScrollTrigger Integration
+// Lenis Smooth Scroll (standalone, no GSAP dependency)
 import Lenis from 'lenis';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
 
 // Initialize Lenis with fast, snappy physics
 const lenis = new Lenis({
@@ -19,11 +15,6 @@ const lenis = new Lenis({
   wheelMultiplier: 1.1,
 });
 
-// Update ScrollTrigger on Lenis scroll cleanly
-lenis.on('scroll', () => {
-  ScrollTrigger.update();
-});
-
 // Use standard, independent requestAnimationFrame for Lenis RAF loop
 function raf(time) {
   lenis.raf(time);
@@ -31,7 +22,7 @@ function raf(time) {
 }
 requestAnimationFrame(raf);
 
-// Auto-resize Lenis when DOM layout changes without heavy ScrollTrigger refreshes
+// Auto-resize Lenis when DOM layout changes
 if (typeof window !== 'undefined') {
   const resizeObserver = new ResizeObserver(() => {
     lenis.resize();

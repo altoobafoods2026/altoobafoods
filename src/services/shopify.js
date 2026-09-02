@@ -1,4 +1,4 @@
-import { getAllProductReviewStats } from './judgeme';
+import { getAllProductReviewStats, getCachedReviewStatsSync } from './judgeme';
 
 const domain = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN;
 const storefrontAccessToken = import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN;
@@ -8,9 +8,26 @@ let productsMemoryCache = null;
 let productsCacheTimestamp = 0;
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
+function enrichProductsWithReviewStats(products, reviewStats) {
+  if (!reviewStats || !products) return products;
+  return products.map(product => {
+    const rawId = product.id ? String(product.id).split('/').pop() : '';
+    const stat = reviewStats[product.slug] || reviewStats[rawId] || null;
+    if (stat) {
+      return {
+        ...product,
+        rating: stat.rating || 5.0,
+        reviewCount: stat.count || 0
+      };
+    }
+    return product;
+  });
+}
+
 export function getCachedProductsSync() {
+  const reviewStats = getCachedReviewStatsSync();
   if (productsMemoryCache && Date.now() - productsCacheTimestamp < CACHE_TTL) {
-    return productsMemoryCache;
+    return enrichProductsWithReviewStats(productsMemoryCache, reviewStats);
   }
   try {
     if (typeof window !== 'undefined' && window.sessionStorage) {
@@ -18,9 +35,10 @@ export function getCachedProductsSync() {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Date.now() - parsed.timestamp < CACHE_TTL) {
-          productsMemoryCache = parsed.data;
+          const enriched = enrichProductsWithReviewStats(parsed.data || [], reviewStats);
+          productsMemoryCache = enriched;
           productsCacheTimestamp = parsed.timestamp;
-          return parsed.data;
+          return enriched;
         }
       }
     }
@@ -133,11 +151,11 @@ export async function getProducts(forceRefresh = false) {
       }
     `;
 
-    // Fast non-blocking review stats promise (300ms max timeout so reviews never slow down page load)
-    const reviewStatsPromise = Promise.race([
-      getAllProductReviewStats(),
-      new Promise(res => setTimeout(() => res(null), 300))
-    ]);
+    // Get review stats from instant cache or fetch all pages dynamically from live Judge.me API
+    const cachedReviewStats = getCachedReviewStatsSync();
+    const reviewStatsPromise = cachedReviewStats
+      ? Promise.resolve(cachedReviewStats)
+      : getAllProductReviewStats();
 
     const [response, reviewStats] = await Promise.all([
       shopifyFetch({ query }),
@@ -194,7 +212,7 @@ export async function getProducts(forceRefresh = false) {
       const stat = (reviewStats && (reviewStats[node.handle] || reviewStats[rawId])) || null;
       
       const realReviewCount = stat ? stat.count : 0;
-      const realRating = stat ? stat.rating : 0;
+      const realRating = (stat && stat.rating && stat.rating > 0) ? stat.rating : 5.0;
 
       // Extract description images from descriptionHtml
       const descImagesMatches = [...(node.descriptionHtml || '').matchAll(/<img[^>]+src=["']([^"']+)["']/g)];
@@ -369,7 +387,7 @@ export async function getProductBySlug(slug) {
   const stat = (reviewStats && (reviewStats[node.handle] || reviewStats[rawId])) || null;
   
   const realReviewCount = stat ? stat.count : 0;
-  const realRating = stat ? stat.rating : 0;
+  const realRating = (stat && stat.rating && stat.rating > 0) ? stat.rating : 5.0;
 
   return {
     id: node.id,
@@ -590,8 +608,23 @@ export const getInstagramReelMetaobjectVideos = async () => {
 let heroVideoCache = null;
 let heroVideoPromise = null;
 
-export const getHeroVideo = async () => {
+export const getCachedHeroVideoSync = () => {
   if (heroVideoCache) return heroVideoCache;
+  if (typeof window !== 'undefined' && window.sessionStorage) {
+    try {
+      const stored = sessionStorage.getItem('altooba_hero_video_cache');
+      if (stored) {
+        heroVideoCache = stored;
+        return stored;
+      }
+    } catch (e) {}
+  }
+  return null;
+};
+
+export const getHeroVideo = async () => {
+  const syncCached = getCachedHeroVideoSync();
+  if (syncCached) return syncCached;
   if (heroVideoPromise) return heroVideoPromise;
 
   heroVideoPromise = (async () => {
@@ -639,13 +672,18 @@ export const getHeroVideo = async () => {
             preferred = mp4Sources.find(s => s.url.includes('1080p')) || mp4Sources.find(s => s.url.includes('720p')) || mp4Sources[0];
           }
           heroVideoCache = preferred.url;
+          try {
+            if (typeof window !== 'undefined' && window.sessionStorage) {
+              sessionStorage.setItem('altooba_hero_video_cache', preferred.url);
+            }
+          } catch (e) {}
           return preferred.url;
         }
       }
-      return '/Islamic_Altooba_.mp4';
+      return heroVideoCache || null;
     } catch (err) {
       console.error('Error fetching hero video Metaobject:', err);
-      return '/Islamic_Altooba_.mp4';
+      return heroVideoCache || null;
     }
   })();
 
