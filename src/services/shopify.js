@@ -585,3 +585,66 @@ export const getHeroVideo = async (handle = 'hero_section-video') => {
 
   return heroVideoPromise;
 };
+
+let carouselMetaobjectCache = null;
+let carouselMetaobjectPromise = null;
+
+export const getCarouselMetaobjectImages = async () => {
+  if (carouselMetaobjectCache) return carouselMetaobjectCache;
+  if (carouselMetaobjectPromise) return carouselMetaobjectPromise;
+
+  carouselMetaobjectPromise = (async () => {
+    const query = `
+      query getCarouselMetaobject {
+        metaobjects(type: "3d_carousel", first: 1) {
+          edges {
+            node {
+              id
+              type
+              handle
+              fields {
+                key
+                references(first: 10) {
+                  edges {
+                    node {
+                      ... on MediaImage {
+                        image {
+                          url
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    try {
+      const response = await shopifyFetch({ query });
+      const edges = response?.body?.data?.metaobjects?.edges || [];
+      if (edges.length > 0) {
+        const fields = edges[0].node.fields || [];
+        const imagesField = fields.find(f => f.key === 'images');
+        const refEdges = imagesField?.references?.edges || [];
+        const imageUrls = refEdges
+          .map(e => e.node?.image?.url)
+          .filter(Boolean);
+
+        if (imageUrls.length > 0) {
+          carouselMetaobjectCache = imageUrls;
+          return imageUrls;
+        }
+      }
+      return [];
+    } catch (err) {
+      console.error('Error fetching 3D Carousel Metaobject:', err);
+      return [];
+    }
+  })();
+
+  return carouselMetaobjectPromise;
+};
+

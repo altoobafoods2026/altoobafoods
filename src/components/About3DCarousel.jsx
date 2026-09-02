@@ -1,27 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-
-const FALLBACK_IMAGES = [
-  '/products/carousel_1.png',
-  '/products/carousel_2.png',
-  '/products/carousel_3.png',
-  '/products/carousel_4.png',
-  '/products/carousel_5.png',
-];
+import { getCarouselMetaobjectImages } from '../services/shopify';
 
 export default function About3DCarousel({ products = [] }) {
   const navigate = useNavigate();
-  const heroProducts = products.filter(p => p.collections && p.collections.includes('hero-section-3d-images'));
-  const dynamicImages = heroProducts.map(p => p.images[0]).filter(Boolean);
-  const displayImages = dynamicImages.length > 0 ? dynamicImages : FALLBACK_IMAGES;
-
+  const [metaImages, setMetaImages] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Removed aggressive preloading to improve initial page load speed
+  useEffect(() => {
+    let isMounted = true;
+    getCarouselMetaobjectImages().then((imgs) => {
+      if (isMounted && imgs && imgs.length > 0) {
+        setMetaImages(imgs);
+      }
+    });
+    return () => { isMounted = false; };
+  }, []);
+
+  const displayImages = metaImages;
 
   // Fast product rotation cycle (2.0s)
   useEffect(() => {
+    if (displayImages.length === 0) return;
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % displayImages.length);
     }, 2000);
@@ -29,26 +30,8 @@ export default function About3DCarousel({ products = [] }) {
   }, [displayImages.length]);
 
   const handleProductClick = () => {
-    const dummyProduct = heroProducts[currentIndex];
-    if (dummyProduct) {
-      const dummyName = dummyProduct.name.toLowerCase().replace(/-/g, ' ');
-      
-      let searchKeyword = dummyName.split(' ')[0];
-      if (dummyName.includes('black seed')) searchKeyword = 'black seed';
-      else if (dummyName.includes('kalonji')) searchKeyword = 'kalonji';
-      else if (dummyName.includes('qalbina')) searchKeyword = 'qalbina';
-      else if (dummyName.includes('talbina')) searchKeyword = 'talbina';
-      else if (dummyName.includes('tibb')) searchKeyword = 'tibb';
-
-      const realProduct = products.find(p => 
-        (!p.collections || !p.collections.includes('hero-section-3d-images')) && 
-        p.name.toLowerCase().includes(searchKeyword)
-      );
-      
-      const targetSlug = realProduct ? realProduct.slug : dummyProduct.slug;
-      window.scrollTo(0, 0);
-      navigate(`/product/${targetSlug}`);
-    }
+    window.scrollTo(0, 0);
+    navigate('/studio');
   };
 
   return (

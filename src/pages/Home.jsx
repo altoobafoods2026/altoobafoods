@@ -212,7 +212,7 @@ export default function Home() {
           {/* Right: 3D Product Centerpiece */}
           <div className="w-full xl:w-[52%] flex justify-center absolute bottom-[2vh] xl:bottom-0 left-0 right-0 xl:left-auto xl:right-[1%] z-20 pointer-events-none xl:pointer-events-auto xl:mb-[3vh]">
             <div className="w-full origin-bottom flex justify-center">
-               {products.length > 0 && <About3DCarousel products={products} />}
+               <About3DCarousel />
             </div>
           </div>
 
