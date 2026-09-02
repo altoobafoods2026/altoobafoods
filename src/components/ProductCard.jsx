@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { MessageSquare } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
 
