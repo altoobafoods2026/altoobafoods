@@ -95,9 +95,9 @@ export default function PolicyPage({ title }) {
           className="bg-white rounded-t-[28px] sm:rounded-t-[32px] rounded-b-[20px] shadow-[0_20px_40px_rgba(13,59,42,0.08)] border border-[#0D3B2A]/5 p-6 sm:p-10 md:p-14"
         >
           {/* Last Updated Date */}
-          <div className="flex items-center gap-2.5 text-xs sm:text-sm text-gray-400 mb-8 sm:mb-10 pb-6 border-b border-gray-100">
-            <Clock className="w-4 h-4 text-[#D4A24C]" />
-            <span className="font-medium tracking-wide">Last Updated: August 2026</span>
+          <div className="flex items-center gap-2.5 text-xs sm:text-sm text-gray-500 mb-8 sm:mb-10 pb-6 border-b border-gray-100">
+            <Clock className="w-4 h-4 text-[#8A5E12]" />
+            <span className="font-medium tracking-wide">Last Updated: {isPrivacyPolicy ? 'September 2026' : 'August 2026'}</span>
           </div>
 
           {isCancellationPolicy ? (
@@ -214,7 +214,7 @@ export default function PolicyPage({ title }) {
                     <span className="text-gray-700">Original payment method</span>
                   </div>
                   <div className="pt-2 border-t border-gray-200/60 text-gray-500 text-[11px] sm:text-xs italic">
-                    <strong>Note:</strong> Shipping charges are non-refundable once the order packaging & fulfillment is initiated.
+                    <strong>Note:</strong> Shipping charges are non-refundable once order packaging &amp; fulfillment is initiated. If an order is returned after dispatch, applicable product GST will be deducted as per our Return &amp; Refund Policy.
                   </div>
                 </div>
               </section>
@@ -442,7 +442,7 @@ export default function PolicyPage({ title }) {
                       Step 4: Receive Refund
                     </h4>
                     <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
-                      Once received and verified, refund will be processed within 5–7 business days.
+                      Once received and verified, your refund (net of applicable product GST and non-refundable shipping) will be processed within 5–7 business days to your original payment method.
                     </p>
                   </div>
                 </div>
@@ -474,23 +474,44 @@ export default function PolicyPage({ title }) {
                 </ul>
               </section>
 
-              {/* 5. Refund Processing */}
+              {/* 5. Refund Processing & Deductions */}
               <section className="space-y-3.5">
                 <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#0D3B2A]">
-                  Refund Processing
+                  Refund Processing &amp; Deductions
                 </h3>
 
-                <div className="bg-[#FAF7F2] border border-[#0D3B2A]/5 rounded-2xl p-4 sm:p-6 space-y-2.5 text-xs sm:text-sm">
+                <div className="bg-[#FAF7F2] border border-[#0D3B2A]/5 rounded-2xl p-4 sm:p-6 space-y-3 text-xs sm:text-sm">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                    <span className="font-bold text-[#0D3B2A] min-w-[140px]">Processing Time:</span>
-                    <span className="text-gray-700">5–7 business days after verification</span>
+                    <span className="font-bold text-[#0D3B2A] min-w-[150px]">Processing Time:</span>
+                    <span className="text-gray-700">5–7 business days after inspection &amp; verification</span>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                    <span className="font-bold text-[#0D3B2A] min-w-[140px]">Refund Method:</span>
-                    <span className="text-gray-700">Amount credited to original payment method (card/wallet/UPI)</span>
+                    <span className="font-bold text-[#0D3B2A] min-w-[150px]">Refund Method:</span>
+                    <span className="text-gray-700">Amount credited to original payment method (Card/Net Banking/UPI/Wallet)</span>
                   </div>
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2">
+                    <span className="font-bold text-[#0D3B2A] min-w-[150px]">Refund Calculation:</span>
+                    <span className="text-gray-700 leading-relaxed">
+                      Refund Amount = <strong>Total Product Price Paid – Applicable GST Amount – Non-Refundable Shipping Charges</strong> (if applicable).
+                    </span>
+                  </div>
+
+                  {/* GST Deduction Policy Highlight Box */}
+                  <div className="bg-amber-50/80 border border-amber-200/90 rounded-xl p-3.5 sm:p-4 mt-2 space-y-1.5">
+                    <div className="flex items-center gap-2 text-[#8A5E12] font-bold text-xs sm:text-sm">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-[#8A5E12]" />
+                      <span>Important Notice Regarding GST (Tax) Deduction:</span>
+                    </div>
+                    <p className="text-gray-700 text-xs sm:text-sm leading-relaxed">
+                      Please note that the statutory <strong className="text-[#0D3B2A]">Goods and Services Tax (GST)</strong> charged on the product at the time of purchase is non-refundable upon customer-initiated returns. <strong className="text-[#0D3B2A]">The exact GST amount levied on the returned product(s) will be deducted from your final refund amount.</strong>
+                    </p>
+                    <p className="text-gray-600 text-[11px] sm:text-xs italic pt-0.5">
+                      (Note: In the rare case of a return due to verified manufacturing defect, damage in transit, or incorrect item delivery confirmed by us, the full refund including taxes will be honored).
+                    </p>
+                  </div>
+
                   <div className="pt-2 border-t border-gray-200/60 text-gray-500 text-[11px] sm:text-xs italic">
-                    <strong>Note:</strong> Shipping charges are non-refundable unless it&apos;s a defective product.
+                    <strong>Note:</strong> Outward and return shipping charges are non-refundable unless the return is due to transit damage or defective item confirmed by our team.
                   </div>
                 </div>
               </section>
@@ -916,9 +937,11 @@ export default function PolicyPage({ title }) {
             <div className="space-y-10 sm:space-y-12 font-sans text-[#1f3a1d]/85">
               
               {/* Intro Statement */}
-              <p className="text-sm sm:text-base text-[#0D3B2A]/80 leading-relaxed font-sans">
-                This Privacy Policy describes how we collect, use, and share your personal information when you visit or make a purchase from our website.
-              </p>
+              <div className="bg-[#FAF7F2] border-l-4 border-[#8A5E12] p-4 sm:p-5 rounded-r-2xl">
+                <p className="text-sm sm:text-base text-[#0D3B2A] leading-relaxed font-sans">
+                  At <strong className="font-bold">AL TOOBA PROPHETIC REMEDIES PRIVATE LIMITED</strong> (“Al-Tooba”, “we”, “our”, or “us”), we are deeply committed to protecting your privacy and ensuring complete transparency. This Privacy Policy describes how your personal information is collected, used, shared, and safeguarded when you visit or make a purchase from <strong className="font-semibold text-[#8A5E12]">altoobafoods.com</strong>.
+                </p>
+              </div>
 
               {/* 1. Information We Collect */}
               <section className="space-y-3.5">
@@ -927,181 +950,301 @@ export default function PolicyPage({ title }) {
                 </h3>
 
                 <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                  When you visit the website, we automatically collect certain information about your device, including your web browser, IP address, time zone, and cookies.
+                  We collect personal data to provide authentic Prophetic remedies, seamless doctor consultations, and smooth order fulfillment:
                 </p>
 
-                <p className="text-xs sm:text-sm text-gray-600 font-medium pt-1">
-                  When you make a purchase, we collect:
-                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                  <div className="bg-[#FAF7F2]/70 border border-[#0D3B2A]/10 rounded-xl p-4 space-y-2">
+                    <h4 className="text-xs sm:text-sm font-bold text-[#0D3B2A] uppercase tracking-wider">A. Information You Provide Directly</h4>
+                    <ul className="space-y-1.5 text-xs sm:text-sm text-gray-700">
+                      <li className="flex items-start gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#8A5E12] shrink-0 mt-1.5"></span>
+                        <span><strong>Personal Details:</strong> Full name, age, gender.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#8A5E12] shrink-0 mt-1.5"></span>
+                        <span><strong>Contact Details:</strong> Mobile phone number, email address.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#8A5E12] shrink-0 mt-1.5"></span>
+                        <span><strong>Delivery Details:</strong> Complete shipping and billing addresses with PIN codes.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#8A5E12] shrink-0 mt-1.5"></span>
+                        <span><strong>Consultation Records:</strong> Health concerns or notes voluntarily shared for Tibb-e-Nabawi guidance.</span>
+                      </li>
+                    </ul>
+                  </div>
 
-                <ul className="space-y-2 text-xs sm:text-sm text-gray-700">
-                  <li className="flex items-center gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
-                    <span>Name</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
-                    <span>Billing and shipping address</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
-                    <span>Payment information</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
-                    <span>Email address</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
-                    <span>Phone number</span>
-                  </li>
-                </ul>
+                  <div className="bg-[#FAF7F2]/70 border border-[#0D3B2A]/10 rounded-xl p-4 space-y-2">
+                    <h4 className="text-xs sm:text-sm font-bold text-[#0D3B2A] uppercase tracking-wider">B. Automatically Collected Information</h4>
+                    <ul className="space-y-1.5 text-xs sm:text-sm text-gray-700">
+                      <li className="flex items-start gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#8A5E12] shrink-0 mt-1.5"></span>
+                        <span><strong>Device Data:</strong> Web browser version, IP address, device type, and operating system.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#8A5E12] shrink-0 mt-1.5"></span>
+                        <span><strong>Usage &amp; Interaction:</strong> Pages visited, remedies viewed, time spent, and referring URLs.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#8A5E12] shrink-0 mt-1.5"></span>
+                        <span><strong>Order Identifiers:</strong> Product selections, cart items, order IDs, and payment statuses.</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               </section>
 
-              {/* 2. How We Use Your Information */}
+              {/* 2. Payment Security & Zero Credential Storage */}
               <section className="space-y-3.5">
                 <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#0D3B2A]">
-                  2. How We Use Your Information
+                  2. Payment Security &amp; Zero Credential Storage
                 </h3>
 
-                <p className="text-xs sm:text-sm text-gray-600">
-                  We use your information to:
+                <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                  Your financial security is our utmost priority. We want to be 100% transparent about how payments are handled on our platform:
                 </p>
 
-                <ul className="space-y-2 text-xs sm:text-sm text-gray-700">
-                  <li className="flex items-center gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
-                    <span>Process and fulfill orders</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
-                    <span>Communicate with you</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
-                    <span>Screen orders for fraud or risk</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
-                    <span>Improve customer experience</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
-                    <span>Send marketing updates (only with consent)</span>
-                  </li>
-                </ul>
-              </section>
-
-              {/* 3. Sharing Your Information */}
-              <section className="space-y-3.5">
-                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#0D3B2A]">
-                  3. Sharing Your Information
-                </h3>
-
-                <p className="text-xs sm:text-sm text-gray-600">
-                  We share your personal data with trusted third parties such as:
-                </p>
-
-                <ul className="space-y-2 text-xs sm:text-sm text-gray-700">
-                  <li className="flex items-center gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
-                    <span>Payment gateways</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
-                    <span>Shipping partners</span>
-                  </li>
-                  <li className="flex items-center gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
-                    <span>Analytics providers</span>
-                  </li>
-                </ul>
-
-                <div className="bg-[#FAF7F2] border border-[#0D3B2A]/10 rounded-xl p-3.5 sm:p-4 mt-2">
-                  <p className="font-bold text-xs sm:text-sm text-[#0D3B2A]">
-                    We do not sell your personal data.
+                <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-4 sm:p-5 space-y-2.5">
+                  <div className="flex items-center gap-2 text-[#0D3B2A] font-bold text-xs sm:text-sm">
+                    <svg className="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    <span>We Never Store Your Sensitive Financial Credentials</span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                    <strong>AL TOOBA PROPHETIC REMEDIES PRIVATE LIMITED does NOT store, capture, view, or process your credit/debit card numbers, CVV codes, Net Banking passwords, or UPI PINs.</strong>
+                  </p>
+                  <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                    All transactions are directly executed through authorized, RBI-compliant, PCI-DSS Level 1 certified payment gateways (such as Razorpay, PhonePe, Cashfree, and Shopify Payments) with end-to-end 256-bit SSL encryption.
                   </p>
                 </div>
               </section>
 
-              {/* 4. Data Retention */}
+              {/* 3. Cookies & Tracking Technologies */}
               <section className="space-y-3.5">
                 <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#0D3B2A]">
-                  4. Data Retention
+                  3. Cookies &amp; Tracking Technologies
                 </h3>
 
                 <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                  We retain your data for our records unless you request deletion.
+                  We use cookies, local web storage, and similar technologies to ensure smooth site navigation, fast page loading, and an optimized shopping experience:
                 </p>
+
+                <ul className="space-y-2.5 text-xs sm:text-sm text-gray-700">
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0 mt-1.5"></span>
+                    <span><strong>Essential &amp; Functional Cookies:</strong> Necessary for maintaining your active browsing session, shopping cart contents, wishlists, and secure checkout navigation.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0 mt-1.5"></span>
+                    <span><strong>Performance &amp; Analytics Tracking:</strong> Anonymized tools (such as Google Analytics and performance monitoring metrics) help us analyze traffic patterns, monitor website loading speeds, detect errors, and continuously improve user experience.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0 mt-1.5"></span>
+                    <span><strong>User Control:</strong> You can choose to disable or block cookies through your web browser settings. However, disabling essential cookies may impact certain interactive features such as the shopping bag or checkout.</span>
+                  </li>
+                </ul>
               </section>
 
-              {/* 5. Your Rights */}
+              {/* 4. Courier & Logistics Data Sharing */}
               <section className="space-y-3.5">
                 <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#0D3B2A]">
-                  5. Your Rights
+                  4. Courier &amp; Logistics Data Sharing
                 </h3>
 
-                <p className="text-xs sm:text-sm text-gray-600">
-                  You have the right to:
+                <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                  In order to fulfill and deliver your orders safely to your doorstep, we share necessary shipping information with authorized third-party logistics and courier partners (e.g., Shiprocket, Delhivery, Blue Dart, DTDC, India Post):
                 </p>
 
                 <ul className="space-y-2 text-xs sm:text-sm text-gray-700">
                   <li className="flex items-center gap-2.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
-                    <span>Access your data</span>
+                    <span><strong>Recipient Name:</strong> For package identification and handover.</span>
                   </li>
                   <li className="flex items-center gap-2.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
-                    <span>Correct your data</span>
+                    <span><strong>Delivery Address &amp; PIN Code:</strong> For accurate route navigation and door delivery.</span>
                   </li>
                   <li className="flex items-center gap-2.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
-                    <span>Request deletion</span>
+                    <span><strong>Primary Contact Number:</strong> For delivery coordination, transit calls, and SMS/OTP verification by the delivery executive.</span>
+                  </li>
+                </ul>
+
+                <p className="text-xs sm:text-sm text-gray-600 italic">
+                  Our logistics partners are contractually obligated to use this information strictly for shipping and transit verification and are prohibited from using it for independent marketing.
+                </p>
+              </section>
+
+              {/* 5. WhatsApp, SMS & Email Communication */}
+              <section className="space-y-3.5">
+                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#0D3B2A]">
+                  5. WhatsApp, SMS &amp; Email Communication
+                </h3>
+
+                <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                  By placing an order or registering an account, you agree to receive essential transactional and service communications:
+                </p>
+
+                <div className="space-y-2 text-xs sm:text-sm text-gray-700">
+                  <div className="p-3 bg-[#FAF7F2] rounded-xl border border-[#0D3B2A]/5">
+                    <p className="font-bold text-[#0D3B2A] mb-1">A. Transactional &amp; Order Notifications (Automated)</p>
+                    <p className="text-gray-600">Order confirmations, invoices, shipment tracking links, dispatch notices, delivery verification OTPs, and doctor consultation reminders sent via SMS, WhatsApp, and email.</p>
+                  </div>
+
+                  <div className="p-3 bg-[#FAF7F2] rounded-xl border border-[#0D3B2A]/5">
+                    <p className="font-bold text-[#0D3B2A] mb-1">B. Direct Customer Support</p>
+                    <p className="text-gray-600">One-on-one communication with our wellness team and customer service executives regarding dosage guidance, shipment inquiries, or general support.</p>
+                  </div>
+
+                  <div className="p-3 bg-[#FAF7F2] rounded-xl border border-[#0D3B2A]/5">
+                    <p className="font-bold text-[#0D3B2A] mb-1">C. Promotional &amp; Educational Updates (Consent-Based Only)</p>
+                    <p className="text-gray-600">Health articles, Sunnah wellness insights, new remedy launches, and special offers are shared only when you opt in. You may opt out or unsubscribe from promotional messages at any time by replying “STOP” on WhatsApp or clicking the unsubscribe link in our emails.</p>
+                  </div>
+                </div>
+              </section>
+
+              {/* 6. Third-Party Services & External Links */}
+              <section className="space-y-3.5">
+                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#0D3B2A]">
+                  6. Third-Party Services &amp; External Links
+                </h3>
+
+                <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                  We integrate trusted third-party service providers to power our platform, including cloud storefront hosting (Shopify), licensed payment processors, shipping aggregators, verified review platforms (Judge.me), and analytics tools.
+                </p>
+
+                <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                  Please be aware that these third-party services operate under their own independent privacy notices and policies. Once you click on an external link or are redirected to a third-party gateway, your information is governed by their respective privacy terms. We encourage you to review their policies prior to submitting data.
+                </p>
+
+                <div className="bg-[#FAF7F2] border border-[#0D3B2A]/10 rounded-xl p-3.5 sm:p-4">
+                  <p className="font-bold text-xs sm:text-sm text-[#0D3B2A]">
+                    We do not sell, rent, or trade your personal data to any third party for commercial monetization.
+                  </p>
+                </div>
+              </section>
+
+              {/* 7. Data Retention & Legal/Tax Compliance */}
+              <section className="space-y-3.5">
+                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#0D3B2A]">
+                  7. Data Retention &amp; Legal Compliance
+                </h3>
+
+                <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                  We retain personal customer data only for as long as necessary to fulfill the operational purposes described in this policy:
+                </p>
+
+                <ul className="space-y-2 text-xs sm:text-sm text-gray-700">
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0 mt-1.5"></span>
+                    <span><strong>Account &amp; Marketing Profiles:</strong> Active for as long as your account remains open or until you request deletion.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0 mt-1.5"></span>
+                    <span><strong>Statutory, Tax &amp; Accounting Records:</strong> Please note that if you submit a deletion request, certain transactional records—including commercial tax invoices, GST filings, payment settlement logs, and accounting ledger entries—<strong>must be lawfully retained</strong> for the mandatory periods prescribed under applicable Indian tax, corporate, and audit regulations before permanent, secure purging.</span>
                   </li>
                 </ul>
               </section>
 
-              {/* 6. Security */}
+              {/* 8. Your Privacy Rights */}
               <section className="space-y-3.5">
                 <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#0D3B2A]">
-                  6. Security
+                  8. Your Privacy Rights
+                </h3>
+
+                <p className="text-xs sm:text-sm text-gray-600">
+                  In accordance with applicable privacy guidelines, you have the following rights:
+                </p>
+
+                <ul className="space-y-2 text-xs sm:text-sm text-gray-700">
+                  <li className="flex items-center gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
+                    <span><strong>Right to Access:</strong> Request a summary of the personal information we hold about you.</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
+                    <span><strong>Right to Rectification:</strong> Request correction of inaccurate, outdated, or incomplete data.</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
+                    <span><strong>Right to Erasure:</strong> Request deletion of your personal account data (subject to statutory tax/invoice retention requirements).</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D3B2A] shrink-0"></span>
+                    <span><strong>Right to Withdraw Consent:</strong> Unsubscribe from marketing newsletters or promotional updates at any time.</span>
+                  </li>
+                </ul>
+              </section>
+
+              {/* 9. Security Measures */}
+              <section className="space-y-3.5">
+                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#0D3B2A]">
+                  9. Security Measures
                 </h3>
 
                 <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                  We use industry-standard security measures to protect your data.
+                  We maintain industry-standard physical, electronic, and procedural safeguards to protect your personal information against unauthorized access, alteration, disclosure, or destruction. Our infrastructure includes 256-bit SSL encryption, restricted administrative access, and strict internal confidentiality standards.
                 </p>
               </section>
 
-              {/* 7. Changes to Policy */}
+              {/* 10. Grievance Redressal & Privacy Contact */}
               <section className="space-y-3.5">
                 <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#0D3B2A]">
-                  7. Changes to Policy
+                  10. Grievance Officer &amp; Privacy Contact
                 </h3>
 
                 <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                  We may update this policy periodically. Your continued use of our website signifies your acceptance of these changes.
+                  If you have questions regarding this Privacy Policy, wish to exercise your data rights, or have any grievances regarding your personal information, please contact our designated Grievance &amp; Compliance Officer:
                 </p>
-              </section>
 
-              {/* 8. Contact Information */}
-              <section className="space-y-3.5">
-                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#0D3B2A]">
-                  8. Contact Information
-                </h3>
+                <div className="bg-[#FAF7F2] border border-[#0D3B2A]/10 rounded-2xl p-5 sm:p-7 space-y-3 text-xs sm:text-sm">
+                  <div className="border-b border-[#0D3B2A]/10 pb-3">
+                    <p className="font-bold text-[#0D3B2A] text-sm sm:text-base">
+                      AL TOOBA PROPHETIC REMEDIES PRIVATE LIMITED
+                    </p>
+                    <p className="text-gray-600 text-xs mt-0.5">
+                      Attn: Grievance &amp; Privacy Compliance Officer
+                    </p>
+                  </div>
 
-                <div className="bg-[#FAF7F2] border border-[#0D3B2A]/5 rounded-2xl p-4 sm:p-6 space-y-2.5 text-xs sm:text-sm">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                    <span className="font-bold text-[#0D3B2A] min-w-[90px]">Email:</span>
-                    <a href="mailto:altoobafoods2026@gmail.com" className="text-[#D4A24C] font-semibold hover:underline">altoobafoods2026@gmail.com</a>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div>
+                      <span className="font-bold text-[#0D3B2A] block mb-0.5">Official Email:</span>
+                      <a href="mailto:altoobafoods2026@gmail.com" className="text-[#8A5E12] font-semibold hover:underline">
+                        altoobafoods2026@gmail.com
+                      </a>
+                    </div>
+                    <div>
+                      <span className="font-bold text-[#0D3B2A] block mb-0.5">Direct Helpline / WhatsApp:</span>
+                      <a href="tel:+918433284322" className="text-[#8A5E12] font-semibold hover:underline">
+                        +91 84332 84322
+                      </a>
+                    </div>
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                    <span className="font-bold text-[#0D3B2A] min-w-[90px]">Phone:</span>
-                    <a href="tel:+918433284322" className="text-[#D4A24C] font-semibold hover:underline">+91 84332 84322</a>
+
+                  <div className="pt-2 border-t border-[#0D3B2A]/10">
+                    <span className="font-bold text-[#0D3B2A] block mb-0.5">Registered Corporate Office:</span>
+                    <span className="text-gray-700 leading-relaxed block">
+                      AQSA MASJID ROAD, NEAR TASLEEM BHAI HOUSE, AQSA MASJID, NANKAR, Rampur, Uttar Pradesh - 244901, India
+                    </span>
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                    <span className="font-bold text-[#0D3B2A] min-w-[90px]">Location:</span>
-                    <span className="text-gray-700">Bilaspur Gate, Nainital Road, Rampur, UP</span>
+
+                  <div className="pt-2 text-[11px] text-gray-500">
+                    <span>Operating Hours: Monday – Saturday | 10:00 AM – 7:00 PM IST (Response time within 24–48 hours)</span>
                   </div>
+                </div>
+
+                {/* Final Sign-off Badge */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-gray-100 text-xs text-gray-500">
+                  <span className="font-medium text-[#0D3B2A]">
+                    Al-Tooba® Authentic Prophetic Wellness
+                  </span>
+                  <span className="font-semibold text-[#8A5E12]">
+                    Last Updated: September 2026
+                  </span>
                 </div>
               </section>
 
