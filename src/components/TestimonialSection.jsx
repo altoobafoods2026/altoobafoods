@@ -40,7 +40,7 @@ export default function TestimonialSection() {
             <div>
               {/* Meaningful Section Heading */}
               <div className="flex items-center gap-2 mb-2">
-                <span className="inline-flex items-center text-[#D4A24C] text-[10px] sm:text-xs font-sans font-bold uppercase tracking-[0.2em] bg-[#0D3B2A]/5 px-3 py-1 rounded-full">
+                <span className="inline-flex items-center text-[#8A5E12] text-[10px] sm:text-xs font-sans font-bold uppercase tracking-[0.2em] bg-[#0D3B2A]/5 px-3 py-1 rounded-full">
                   OUR FOUNDER'S JOURNEY
                 </span>
               </div>
@@ -112,8 +112,12 @@ export default function TestimonialSection() {
           {/* Right Image Card */}
           <div className="relative w-full h-[470px] lg:h-[550px] xl:h-auto rounded-3xl overflow-hidden shadow-sm group border border-[#D4A24C]/25">
             <img 
-              src="/hakeem_attari.jpg" 
+              src="/hakeem_attari.webp" 
               alt="Hakeem Abdul Qadir Attari" 
+              width="520"
+              height="643"
+              loading="lazy"
+              decoding="async"
               className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
             />
             {/* Gradient Overlay for text readability */}

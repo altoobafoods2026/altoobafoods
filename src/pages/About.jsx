@@ -57,7 +57,7 @@ export default function About() {
               </p>
             </div>
             <div className="lg:col-span-5 relative aspect-[4/5] rounded-2xl overflow-hidden border border-[#D4A24C]/25 bg-[#FAF7F2] shadow-lg group">
-              <img src="/hakeem_attari.jpg" alt="Hakeem Abdul Qadir Attari" className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700" />
+              <img src="/hakeem_attari.webp" alt="Hakeem Abdul Qadir Attari" width="520" height="643" loading="lazy" decoding="async" className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               <div className="absolute bottom-4 left-4 bg-black/65 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
                 <p className="text-[#FAF7F2] font-serif font-bold text-sm">Hakeem Abdul Qadir Attari</p>
@@ -331,7 +331,7 @@ export default function About() {
           {/* Founder strip */}
           <div className="inline-flex items-center gap-4 bg-white border border-[#D4A24C]/20 rounded-full px-5 py-2.5 shadow-sm mb-12">
             <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#D4A24C]/40 shrink-0">
-              <img src="/hakeem_attari.jpg" alt="Hakeem Abdul Qadir Attari" className="w-full h-full object-cover object-top" />
+              <img src="/hakeem_attari.webp" alt="Hakeem Abdul Qadir Attari" width="40" height="40" loading="lazy" decoding="async" className="w-full h-full object-cover object-top" />
             </div>
             <div className="text-left">
               <p className="font-serif font-bold text-[#0D3B2A] text-sm leading-tight">Hakeem Abdul Qadir Attari</p>

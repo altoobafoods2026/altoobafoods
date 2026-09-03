@@ -6,13 +6,19 @@ import MagneticButton from './MagneticButton';
 
 import { useCartStore } from '../../store/cartStore';
 import { useToastStore } from '../../store/toastStore';
+import { optimizeShopifyImage } from '../../utils/imageOptimizer';
 
 const CursorImageSwap = ({ frontImg, backImg, alt }) => {
-  if (!backImg) {
+  const optimizedFront = optimizeShopifyImage(frontImg, 350);
+  const optimizedBack = optimizeShopifyImage(backImg, 350);
+
+  if (!optimizedBack) {
     return (
       <img 
-        src={frontImg} 
+        src={optimizedFront} 
         alt={alt}
+        loading="lazy"
+        decoding="async"
         className="w-full h-full object-cover object-center group-hover/img:scale-110 transition-transform duration-[1.2s] ease-out"
       />
     );
@@ -21,13 +27,17 @@ const CursorImageSwap = ({ frontImg, backImg, alt }) => {
   return (
     <div className="relative w-full h-full overflow-hidden group/swap">
       <img 
-        src={frontImg} 
+        src={optimizedFront} 
         alt={alt}
+        loading="lazy"
+        decoding="async"
         className="absolute inset-0 w-full h-full object-cover object-center transition-all duration-500 ease-out group-hover/swap:opacity-0 group-hover/swap:scale-105 opacity-100 scale-100"
       />
       <img 
-        src={backImg}
+        src={optimizedBack}
         alt={`${alt} back`}
+        loading="lazy"
+        decoding="async"
         className="absolute inset-0 w-full h-full object-cover object-center transition-all duration-500 ease-out opacity-0 group-hover/swap:opacity-100 group-hover/swap:scale-105"
       />
     </div>
@@ -116,27 +126,27 @@ export default function NoorBestSellers({ products = [] }) {
                         
                         {/* Brand and Rating Row */}
                         <div className="flex flex-wrap items-center justify-between mb-1 sm:mb-1.5 gap-1">
-                          <span className="text-[9px] sm:text-[10px] font-sans font-bold uppercase tracking-widest text-gray-400">AL-TOOBA</span>
+                          <span className="text-[9px] sm:text-[10px] font-sans font-bold uppercase tracking-widest text-gray-600">AL-TOOBA</span>
                           <div className="flex items-center gap-1 text-[10px] sm:text-xs">
-                            <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-[#D4A24C]" viewBox="0 0 24 24">
+                            <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-[#8A5E12]" viewBox="0 0 24 24">
                               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                             </svg>
-                            <span className="font-sans font-medium text-gray-500">{product.rating}</span>
-                            <span className="text-gray-300 mx-0.5 hidden sm:inline">|</span>
-                            <span className="font-sans text-gray-400 hidden sm:inline">{product.reviewCount || 0}</span>
+                            <span className="font-sans font-medium text-gray-700">{product.rating}</span>
+                            <span className="text-gray-400 mx-0.5 hidden sm:inline">|</span>
+                            <span className="font-sans text-gray-600 hidden sm:inline">{product.reviewCount || 0}</span>
                           </div>
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-[13px] sm:text-[15px] font-sans font-bold text-[#0D3B2A] mb-1.5 sm:mb-2 leading-snug group-hover:text-[#D4A24C] transition-colors duration-300 line-clamp-2 min-h-[36px] sm:min-h-[40px]">
+                        <h3 className="text-[13px] sm:text-[15px] font-sans font-bold text-[#0D3B2A] mb-1.5 sm:mb-2 leading-snug group-hover:text-[#8A5E12] transition-colors duration-300 line-clamp-2 min-h-[36px] sm:min-h-[40px]">
                           {product.name}
                         </h3>
                         
                         {/* Pricing Row */}
                         <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-2 sm:mb-3 mt-auto">
-                          <span className="text-[15px] sm:text-[19px] font-sans font-bold text-[#D4A24C]">₹{product.price.toFixed(2)}</span>
+                          <span className="text-[15px] sm:text-[19px] font-sans font-bold text-[#8A5E12]">₹{product.price.toFixed(2)}</span>
                           {product.mrp && product.mrp > product.price && (
-                            <span className="text-[10px] sm:text-xs font-sans text-gray-400 line-through">
+                            <span className="text-[10px] sm:text-xs font-sans text-gray-600 line-through">
                               ₹{product.mrp.toFixed(2)}
                             </span>
                           )}

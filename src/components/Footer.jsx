@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useToastStore } from '../store/toastStore';
-import logoSrc from '../assets/logo.png';
+import logoSrc from '../assets/logo.webp';
 
 export default function Footer() {
   const showToast = useToastStore((state) => state.showToast);
@@ -24,7 +24,7 @@ export default function Footer() {
           {/* Column 1: Brand & Logo */}
           <div className="flex flex-col space-y-6">
             <Link to="/" className="inline-block mr-auto hover:opacity-95 transition-opacity">
-              <img src={logoSrc} alt="Al-Tooba Logo" className="h-20 sm:h-24 w-auto object-left brightness-0 invert" />
+              <img src={logoSrc} alt="Al-Tooba Logo" width="192" height="96" loading="lazy" decoding="async" className="h-20 sm:h-24 w-auto object-left brightness-0 invert" />
             </Link>
             <p className="text-sm leading-relaxed text-muted-green">
               Al Tooba® provides premium prophetic remedies and organic wellness solutions crafted with pure natural essence, shared with love.
@@ -143,7 +143,7 @@ export default function Footer() {
 
         {/* Bottom copyright details */}
         <div className="pt-8 border-t border-parchment/10 flex flex-col md:flex-row items-center justify-start gap-2 text-left">
-          <p className="text-[11px] text-[#5a8060] font-sans font-semibold tracking-wider flex flex-wrap items-center justify-center md:justify-start gap-2">
+          <p className="text-[11px] text-[#b4d6be] font-sans font-semibold tracking-wider flex flex-wrap items-center justify-center md:justify-start gap-2">
             <span>© {new Date().getFullYear()} AL-TOOBA®. ALL RIGHTS RESERVED.</span>
             <span className="hidden md:inline">|</span>
            { /*<span>

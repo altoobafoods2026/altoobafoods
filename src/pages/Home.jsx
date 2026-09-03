@@ -111,7 +111,10 @@ export default function Home() {
             muted
             playsInline
             preload="metadata"
-          />
+            aria-label="Al-Tooba Prophetic Remedies background ambient video"
+          >
+            <track kind="captions" src="data:text/vtt;charset=utf-8,WEBVTT" label="English" default />
+          </video>
         ) : (
           <div className="absolute inset-0 bg-[#0D3B2A] z-0" />
         )}

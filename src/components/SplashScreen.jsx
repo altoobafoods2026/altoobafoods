@@ -1,4 +1,4 @@
-import logoSrc from '../assets/logo.png';
+import logoSrc from '../assets/logo.webp';
 
 export default function SplashScreen({ isLoading = true }) {
   return (
@@ -18,6 +18,8 @@ export default function SplashScreen({ isLoading = true }) {
           <img
             src={logoSrc}
             alt="Al-Tooba Prophetic Remedies"
+            width="192"
+            height="96"
             className="h-20 sm:h-24 w-auto object-contain drop-shadow-md relative z-10 animate-fade-in"
           />
         </div>

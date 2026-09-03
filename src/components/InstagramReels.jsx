@@ -146,13 +146,13 @@ export default function InstagramReels() {
                   isMobile ? 'w-[260px] h-[460px]' : 'w-[340px] h-[600px]'
                 }`}
               >
-                {/* Native video tag */}
+                {/* Native video tag - Only load media stream for active center reel */}
                 <video 
                   key={`${short.id}-${isCenter}`}
-                  src={short.videoSrc}
+                  src={isCenter ? short.videoSrc : undefined}
                   poster={short.poster || undefined}
                   autoPlay={isCenter}
-                  preload="metadata"
+                  preload={isCenter ? "metadata" : "none"}
                   loop
                   muted={isMuted}
                   playsInline

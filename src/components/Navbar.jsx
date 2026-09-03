@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import { useWishlistStore } from '../store/wishlistStore';
 import CartDrawer from './CartDrawer';
-import logoSrc from '../assets/logo.png';
+import logoSrc from '../assets/logo.webp';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -110,7 +110,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-6 sm:px-8 py-4 flex items-center justify-between">
           {/* Logo Area */}
           <a href="/" className="flex items-center w-auto transition-opacity hover:opacity-90">
-            <img src={logoSrc} alt="Al-Tooba Logo" className={`h-[58px] sm:h-[70px] w-auto transition-all duration-500 ${isTransparent ? 'drop-shadow-[0_0_15px_rgba(255,255,255,0.85)] brightness-[1.2]' : 'drop-shadow-sm'}`} />
+            <img src={logoSrc} alt="Al-Tooba Logo" width="140" height="70" className={`h-[58px] sm:h-[70px] w-auto transition-all duration-500 ${isTransparent ? 'drop-shadow-[0_0_15px_rgba(255,255,255,0.85)] brightness-[1.2]' : 'drop-shadow-sm'}`} />
           </a>
 
           {/* Nav Links Center */}
