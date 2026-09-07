@@ -15,6 +15,23 @@ export default function ScrollToTop() {
     } else {
       window.scrollTo(0, 0);
     }
+
+    // Dynamic Canonical Tag Management for Googlebot & SEO
+    try {
+      const baseUrl = 'https://www.altoobafoods.com';
+      const cleanPath = pathname === '/' ? '/' : pathname.replace(/\/+$/, '');
+      const canonicalUrl = `${baseUrl}${cleanPath}`;
+
+      let canonicalTag = document.querySelector("link[rel='canonical']");
+      if (!canonicalTag) {
+        canonicalTag = document.createElement('link');
+        canonicalTag.setAttribute('rel', 'canonical');
+        document.head.appendChild(canonicalTag);
+      }
+      canonicalTag.setAttribute('href', canonicalUrl);
+    } catch (e) {
+      console.warn('Could not update canonical URL', e);
+    }
   }, [pathname, hash]);
 
   return null;
