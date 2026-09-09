@@ -40,6 +40,7 @@ const GlobalSections = () => {
     location.pathname === '/studio' ||
     location.pathname === '/about' ||
     location.pathname === '/login' ||
+    location.pathname === '/account' ||
     location.pathname === '/cart' ||
     location.pathname.startsWith('/product/') ||
     location.pathname === '/privacy-policy' ||
@@ -88,6 +89,7 @@ export default function App() {
               <Route path="/contact-us" element={<ContactUs />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/account" element={<Login />} />
               
               {/* Policy Pages */}
               <Route path="/privacy-policy" element={<PolicyPage title="Privacy Policy" />} />

@@ -209,14 +209,26 @@
 
         // 1. Intercept window.fetch
         const originalFetch = window.fetch;
-        window.fetch = async function(input, init) {
-          const url = typeof input === 'string' ? input : (input && input.url ? input.url : '');
-          if (url.includes('/cart.js') || url.includes('/cart.json')) {
-            const payload = getCartPayload();
-            return new Response(JSON.stringify(payload), {
-              status: 200,
-              headers: { 'Content-Type': 'application/json' }
-            });
+        window.fetch = function(input, init) {
+          try {
+            const url = typeof input === 'string' ? input : (input && input.url ? input.url : '');
+            if (url.includes('/cart.js') || url.includes('/cart.json')) {
+              const payload = getCartPayload();
+              return Promise.resolve(new Response(JSON.stringify(payload), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+              }));
+            }
+            if (url.includes('gkx.gokwik.co')) {
+              const proxiedUrl = url.replace('https://gkx.gokwik.co', '/gkx-proxy');
+              if (typeof input === 'string') {
+                return originalFetch.call(this, proxiedUrl, init);
+              } else if (input && typeof input === 'object') {
+                return originalFetch.call(this, new Request(proxiedUrl, input), init);
+              }
+            }
+          } catch (e) {
+            console.warn('[Fetch Interceptor Error]', e);
           }
           return originalFetch.apply(this, arguments);
         };
@@ -228,12 +240,16 @@
           let isCartRequest = false;
 
           const originalOpen = xhr.open;
-          xhr.open = function(method, url) {
-            const urlStr = String(url || '');
+          xhr.open = function(method, url, async, user, password) {
+            let urlStr = String(url || '');
             if (urlStr.includes('/cart.js') || urlStr.includes('/cart.json')) {
               isCartRequest = true;
             }
-            return originalOpen.apply(xhr, arguments);
+            let targetUrl = url;
+            if (urlStr.includes('gkx.gokwik.co')) {
+              targetUrl = urlStr.replace('https://gkx.gokwik.co', '/gkx-proxy');
+            }
+            return originalOpen.call(xhr, method, targetUrl, async !== false, user, password);
           };
 
           const originalSend = xhr.send;
@@ -254,6 +270,24 @@
               }, 10);
               return;
             }
+
+            // Ensure Al-Tooba logo is injected when merchant components are loaded
+            xhr.addEventListener('readystatechange', function() {
+              if (xhr.readyState === 4 && xhr.status === 200) {
+                try {
+                  const ALTOOBA_LOGO = 'https://cdn.jsdelivr.net/gh/altoobafoods2026/altoobafoods@main/src/assets/logo.png';
+                  let raw = xhr.responseText;
+                  if (raw && (raw.includes('Default') && raw.includes('merchant logo'))) {
+                    let updated = raw
+                      .replace(/https:\/\/assets\.gokwik\.co\/uploads\/[0-9]+_Default%20merchant%20logo\.png/g, ALTOOBA_LOGO)
+                      .replace(/https:\/\/assets\.gokwik\.co\/uploads\/[0-9]+_Default merchant logo\.png/g, ALTOOBA_LOGO);
+                    Object.defineProperty(xhr, 'responseText', { value: updated, writable: true, configurable: true });
+                    Object.defineProperty(xhr, 'response', { value: updated, writable: true, configurable: true });
+                  }
+                } catch (e) {}
+              }
+            });
+
             return originalSend.apply(xhr, arguments);
           };
 
@@ -297,6 +331,23 @@
         gkPlatform: "SHOPIFY",
         integrationType: "CUSTOM_SHOPIFY"
       };
+
+      // Pre-seed Al-Tooba brand logo in KwikPass modal session storage
+      (function() {
+        const ALTOOBA_LOGO = 'https://cdn.jsdelivr.net/gh/altoobafoods2026/altoobafoods@main/src/assets/logo.png';
+        try {
+          ['LOGIN_MODAL_ASSETS', 'CUSTOM_LOGIN_MODAL_ASSETS'].forEach(function(key) {
+            const raw = sessionStorage.getItem(key);
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (parsed) {
+                parsed.merchant_icon = ALTOOBA_LOGO;
+                sessionStorage.setItem(key, JSON.stringify(parsed));
+              }
+            }
+          });
+        } catch (e) {}
+      })();
     </script>
     <script src="https://pdp.gokwik.co/kwikpass/kwikpass-core-functions.js" defer></script>
     <script src="https://pdp.gokwik.co/kwikpass/plugin/build/kp-merchant-v2.js" defer></script>
