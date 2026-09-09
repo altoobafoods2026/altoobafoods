@@ -64,23 +64,113 @@ export function loadGokwikSdk() {
 }
 
 /**
+ * Supplies the complete cart payload to window.merchantInfo.cart as required for GoKwik Headless Checkout
+ */
+export function populateGokwikCartPayload(cartId = '', items = null) {
+  if (typeof window === 'undefined') return;
+
+  const rawCart = localStorage.getItem('cart') || localStorage.getItem('altooba_cart') || '[]';
+  let cartItems = [];
+  try {
+    const parsed = JSON.parse(rawCart);
+    cartItems = Array.isArray(parsed) ? parsed : (parsed?.state?.items || []);
+  } catch (e) {
+    cartItems = [];
+  }
+
+  if (items && items.length > 0) {
+    cartItems = items.map((it) => {
+      let vId = it.selectedVariant && it.product?.variants?.find(
+        (v) => v.name === it.selectedVariant || v.title === it.selectedVariant
+      )?.id;
+      if (!vId && it.product?.variants?.[0]?.id) vId = it.product.variants[0].id;
+      if (!vId) vId = it.variantId || it.id || '1';
+
+      return {
+        id: vId,
+        variantId: vId,
+        title: it.product?.title || it.title || it.name || '',
+        price: it.price,
+        quantity: it.quantity || 1,
+        image: it.product?.images?.[0]?.url || it.image || '',
+      };
+    });
+  }
+
+  const subtotal = cartItems.reduce((acc, it) => acc + (Number(it.price || 0) * (it.quantity || 1)), 0);
+  const totalPaise = Math.round(subtotal * 100);
+  const effectiveCartId = cartId || localStorage.getItem('shopify_cart_id') || '';
+  if (effectiveCartId) {
+    try {
+      localStorage.setItem('shopify_cart_id', effectiveCartId);
+    } catch (e) {}
+  }
+  const token = effectiveCartId.replace('gid://shopify/Cart/', '').split('?')[0];
+
+  window.merchantInfo = {
+    mid: GOKWIK_MID,
+    appId: GOKWIK_APP_ID,
+    storeId: GOKWIK_STORE_ID,
+    environment: GOKWIK_ENV,
+    type: 'merchantInfo',
+    gkPlatform: 'SHOPIFY',
+    integrationType: 'CUSTOM_SHOPIFY',
+    cart: {
+      id: effectiveCartId,
+      token: token,
+      original_total_price: totalPaise,
+      total_price: totalPaise,
+      item_count: cartItems.reduce((acc, it) => acc + (it.quantity || 1), 0),
+      items: cartItems.map((it) => {
+        const rawId = it.variantId || it.id || '1';
+        const numericId = String(rawId).replace(/\D/g, '') || 1;
+        return {
+          id: Number(numericId),
+          variant_id: Number(numericId),
+          quantity: it.quantity || 1,
+          title: it.title || it.name || '',
+          price: Math.round(Number(it.price || 0) * 100),
+          original_price: Math.round(Number(it.price || 0) * 100),
+          line_price: Math.round(Number(it.price || 0) * (it.quantity || 1) * 100),
+          image: it.image || '',
+        };
+      }),
+    },
+  };
+
+  return window.merchantInfo.cart;
+}
+
+/**
+ * Direct Instant Checkout trigger with complete cart payload
+ */
+export function handleInstantCheckout(items = null) {
+  populateGokwikCartPayload('', items);
+
+  if (typeof window.triggerGokwikCustomCheckout === 'function') {
+    try {
+      window.triggerGokwikCustomCheckout();
+      return true;
+    } catch (err) {
+      console.error('Error in triggerGokwikCustomCheckout:', err);
+    }
+  }
+  return false;
+}
+
+/**
  * Opens GoKwik Checkout modal for a given Shopify cartId.
  * Falls back to Shopify native checkout URL if GoKwik is blocked or unavailable.
  *
  * @param {string} cartId - Shopify Cart GID (e.g. gid://shopify/Cart/...)
  * @param {string} checkoutUrl - Fallback native Shopify checkout URL
+ * @param {Array} items - Optional cart items
  */
-export async function triggerGokwikCheckout(cartId, checkoutUrl) {
-  if (!cartId) {
-    throw new Error('Missing cartId for GoKwik checkout');
-  }
+export async function triggerGokwikCheckout(cartId, checkoutUrl, items = null) {
+  // Populate the full cart object with tokens and items
+  populateGokwikCartPayload(cartId, items);
 
-  initGokwikMerchantInfo();
-
-  // Assign the cart ID to merchantInfo as required by GoKwik Scenario 2
-  window.merchantInfo.cart = { id: cartId };
-
-  // Check if SDK is available or try to wait briefly
+  // Check if SDK is available
   if (typeof window.triggerGokwikCustomCheckout === 'function') {
     try {
       window.triggerGokwikCustomCheckout();
@@ -111,11 +201,21 @@ export async function initiateGokwikCheckout(items) {
     throw new Error('Your cart is empty');
   }
 
-  // 1. Create official Shopify Cart
-  const { cartId, checkoutUrl } = await createShopifyCart(items);
+  // 1. Immediately populate local cart state so SDK has full items payload
+  populateGokwikCartPayload('', items);
 
-  // 2. Trigger GoKwik with Shopify fallback
-  await triggerGokwikCheckout(cartId, checkoutUrl);
+  try {
+    // 2. Create official Shopify Cart
+    const { cartId, checkoutUrl } = await createShopifyCart(items);
 
-  return { cartId, checkoutUrl };
+    // 3. Trigger GoKwik with full cart payload
+    await triggerGokwikCheckout(cartId, checkoutUrl, items);
+
+    return { cartId, checkoutUrl };
+  } catch (err) {
+    console.warn('Shopify cart creation error, falling back to local cart checkout:', err);
+    // If Shopify GraphQL fails or times out, trigger GoKwik with local cart payload
+    handleInstantCheckout(items);
+    return { cartId: '', checkoutUrl: '' };
+  }
 }

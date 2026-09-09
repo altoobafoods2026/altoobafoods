@@ -151,6 +151,119 @@
     }
     </script>
     
+    <!-- GoKwik /cart.js & /cart.json Client-Side Interceptor (For Headless React Architecture) -->
+    <script>
+      (function() {
+        if (typeof window === 'undefined') return;
+
+        function getCartPayload() {
+          try {
+            const rawCart = localStorage.getItem('cart') || localStorage.getItem('altooba_cart') || '[]';
+            let cartItems = [];
+            try {
+              const parsed = JSON.parse(rawCart);
+              cartItems = Array.isArray(parsed) ? parsed : (parsed?.state?.items || []);
+            } catch (e) {
+              cartItems = [];
+            }
+
+            const subtotal = cartItems.reduce(function(acc, it) {
+              return acc + (Number(it.price || 0) * (it.quantity || 1));
+            }, 0);
+            const totalPaise = Math.round(subtotal * 100);
+            const cartId = localStorage.getItem('shopify_cart_id') || 'cart_token';
+            const cartToken = cartId.replace('gid://shopify/Cart/', '').split('?')[0];
+
+            return {
+              token: cartToken,
+              id: cartId,
+              note: null,
+              attributes: {},
+              original_total_price: totalPaise,
+              total_price: totalPaise,
+              item_count: cartItems.reduce(function(acc, it) { return acc + (it.quantity || 1); }, 0),
+              items: cartItems.map(function(it) {
+                const rawId = it.variantId || it.id || it.product?.variants?.[0]?.id || it.product?.id || '1';
+                const numericId = String(rawId).replace(/\D/g, '') || 1;
+                return {
+                  id: Number(numericId),
+                  variant_id: Number(numericId),
+                  quantity: it.quantity || 1,
+                  title: it.title || it.name || it.product?.title || '',
+                  product_title: it.product?.title || it.title || it.name || '',
+                  variant_title: it.selectedVariant || '',
+                  price: Math.round(Number(it.price || 0) * 100),
+                  original_price: Math.round(Number(it.price || 0) * 100),
+                  line_price: Math.round(Number(it.price || 0) * (it.quantity || 1) * 100),
+                  image: it.image || it.featuredImage || it.product?.images?.[0]?.url || it.product?.image || '',
+                  url: '/product/' + (it.product?.handle || '')
+                };
+              }),
+              currency: 'INR'
+            };
+          } catch (err) {
+            console.warn('[GoKwik Interceptor Error]', err);
+            return { token: 'cart_token', items: [], item_count: 0, total_price: 0, currency: 'INR' };
+          }
+        }
+
+        // 1. Intercept window.fetch
+        const originalFetch = window.fetch;
+        window.fetch = async function(input, init) {
+          const url = typeof input === 'string' ? input : (input && input.url ? input.url : '');
+          if (url.includes('/cart.js') || url.includes('/cart.json')) {
+            const payload = getCartPayload();
+            return new Response(JSON.stringify(payload), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          }
+          return originalFetch.apply(this, arguments);
+        };
+
+        // 2. Intercept window.XMLHttpRequest (Used by GoKwik SDK)
+        const OriginalXHR = window.XMLHttpRequest;
+        function CustomXHR() {
+          const xhr = new OriginalXHR();
+          let isCartRequest = false;
+
+          const originalOpen = xhr.open;
+          xhr.open = function(method, url) {
+            const urlStr = String(url || '');
+            if (urlStr.includes('/cart.js') || urlStr.includes('/cart.json')) {
+              isCartRequest = true;
+            }
+            return originalOpen.apply(xhr, arguments);
+          };
+
+          const originalSend = xhr.send;
+          xhr.send = function(body) {
+            if (isCartRequest) {
+              const payload = getCartPayload();
+              const responseText = JSON.stringify(payload);
+
+              Object.defineProperty(xhr, 'readyState', { value: 4, writable: true });
+              Object.defineProperty(xhr, 'status', { value: 200, writable: true });
+              Object.defineProperty(xhr, 'statusText', { value: 'OK', writable: true });
+              Object.defineProperty(xhr, 'responseText', { value: responseText, writable: true });
+              Object.defineProperty(xhr, 'response', { value: responseText, writable: true });
+
+              setTimeout(function() {
+                if (typeof xhr.onreadystatechange === 'function') xhr.onreadystatechange();
+                if (typeof xhr.onload === 'function') xhr.onload();
+              }, 10);
+              return;
+            }
+            return originalSend.apply(xhr, arguments);
+          };
+
+          return xhr;
+        }
+        CustomXHR.prototype = OriginalXHR.prototype;
+        window.XMLHttpRequest = CustomXHR;
+      })();
+    </script>
+
     <!-- GoKwik 1-Click Checkout & KwikPass SDK (Scenario 2: Custom Headless Storefront) -->
     <script>
       window.merchantInfo = {
