@@ -11,7 +11,9 @@ export default function Navbar() {
   const [isHidden, setIsHidden] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileProductsOpen, setIsMobileProductsOpen] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  const isCartOpen = useCartStore((state) => state.isDrawerOpen);
+  const openCart = useCartStore((state) => state.openDrawer);
+  const closeCart = useCartStore((state) => state.closeDrawer);
   const [isLoggedIn, setIsLoggedIn] = useState(() => isKwikPassLoggedIn());
   
   const location = useLocation();
@@ -180,7 +182,7 @@ export default function Navbar() {
 
             {/* Shopping Cart */}
             <button
-              onClick={() => setIsCartOpen(true)}
+              onClick={openCart}
               className={`p-2 rounded-full transition-colors relative cursor-pointer ${isTransparent ? 'hover:bg-white/10 hover:text-white' : 'hover:bg-forest/5 hover:text-forest/80'}`}
               aria-label="Shopping Cart"
             >
@@ -321,7 +323,7 @@ export default function Navbar() {
       </div>
 
       {/* Cart Slider Drawer */}
-      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      <CartDrawer isOpen={isCartOpen} onClose={closeCart} />
     </>
   );
 }

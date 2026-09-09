@@ -101,8 +101,6 @@ export default function ProductDetail() {
     for (let i = 0; i < quantity; i++) {
       addItem(product, selectedVariant?.title || null);
     }
-    const variantSuffix = selectedVariant && selectedVariant.title !== 'Default Title' ? ` (${selectedVariant.title})` : '';
-    showToast(`Added ${quantity}x ${product.name}${variantSuffix} to cart`);
   };
 
   const handleBuyNow = async () => {
@@ -111,7 +109,7 @@ export default function ProductDetail() {
       return;
     }
     for (let i = 0; i < quantity; i++) {
-      addItem(product, selectedVariant?.title || null);
+      addItem(product, selectedVariant?.title || null, false);
     }
     try {
       setIsBuyingNow(true);

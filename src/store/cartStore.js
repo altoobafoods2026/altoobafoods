@@ -62,8 +62,13 @@ export const useCartStore = create((set, get) => ({
   items: initialItems,
   total: initialTotal,
   count: initialCount,
+  isDrawerOpen: false,
+
+  openDrawer: () => set({ isDrawerOpen: true }),
+  closeDrawer: () => set({ isDrawerOpen: false }),
+  setIsDrawerOpen: (isOpen) => set({ isDrawerOpen: isOpen }),
   
-  addItem: (product, variantName = null) => {
+  addItem: (product, variantName = null, openDrawer = true) => {
     const items = get().items;
     const existingIndex = items.findIndex(
       item => item.product.id === product.id && item.selectedVariant === variantName
@@ -86,7 +91,7 @@ export const useCartStore = create((set, get) => ({
     const total = newItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const count = newItems.reduce((sum, item) => sum + item.quantity, 0);
     saveCartToStorage(newItems);
-    set({ items: newItems, total, count });
+    set({ items: newItems, total, count, ...(openDrawer ? { isDrawerOpen: true } : {}) });
   },
 
   removeItem: (productId, variantName = null) => {
@@ -125,6 +130,15 @@ export const useCartStore = create((set, get) => ({
     try {
       localStorage.removeItem('shopify_cart_id');
     } catch (e) {}
-    set({ items: [], total: 0, count: 0 });
+    set({ items: [], total: 0, count: 0, isDrawerOpen: false });
   }
 }));
+
+if (typeof window !== 'undefined') {
+  const handleClear = () => {
+    useCartStore.getState().clearCart();
+  };
+  window.addEventListener('cart_cleared', handleClear);
+  window.addEventListener('gokwik_order_completed', handleClear);
+}
+

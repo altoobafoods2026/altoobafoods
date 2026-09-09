@@ -162,7 +162,6 @@ export default function NoorBestSellers({ products = [] }) {
                               return;
                             }
                             addItem(product);
-                            showToast(`Added ${product.name} to cart`);
                           }}>
                             <MagneticButton 
                               style={{ '--liquid-bg': '#F7EFE0', '--liquid-text': '#0D3B2A' }}

@@ -329,7 +329,10 @@
         environment: "production",
         type: "merchantInfo",
         gkPlatform: "SHOPIFY",
-        integrationType: "CUSTOM_SHOPIFY"
+        integrationType: "CUSTOM_SHOPIFY",
+        isHydrogen: true,
+        storefrontCartFlow: true,
+        WebRedirectReturnURl: window.location.origin
       };
 
       // Pre-seed Al-Tooba brand logo in KwikPass modal session storage
@@ -347,6 +350,159 @@
             }
           });
         } catch (e) {}
+      })();
+    </script>
+
+    <!-- GoKwik Checkout & Order Interceptor (Blocks External Redirects & Preserves Screen) -->
+    <script>
+      (function() {
+        if (typeof window === 'undefined') return;
+
+        let lastGoKwikOrder = null;
+
+        function closeGokwikModal() {
+          try {
+            const wrapper = document.getElementById('gokwik-modal-wrapper');
+            if (wrapper) {
+              wrapper.style.display = 'none';
+              wrapper.remove();
+            }
+            const iframe = document.getElementById('gokwik-iframe');
+            if (iframe) {
+              iframe.style.display = 'none';
+              iframe.remove();
+            }
+            const bgEls = document.querySelectorAll('.gokwik-modalbackground, .gokwik-modalwrapper, .gokwik-container');
+            bgEls.forEach(function(el) {
+              el.style.display = 'none';
+            });
+            document.body.style.overflow = 'auto';
+            document.body.style.position = '';
+            
+            // Notify GoKwik SDK to reset internal state
+            window.postMessage({ type: 'modal_close_hydrogen' }, '*');
+            window.postMessage({ type: 'close', data: {} }, '*');
+          } catch (e) {
+            console.warn('[GoKwik Close Error]', e);
+          }
+        }
+
+        function extractOrderDetails(data, url) {
+          let orderNumber = data?.order_name || '';
+          if (!orderNumber && url) {
+            const numMatch = url.match(/orders\/([a-zA-Z0-9_-]+)/);
+            if (numMatch && numMatch[1] && !numMatch[1].includes('buyer_token')) {
+              orderNumber = '#' + numMatch[1];
+            }
+          }
+          if (!orderNumber) {
+            orderNumber = '#' + Math.floor(1000 + Math.random() * 9000);
+          }
+          return {
+            orderNumber: orderNumber,
+            orderId: data?.moid || data?.graphqlOrderId || data?.requestId || '',
+            totalPrice: data?.total_price || (data?.cart && data?.cart?.total_price / 100) || 0,
+            paymentMethod: data?.order_type === 'cod' ? 'Cash on Delivery (COD)' : (data?.order_type || 'Cash on Delivery (COD)'),
+            phone: data?.phone || '',
+            email: data?.email || '',
+            address: data?.address || null,
+            redirectUrl: url || '',
+            success: true
+          };
+        }
+
+        function triggerOrderSuccess(orderInfo) {
+          console.log('[GoKwik] Processing Completed Order:', orderInfo);
+
+          // 1. Close the checkout modal immediately
+          closeGokwikModal();
+
+          // 2. Clear cart from storage
+          try {
+            localStorage.removeItem('cart');
+            localStorage.removeItem('altooba_cart');
+            localStorage.removeItem('shopify_cart_id');
+            sessionStorage.removeItem('cart');
+          } catch (e) {}
+
+          // 3. Dispatch global custom events for React
+          const eventDetail = {
+            ...orderInfo,
+            timestamp: Date.now()
+          };
+
+          window.dispatchEvent(new CustomEvent('gokwik_order_completed', { detail: eventDetail }));
+          window.dispatchEvent(new CustomEvent('cart_cleared', { detail: eventDetail }));
+        }
+
+        // CAPTURING Message Listener (Runs before GoKwik SDK listener)
+        window.addEventListener('message', function(e) {
+          if (!e || !e.data) return;
+          const data = e.data;
+
+          // A. Intercept Order Success Data
+          if (data.type === 'orderSuccess' && data.response) {
+            lastGoKwikOrder = data.response;
+            const orderInfo = extractOrderDetails(data.response, '');
+            triggerOrderSuccess(orderInfo);
+          }
+
+          // B. Intercept Order Create Success
+          if (data === 'order_create_success' || data.type === 'order_create_success') {
+            const orderInfo = extractOrderDetails(lastGoKwikOrder, '');
+            triggerOrderSuccess(orderInfo);
+          }
+
+          // C. Intercept Redirects to Shopify (External order status page)
+          if (
+            (data.type === 'redirect' || data.type === 'shopifyRedirect') &&
+            (typeof data.url === 'string' || typeof data.link === 'string')
+          ) {
+            const targetUrl = data.url || data.link || '';
+            if (
+              targetUrl.includes('shopify.com') ||
+              targetUrl.includes('account/orders') ||
+              targetUrl.includes('/orders/') ||
+              targetUrl.includes('/checkouts/') ||
+              targetUrl.includes('buyer_token_attempted') ||
+              targetUrl.includes('thank_you')
+            ) {
+              // STOP PROPAGATION SO GOKWIK SDK DOES NOT REDIRECT THE PAGE AWAY
+              e.stopImmediatePropagation();
+              e.preventDefault();
+              console.log('[GoKwik Interceptor] Intercepted and blocked Shopify redirect to:', targetUrl);
+
+              const orderInfo = extractOrderDetails(lastGoKwikOrder, targetUrl);
+              triggerOrderSuccess(orderInfo);
+              return;
+            }
+          }
+
+          // D. Intercept clear_cart
+          if (data.type === 'clear_cart') {
+            try {
+              localStorage.removeItem('cart');
+              localStorage.removeItem('altooba_cart');
+              localStorage.removeItem('shopify_cart_id');
+              window.dispatchEvent(new CustomEvent('cart_cleared'));
+            } catch (err) {}
+          }
+        }, true); // Important: true = capture phase!
+
+        // Safeguard against any window.open to Shopify order page
+        const origOpen = window.open;
+        window.open = function(url, target, features) {
+          if (
+            typeof url === 'string' &&
+            (url.includes('shopify.com') || url.includes('account/orders') || url.includes('/orders/'))
+          ) {
+            console.log('[GoKwik Interceptor] Prevented window.open to Shopify order page:', url);
+            const orderInfo = extractOrderDetails(lastGoKwikOrder, url);
+            triggerOrderSuccess(orderInfo);
+            return null;
+          }
+          return origOpen.apply(this, arguments);
+        };
       })();
     </script>
     <script src="https://pdp.gokwik.co/kwikpass/kwikpass-core-functions.js" defer></script>

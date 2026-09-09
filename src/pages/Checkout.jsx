@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
@@ -39,6 +39,20 @@ export default function Checkout() {
   const [formErrors, setFormErrors] = useState({});
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderId, setOrderId] = useState('');
+
+  useEffect(() => {
+    const handleOrder = (event) => {
+      const detail = event?.detail || {};
+      if (detail.orderNumber || detail.orderId) {
+        setOrderId(detail.orderNumber || detail.orderId || '1005');
+        setOrderPlaced(true);
+      }
+    };
+    window.addEventListener('gokwik_order_completed', handleOrder);
+    return () => {
+      window.removeEventListener('gokwik_order_completed', handleOrder);
+    };
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

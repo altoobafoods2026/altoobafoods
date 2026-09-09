@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Toast from './components/Toast';
+import OrderSuccessModal from './components/OrderSuccessModal';
 import ScrollToTop from './components/ScrollToTop';
 
 import Home from './pages/Home';
@@ -72,6 +73,9 @@ export default function App() {
 
         {/* Global dynamic toasts notification system */}
         <Toast />
+
+        {/* Global on-screen GoKwik order confirmation modal */}
+        <OrderSuccessModal />
 
         {/* Main Routed Area */}
         <main className="flex-grow">

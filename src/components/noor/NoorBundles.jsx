@@ -93,8 +93,6 @@ export default function NoorBundles({ products = [] }) {
         variantId: `${bundle.id}-default`,
       });
     }
-
-    showToast(`Added "${bundle.name}" to your cart! 🛍️`, 'success');
   };
 
   return (

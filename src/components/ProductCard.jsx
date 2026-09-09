@@ -21,7 +21,6 @@ export default function ProductCard({ product, index = 0 }) {
       return;
     }
     addItem(product);
-    showToast(`Added ${product.name} to cart`);
   };
 
   return (

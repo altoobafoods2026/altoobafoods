@@ -19,6 +19,9 @@ export function initGokwikMerchantInfo() {
     type: 'merchantInfo',
     gkPlatform: 'SHOPIFY',
     integrationType: 'CUSTOM_SHOPIFY',
+    isHydrogen: true,
+    storefrontCartFlow: true,
+    WebRedirectReturnURl: typeof window !== 'undefined' ? window.location.origin : '',
   };
 }
 
@@ -115,6 +118,9 @@ export function populateGokwikCartPayload(cartId = '', items = null) {
     type: 'merchantInfo',
     gkPlatform: 'SHOPIFY',
     integrationType: 'CUSTOM_SHOPIFY',
+    isHydrogen: true,
+    storefrontCartFlow: true,
+    WebRedirectReturnURl: typeof window !== 'undefined' ? window.location.origin : '',
     cart: {
       id: effectiveCartId,
       token: token,

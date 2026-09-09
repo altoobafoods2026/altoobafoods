@@ -41,18 +41,26 @@ export default function CartDrawer({ isOpen, onClose }) {
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
+    <div 
+      className={`fixed inset-0 z-50 flex justify-end transition-all duration-600 ${
+        isOpen ? 'pointer-events-auto visible' : 'pointer-events-none invisible delay-600'
+      }`}
+    >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-[#0d2018]/40 backdrop-blur-sm"
+        className={`fixed inset-0 bg-[#0d2018]/50 backdrop-blur-sm transition-opacity duration-600 ease-out ${
+          isOpen ? 'opacity-100' : 'opacity-0'
+        }`}
         onClick={onClose}
       />
 
       {/* Drawer Panel */}
-      <div className="relative w-full max-w-md h-full bg-parchment border-l border-forest/10 shadow-2xl flex flex-col justify-between z-10 animate-fade-up">
+      <div 
+        className={`relative w-full max-w-md h-full bg-parchment border-l border-forest/10 shadow-2xl flex flex-col justify-between z-10 transform transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
         {/* Header */}
         <div className="p-6 border-b border-forest/10 flex items-center justify-between">
           <h2 className="font-serif font-bold text-2xl text-forest">Your Journey ({count})</h2>

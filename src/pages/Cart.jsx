@@ -12,46 +12,11 @@ export default function Cart() {
   const showToast = useToastStore((state) => state.showToast);
 
   const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [promoCode, setPromoCode] = useState('');
-  const [discountPercent, setDiscountPercent] = useState(0);
-  const [promoError, setPromoError] = useState('');
-  const [promoSuccess, setPromoSuccess] = useState('');
-
-  // Contact form state
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    subject: 'general',
-    message: ''
-  });
-  const [submitted, setSubmitted] = useState(false);
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shippingThreshold = 1000;
   const shippingCost = subtotal >= shippingThreshold || subtotal === 0 ? 0 : 100;
-  const discountAmount = (subtotal * discountPercent) / 100;
-  const total = subtotal - discountAmount + shippingCost;
-
-  const handleApplyPromo = (e) => {
-    e.preventDefault();
-    setPromoError('');
-    setPromoSuccess('');
-    
-    const code = promoCode.trim().toUpperCase();
-    if (code === 'TIBB10') {
-      setDiscountPercent(10);
-      setPromoSuccess('Promo code TIBB10 applied! 10% discount added.');
-      showToast('10% Promo discount applied!');
-    } else if (code === 'ALTOOBA15') {
-      setDiscountPercent(15);
-      setPromoSuccess('Promo code ALTOOBA15 applied! 15% discount added.');
-      showToast('15% Promo discount applied!');
-    } else if (code === '') {
-      setPromoError('Please enter a promo code');
-    } else {
-      setPromoError('Invalid promo code. Try "TIBB10" or "ALTOOBA15"');
-    }
-  };
+  const total = subtotal + shippingCost;
 
   const handleQtyChange = (itemId, newQty, variant) => {
     updateQty(itemId, newQty, variant);
@@ -73,25 +38,6 @@ export default function Cart() {
     } finally {
       setIsCheckingOut(false);
     }
-  };
-
-  // Contact form handlers
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
-      showToast('Please complete all form fields', 'error');
-      return;
-    }
-
-    // Success Mockup
-    setSubmitted(true);
-    showToast('Your message has been sent to Al-Tooba.');
-    setForm({ name: '', email: '', subject: 'general', message: '' });
   };
 
   return (
@@ -206,28 +152,6 @@ export default function Cart() {
                   </div>
                 </div>
 
-                {/* Promo Code Box */}
-                <div className="border border-forest/10 rounded-3xl bg-white p-6 sm:p-8 shadow-[0_4px_12px_rgba(0,0,0,0.01)]">
-                  <h3 className="font-serif font-bold text-lg text-forest mb-4">Have a Promocode?</h3>
-                  <form onSubmit={handleApplyPromo} className="flex flex-col sm:flex-row gap-4 items-stretch">
-                    <input
-                      type="text"
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value)}
-                      placeholder="e.g. TIBB10, ALTOOBA15"
-                      className="flex-grow bg-parchment/30 border border-forest/10 rounded-full px-6 py-3.5 text-sm font-sans text-forest placeholder-forest/40 focus:outline-none focus:border-forest"
-                    />
-                    <button
-                      type="submit"
-                      className="rounded-full px-8 py-3.5 bg-forest text-parchment text-xs font-sans font-bold uppercase tracking-wider hover:bg-[#2b4c29] transition-colors cursor-pointer"
-                    >
-                      Apply Code
-                  </button>
-                  </form>
-                  {promoError && <p className="text-red-700 font-sans font-semibold text-xs mt-3 pl-2">{promoError}</p>}
-                  {promoSuccess && <p className="text-forest font-sans font-semibold text-xs mt-3 pl-2">{promoSuccess}</p>}
-                  <p className="text-xs text-forest/40 mt-3 pl-2">Use "TIBB10" for 10% off or "ALTOOBA15" for 15% off.</p>
-                </div>
               </div>
 
               {/* Order Summary */}
@@ -238,12 +162,6 @@ export default function Cart() {
                     <span className="text-forest/70">Subtotal</span>
                     <span className="font-semibold">{formatPrice(subtotal)}</span>
                   </div>
-                  {discountAmount > 0 && (
-                    <div className="flex justify-between text-forest">
-                      <span className="text-forest/70">Discount ({discountPercent}%)</span>
-                      <span className="font-semibold text-forest-green">- {formatPrice(discountAmount)}</span>
-                    </div>
-                  )}
                   <div className="flex justify-between">
                     <span className="text-forest/70">Shipping</span>
                     <span className="font-semibold">
@@ -264,7 +182,7 @@ export default function Cart() {
                 <button
                   onClick={handleCheckout}
                   disabled={isCheckingOut || items.length === 0}
-                  className="w-full text-center flex items-center justify-center gap-2 rounded-full py-4 bg-forest text-parchment text-xs font-sans font-bold uppercase tracking-widest hover:bg-[#2b4c29] transition-all shadow-md mb-2 cursor-pointer disabled:opacity-70"
+                  className="w-full text-center flex items-center justify-center gap-2 rounded-full py-4 bg-forest text-parchment text-xs font-sans font-bold uppercase tracking-widest hover:bg-[#2b4c29] transition-all shadow-md mb-3 cursor-pointer disabled:opacity-70"
                 >
                   {isCheckingOut ? (
                     <>
@@ -287,161 +205,13 @@ export default function Cart() {
                   <span>•</span>
                   <span>Cards</span>
                 </div>
-                <Link
-                  to="/checkout"
-                  state={{ discountPercent, discountAmount, promoCode }}
-                  className="block text-center text-xs text-forest/60 hover:text-forest underline transition-colors"
-                >
-                  Or manual address &amp; standard checkout &rarr;
-                </Link>
 
-                <div className="flex items-center justify-center gap-2 text-[10px] font-sans font-bold uppercase tracking-wider text-forest/40 mt-6">
+                <div className="flex items-center justify-center gap-2 text-[10px] font-sans font-bold uppercase tracking-wider text-forest/40 mt-4">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                   Secure Checkout Guarantee
                 </div>
-              </div>
-            </div>
-
-            {/* Bottom Side: Contact Us form and details grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start border-t border-forest/10 pt-16">
-              {/* Left Column: Contact details */}
-              <div className="lg:col-span-5 bg-[#1a4a38] border border-forest/10 rounded-3xl p-8 sm:p-10 shadow-[0_4px_12px_rgba(0,0,0,0.01)] space-y-8">
-                <div>
-                  <h3 className="font-serif font-bold text-xl text-parchment mb-4">Apothecary Lab</h3>
-                  <p className="text-sm text-parchment/75 leading-relaxed font-sans">
-                    Al-Tooba® Prophetic Remedies Pvt. Ltd.<br />
-                    Bilaspur Gate, Nainital Road, Rampur, UP<br />
-                    India
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="font-serif font-bold text-xl text-parchment mb-4">Direct Contact</h3>
-                  <ul className="space-y-3 text-sm text-parchment/75 font-sans">
-                    <li className="flex items-start gap-2">
-                      <span className="text-gold font-bold mt-0.5">📞</span>
-                      <div className="flex flex-col gap-1">
-                        <span>+91 8433284322</span>
-                        <span>+91 8433439628</span>
-                        <span>+91 8433284322</span>
-                      </div>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-gold font-bold">✉️</span>
-                      <a href="mailto:altoobafoods2026@gmail.com" className="hover:text-gold transition-colors">altoobafoods2026@gmail.com</a>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-gold font-bold">💬</span>
-                      <span>WhatsApp: +91 8433284322</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="font-serif font-bold text-xl text-parchment mb-4">Operational Hours</h3>
-                  <ul className="space-y-2 text-sm text-parchment/75 font-sans">
-                    <li className="flex justify-between">
-                      <span>Monday - Sunday</span>
-                      <span className="font-semibold text-parchment">24x7 (Always Open)</span>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* International Orders Box */}
-                <div className="border border-parchment/10 bg-parchment/5 rounded-2xl p-6 text-center">
-                  <span className="text-xl mb-2 block">🕋</span>
-                  <h4 className="font-serif font-bold text-parchment mb-1 text-sm">International Orders</h4>
-                  <p className="text-xs text-parchment/70 font-sans leading-relaxed">
-                    We ship to Saudi Arabia, UAE, UK, and USA. International inquiries can be forwarded to <a href="mailto:altoobafoods2026@gmail.com" className="font-bold text-parchment hover:text-gold">altoobafoods2026@gmail.com</a>.
-                  </p>
-                </div>
-              </div>
-
-              {/* Right Column: Contact form */}
-              <div className="lg:col-span-7 bg-[#1a4a38] border border-forest/10 rounded-3xl p-8 sm:p-10 shadow-[0_4px_12px_rgba(0,0,0,0.01)]">
-                <h3 className="font-serif font-bold text-2xl text-parchment mb-2">Send a Message</h3>
-                <p className="text-xs sm:text-sm text-parchment/70 mb-8 font-sans">
-                  Fill in your details below and we will contact you back as soon as possible.
-                </p>
-
-                {submitted ? (
-                  <div className="text-center py-12 bg-parchment/5 rounded-2xl border border-parchment/5">
-                    <span className="text-4xl mb-4 block">✉️</span>
-                    <h4 className="font-serif font-bold text-xl text-parchment mb-2">Message Dispatched!</h4>
-                    <p className="text-xs sm:text-sm text-parchment/70 max-w-sm mx-auto mb-6 leading-relaxed">
-                      Thank you for reaching out. A botanical representative will review your message and respond within 24 hours.
-                    </p>
-                    <button
-                      onClick={() => setSubmitted(false)}
-                      className="rounded-full px-6 py-2.5 bg-[#D4A24C] text-forest text-xs font-sans font-bold uppercase tracking-wider hover:bg-[#c2913b] transition-colors"
-                    >
-                      Send another message
-                    </button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                      <label className="block text-[11px] font-sans font-bold uppercase tracking-wider text-parchment/70 mb-2">Your Name *</label>
-                      <input
-                        type="text"
-                        name="name"
-                        value={form.name}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full bg-parchment/10 border border-parchment/20 rounded-full px-5 py-3.5 text-sm font-sans text-parchment focus:outline-none focus:border-gold placeholder:text-parchment/30"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-sans font-bold uppercase tracking-wider text-parchment/70 mb-2">Email Address *</label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={form.email}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full bg-parchment/10 border border-parchment/20 rounded-full px-5 py-3.5 text-sm font-sans text-parchment focus:outline-none focus:border-gold placeholder:text-parchment/30"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-sans font-bold uppercase tracking-wider text-parchment/70 mb-2">Topic of Interest</label>
-                      <select
-                        name="subject"
-                        value={form.subject}
-                        onChange={handleInputChange}
-                        className="w-full bg-parchment/10 border border-parchment/20 rounded-full px-5 py-3.5 text-sm font-sans text-parchment focus:outline-none focus:border-gold"
-                      >
-                        <option value="general" className="bg-forest text-parchment">General Inquiry</option>
-                        <option value="order" className="bg-forest text-parchment">Order Support</option>
-                        <option value="consult" className="bg-forest text-parchment">Remedy Consultation</option>
-                        <option value="wholesale" className="bg-forest text-parchment">Wholesale & Distribution</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-sans font-bold uppercase tracking-wider text-parchment/70 mb-2">Your Message *</label>
-                      <textarea
-                        name="message"
-                        value={form.message}
-                        onChange={handleInputChange}
-                        required
-                        rows="5"
-                        placeholder="Describe your inquiry in detail..."
-                        className="w-full bg-parchment/10 border border-parchment/20 rounded-3xl px-5 py-4 text-sm font-sans text-parchment focus:outline-none focus:border-gold resize-none placeholder:text-parchment/30"
-                      ></textarea>
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="w-full rounded-full py-4 bg-[#D4A24C] text-forest text-xs font-sans font-bold uppercase tracking-widest hover:bg-[#c2913b] transition-colors shadow-md cursor-pointer block text-center"
-                    >
-                      Send Message
-                    </button>
-                  </form>
-                )}
               </div>
             </div>
           </div>
