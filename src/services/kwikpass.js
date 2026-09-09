@@ -20,9 +20,30 @@ export function initKwikPassConfig() {
     storeId: GOKWIK_STORE_ID,
     environment: GOKWIK_ENV,
     type: 'merchantInfo',
-    integrationType: 'custom_shopify',
-    gkPlatform: 'shopify',
+    integrationType: 'CUSTOM_SHOPIFY',
+    gkPlatform: 'SHOPIFY',
   };
+}
+
+/**
+ * Ensures the KwikPass iframe exists in the DOM
+ */
+export function ensureKwikpassIframe() {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return null;
+
+  let iframe = document.getElementById('iframe-kp');
+  if (!iframe) {
+    iframe = document.createElement('iframe');
+    iframe.id = 'iframe-kp';
+    iframe.name = 'iframe-kp';
+    iframe.src = 'https://pdp.gokwik.co/kwikpass/kwikpass.html';
+    iframe.className = 'iframe-kp hidden';
+    iframe.setAttribute('allow', 'otp-credentials; web-share; clipboard-write;');
+    iframe.setAttribute('title', 'KwikPass 1-Click Login');
+    iframe.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:999999999;border:none;background:rgba(0,0,0,0.6);display:none;';
+    document.body.appendChild(iframe);
+  }
+  return iframe;
 }
 
 /**
@@ -34,38 +55,106 @@ export function setupKwikPassListeners(onLoginSuccess) {
 
   const handleDataSent = (e) => {
     const detail = e?.detail || {};
-    if (detail.kpToken && detail.success) {
-      console.log('KwikPass login successful. Token received:', detail.kpToken);
+    if ((detail.kpToken || detail.token) && (detail.success !== false)) {
+      const token = detail.kpToken || detail.token;
+      const phone = detail.phone || detail.phoneNumber || '';
+      console.log('KwikPass login successful. Token received:', token);
       try {
-        localStorage.setItem('kpToken', detail.kpToken);
+        localStorage.setItem('kpToken', token);
         localStorage.setItem('isLoggedIn', 'true');
+        if (phone) {
+          localStorage.setItem('kp_user_phone', phone);
+          localStorage.setItem('kp_user_id', phone);
+        }
       } catch (err) {
         console.warn('Could not store kpToken in localStorage', err);
       }
       if (typeof onLoginSuccess === 'function') {
-        onLoginSuccess(detail);
+        onLoginSuccess({ ...detail, kpToken: token, phone });
       }
     } else if (detail.kpLogout) {
       console.log('KwikPass user logged out');
       try {
         localStorage.removeItem('kpToken');
         localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('kp_user_phone');
+        localStorage.removeItem('kp_user_id');
       } catch (err) {}
+    }
+  };
+
+  const handleMessage = (e) => {
+    if (!e || !e.data) return;
+    const data = e.data;
+
+    // Show or hide iframe based on KwikPass postMessage
+    if (data.type === 'showIframe') {
+      const iframe = document.getElementById('iframe-kp');
+      if (iframe) {
+        if (data.value) {
+          iframe.classList.remove('hidden');
+          iframe.style.display = 'block';
+          document.body.style.overflow = 'hidden';
+        } else {
+          iframe.classList.add('hidden');
+          iframe.style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }
+      }
+    }
+
+    if (data.type === 'close_popup' || data === 'close_popup') {
+      const iframe = document.getElementById('iframe-kp');
+      if (iframe) {
+        iframe.classList.add('hidden');
+        iframe.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+    }
+
+    if (
+      data.type === 'kp_token' ||
+      data.type === 'kp_token_for_custom_merchants' ||
+      data.type === 'KC_PHONE_NUMBER' ||
+      data.type === 'user-loggedin' ||
+      data.type === 'kp_data_sent'
+    ) {
+      const phone = data.kcPhoneNumber || (data.phoneNumber && (data.phoneNumber.value || data.phoneNumber)) || '';
+      const token = data.token || data.kpToken || data.core_token || '';
+
+      if (token || phone) {
+        if (phone) {
+          try {
+            localStorage.setItem('kp_user_phone', String(phone));
+            localStorage.setItem('kp_user_id', String(phone));
+          } catch (err) {}
+        }
+        if (token) {
+          try {
+            localStorage.setItem('kpToken', String(token));
+          } catch (err) {}
+        }
+        try {
+          localStorage.setItem('isLoggedIn', 'true');
+        } catch (err) {}
+
+        if (typeof onLoginSuccess === 'function') {
+          onLoginSuccess({ kpToken: token, phone, success: true });
+        }
+      }
     }
   };
 
   window.addEventListener('kp_data_sent', handleDataSent);
   window.addEventListener('kp-data-sent', handleDataSent);
-  window.addEventListener('user-loggedin', (e) => {
-    console.log('KwikPass user-loggedin event:', e?.detail);
-    if (typeof onLoginSuccess === 'function') {
-      onLoginSuccess(e?.detail);
-    }
-  });
+  window.addEventListener('user-loggedin', handleDataSent);
+  window.addEventListener('message', handleMessage);
 
   return () => {
     window.removeEventListener('kp_data_sent', handleDataSent);
     window.removeEventListener('kp-data-sent', handleDataSent);
+    window.removeEventListener('user-loggedin', handleDataSent);
+    window.removeEventListener('message', handleMessage);
   };
 }
 
@@ -77,64 +166,70 @@ export function triggerKwikpassLogin() {
   if (typeof window === 'undefined') return false;
 
   initKwikPassConfig();
+  const iframe = ensureKwikpassIframe();
 
-  // 1. Try official KwikPass core openIframe
-  if (typeof window.openIframe === 'function') {
-    try {
-      window.openIframe('login');
-      return true;
-    } catch (e) {
-      console.warn('openIframe error:', e);
-    }
+  let triggered = false;
+
+  // 1. Dispatch official GoKwik open_login_modal event (handled by kp-merchant-v2.js)
+  try {
+    window.dispatchEvent(new CustomEvent('open_login_modal', {
+      detail: {
+        customLogin: false,
+        params: { from: 'header' }
+      }
+    }));
+    triggered = true;
+  } catch (e) {
+    console.warn('[KwikPass] open_login_modal dispatch error:', e);
   }
 
-  // 2. Try kpHandleLogin
+  // 2. Call kpHandleLogin or handleKpAndShopifyLogin if available
   if (typeof window.kpHandleLogin === 'function') {
     try {
       window.kpHandleLogin();
-      return true;
+      triggered = true;
     } catch (e) {
-      console.warn('kpHandleLogin error:', e);
+      console.warn('[KwikPass] kpHandleLogin error:', e);
+    }
+  } else if (typeof window.handleKpAndShopifyLogin === 'function') {
+    try {
+      window.handleKpAndShopifyLogin();
+      triggered = true;
+    } catch (e) {
+      console.warn('[KwikPass] handleKpAndShopifyLogin error:', e);
     }
   }
 
-  // 3. Try official custom SDK instance
-  if (window.__KP_LOGIN_SDK_INSTANCE__?.handleKpLogin) {
-    try {
-      window.__KP_LOGIN_SDK_INSTANCE__.handleKpLogin();
-      return true;
-    } catch (e) {
-      console.warn('Error calling __KP_LOGIN_SDK_INSTANCE__.handleKpLogin', e);
-    }
-  }
+  // 3. Make sure iframe is visible & send direct SSO payload
+  if (iframe) {
+    iframe.classList.remove('hidden');
+    iframe.style.display = 'block';
+    document.body.style.overflow = 'hidden';
 
-  // 4. Try global handleKpLogin
-  if (typeof window.handleKpLogin === 'function') {
     try {
-      window.handleKpLogin();
-      return true;
-    } catch (e) {
-      console.warn('Error calling window.handleKpLogin', e);
-    }
-  }
-
-  // 5. Try kp_trigger_popup
-  if (typeof window.kp_trigger_popup === 'function') {
-    try {
-      window.kp_trigger_popup();
-      return true;
+      if (typeof window.openIframe === 'function') {
+        window.openIframe('login');
+      }
     } catch (e) {}
+
+    try {
+      if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage({
+          type: 'process-sso',
+          event: 'login',
+          mid: window.merchantInfo?.mid || GOKWIK_MID,
+          gkPlatform: window.merchantInfo?.gkPlatform || 'SHOPIFY',
+          integrationType: window.merchantInfo?.integrationType || 'CUSTOM_SHOPIFY',
+          merchantUrl: window.location.origin,
+          showLogin: true
+        }, '*');
+      }
+    } catch (e) {}
+
+    triggered = true;
   }
 
-  // 6. Try clicking element with class kwik-pass-login
-  const kpEl = document.querySelector('.kwik-pass-login, #kwik-pass-login');
-  if (kpEl) {
-    kpEl.click();
-    return true;
-  }
-
-  console.warn('KwikPass SDK is not fully loaded yet.');
-  return false;
+  return triggered;
 }
 
 /**

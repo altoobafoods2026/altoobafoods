@@ -156,7 +156,12 @@ export default function Navbar() {
             
             {/* Login with KwikPass */}
             <button
+              id="kp-login-button-header-logo"
               onClick={() => {
+                if (isLoggedIn) {
+                  navigate('/login');
+                  return;
+                }
                 const triggered = triggerKwikpassLogin();
                 if (!triggered) {
                   navigate('/login');
@@ -290,16 +295,21 @@ export default function Navbar() {
           })}
 
           <button
+            id="kp-login-button-header-logo-mobile"
             ref={(el) => (linksRef.current[menuItems.length] = el)}
             onClick={() => {
               setIsMobileMenuOpen(false);
               setIsMobileProductsOpen(false);
+              if (isLoggedIn) {
+                navigate('/login');
+                return;
+              }
               const triggered = triggerKwikpassLogin();
               if (!triggered) {
                 navigate('/login');
               }
             }}
-            className="kwik-pass-login liquid mt-2 rounded-full px-8 py-3 bg-[#D4A24C] text-[#0D3B2A] text-sm font-sans font-bold uppercase tracking-widest transition-all duration-300 shadow-lg border-none cursor-pointer flex items-center justify-center gap-2"
+            className="liquid mt-2 rounded-full px-8 py-3 bg-[#D4A24C] text-[#0D3B2A] text-sm font-sans font-bold uppercase tracking-widest transition-all duration-300 shadow-lg border-none cursor-pointer flex items-center justify-center gap-2"
             style={{ '--liquid-bg': '#FAF7F2', '--liquid-text': '#0D3B2A' }}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">

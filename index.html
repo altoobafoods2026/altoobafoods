@@ -264,6 +264,28 @@
       })();
     </script>
 
+    <!-- KwikPass Modal Styling -->
+    <style>
+      .iframe-kp.hidden {
+        display: none !important;
+      }
+      .iframe-kp {
+        background: rgba(0, 0, 0, 0.6);
+        position: fixed;
+        top: 0px;
+        bottom: 0px;
+        right: 0px;
+        left: 0px;
+        width: 100vw;
+        height: 100vh;
+        border: none;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        z-index: 999999999;
+      }
+    </style>
+
     <!-- GoKwik 1-Click Checkout & KwikPass SDK (Scenario 2: Custom Headless Storefront) -->
     <script>
       window.merchantInfo = {
@@ -277,10 +299,87 @@
       };
     </script>
     <script src="https://pdp.gokwik.co/kwikpass/kwikpass-core-functions.js" defer></script>
+    <script src="https://pdp.gokwik.co/kwikpass/plugin/build/kp-merchant-v2.js" defer></script>
     <script src="https://pdp.gokwik.co/merchant-integration/build/merchant.integration.js?v4" defer></script>
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- KwikPass SSO & 1-Click Login Event Bridge -->
+    <script>
+      (function() {
+        if (typeof window === 'undefined') return;
+
+        // Bridge iframe messages from pdp.gokwik.co
+        window.addEventListener('message', function(e) {
+          if (!e || !e.data) return;
+          const data = e.data;
+
+          // 1. Show or hide iframe
+          if (data.type === 'showIframe') {
+            const iframe = document.getElementById('iframe-kp');
+            if (iframe) {
+              if (data.value) {
+                iframe.classList.remove('hidden');
+                iframe.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+              } else {
+                iframe.classList.add('hidden');
+                iframe.style.display = 'none';
+                document.body.style.overflow = 'auto';
+              }
+            }
+          }
+
+          // 2. Close Popup request
+          if (data.type === 'close_popup' || data === 'close_popup') {
+            const iframe = document.getElementById('iframe-kp');
+            if (iframe) {
+              iframe.classList.add('hidden');
+              iframe.style.display = 'none';
+              document.body.style.overflow = 'auto';
+            }
+          }
+
+          // 3. User phone number / token received
+          if (
+            data.type === 'kp_token' ||
+            data.type === 'kp_token_for_custom_merchants' ||
+            data.type === 'KC_PHONE_NUMBER' ||
+            data.type === 'user-loggedin' ||
+            data.type === 'kp_data_sent'
+          ) {
+            const phone = data.kcPhoneNumber || (data.phoneNumber && (data.phoneNumber.value || data.phoneNumber)) || '';
+            const token = data.token || data.kpToken || data.core_token || '';
+
+            if (phone) {
+              try {
+                localStorage.setItem('kp_user_phone', String(phone));
+                localStorage.setItem('kp_user_id', String(phone));
+              } catch (err) {}
+            }
+            if (token) {
+              try {
+                localStorage.setItem('kpToken', String(token));
+              } catch (err) {}
+            }
+            try {
+              localStorage.setItem('isLoggedIn', 'true');
+            } catch (err) {}
+
+            window.dispatchEvent(new CustomEvent('kp_data_sent', {
+              detail: {
+                kpToken: token,
+                phone: phone,
+                phoneNumber: phone,
+                success: true
+              }
+            }));
+          }
+        });
+      })();
+    </script>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

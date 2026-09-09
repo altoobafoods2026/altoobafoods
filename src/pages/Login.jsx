@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useToastStore } from '../store/toastStore';
-import { triggerKwikpassLogin, setupKwikPassListeners, isKwikPassLoggedIn, handleKwikPassLogout } from '../services/kwikpass';
+import { triggerKwikpassLogin, setupKwikPassListeners, isKwikPassLoggedIn, handleKwikPassLogout, ensureKwikpassIframe } from '../services/kwikpass';
 import logoImg from '../assets/logo.webp';
 
 export default function Login() {
@@ -19,8 +19,10 @@ export default function Login() {
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
 
-  // Setup KwikPass listeners
+  // Setup KwikPass listeners & preload iframe
   useEffect(() => {
+    ensureKwikpassIframe();
+
     const cleanup = setupKwikPassListeners((detail) => {
       setIsLoggedIn(true);
       if (detail?.phone || detail?.phoneNumber) {
