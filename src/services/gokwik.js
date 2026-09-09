@@ -17,6 +17,8 @@ export function initGokwikMerchantInfo() {
     storeId: GOKWIK_STORE_ID,
     environment: GOKWIK_ENV,
     type: 'merchantInfo',
+    gkPlatform: 'SHOPIFY',
+    integrationType: 'CUSTOM_SHOPIFY',
   };
 }
 
