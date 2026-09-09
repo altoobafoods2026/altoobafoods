@@ -48,16 +48,22 @@ export default function NoorBestSellers({ products = [] }) {
   const addItem = useCartStore((state) => state.addItem);
   const showToast = useToastStore((state) => state.showToast);
 
-  // Filter products that belong to the Shopify "Best Sellers" collection
-  const bestSellerProducts = products.filter(p => {
-    const handles = p.collections || [];
-    const titles = p.collectionTitles || [];
-    return handles.some(h => 
-      h.includes('best-seller') || h.includes('best_seller') || h.includes('bestseller') || h.includes('best-sellers')
-    ) || titles.some(t => 
-      t.toLowerCase().includes('best seller') || t.toLowerCase().includes('bestseller')
-    );
-  });
+  // Filter products that belong to the Shopify "Best Sellers" collection in exact Shopify sequence
+  const bestSellerProducts = products
+    .filter(p => {
+      const handles = p.collections || [];
+      const titles = p.collectionTitles || [];
+      return handles.some(h => 
+        h.includes('best-seller') || h.includes('best_seller') || h.includes('bestseller') || h.includes('best-sellers')
+      ) || titles.some(t => 
+        t.toLowerCase().includes('best seller') || t.toLowerCase().includes('bestseller')
+      );
+    })
+    .sort((a, b) => {
+      const orderA = a.collectionOrders?.['best-sellers'] ?? 999;
+      const orderB = b.collectionOrders?.['best-sellers'] ?? 999;
+      return orderA - orderB;
+    });
 
   // If products are tagged with "Best Sellers" in Shopify, use them; otherwise fallback to top products
   const displayProducts = bestSellerProducts.length > 0 

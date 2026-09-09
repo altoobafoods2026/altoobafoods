@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
-import { useToastStore } from '../store/toastStore';
 import { formatPrice } from '../utils/formatPrice';
 import { initiateGokwikCheckout } from '../services/gokwik';
 
@@ -9,7 +8,6 @@ export default function CartDrawer({ isOpen, onClose }) {
   const items = useCartStore((state) => state.items);
   const updateQty = useCartStore((state) => state.updateQty);
   const removeItem = useCartStore((state) => state.removeItem);
-  const showToast = useToastStore((state) => state.showToast);
   
   const total = useCartStore((state) => state.total);
   const count = useCartStore((state) => state.count);
@@ -23,7 +21,6 @@ export default function CartDrawer({ isOpen, onClose }) {
       onClose();
     } catch (err) {
       console.error('GoKwik checkout failed:', err);
-      showToast(err.message || 'Failed to open checkout. Please try again.', 'error');
     } finally {
       setIsCheckingOut(false);
     }

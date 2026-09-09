@@ -31,7 +31,7 @@ export function getCachedProductsSync() {
   }
   try {
     if (typeof window !== 'undefined' && window.sessionStorage) {
-      const stored = sessionStorage.getItem('altooba_products_cache');
+      const stored = sessionStorage.getItem('altooba_products_cache_v3');
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Date.now() - parsed.timestamp < CACHE_TTL) {
@@ -91,12 +91,30 @@ export async function getProducts(forceRefresh = false) {
   try {
     const query = `
       {
+        collections(first: 50) {
+          edges {
+            node {
+              id
+              title
+              handle
+              products(first: 50) {
+                edges {
+                  node {
+                    id
+                    handle
+                  }
+                }
+              }
+            }
+          }
+        }
         products(first: 50) {
           edges {
             node {
               id
               title
               handle
+              tags
               description
               descriptionHtml
               productType
@@ -182,6 +200,18 @@ export async function getProducts(forceRefresh = false) {
       return staleCache || [];
     }
 
+    // Extract Shopify Collection exact manual sort sequences
+    const collectionOrdersMap = {};
+    if (response.body.data.collections?.edges) {
+      response.body.data.collections.edges.forEach(({ node }) => {
+        const productHandles = node.products.edges.map(e => e.node.handle);
+        collectionOrdersMap[node.handle] = productHandles;
+        if (node.title) {
+          collectionOrdersMap[node.title.toLowerCase()] = productHandles;
+        }
+      });
+    }
+
     // Map to our local schema
     const products = response.body.data.products.edges
       .filter(({ node }) => {
@@ -221,6 +251,28 @@ export async function getProducts(forceRefresh = false) {
       const finalCategory = overrides[node.handle] || matchedCategory;
       const collectionHandles = node.collections?.edges.map(e => e.node.handle) || [];
 
+      // Attach exact sequence position in collections for this product
+      const collectionOrders = {};
+      collectionHandles.forEach(h => {
+        const orderList = collectionOrdersMap[h];
+        if (orderList) {
+          const idx = orderList.indexOf(node.handle);
+          if (idx !== -1) {
+            collectionOrders[h] = idx;
+          }
+        }
+      });
+      if (finalCategory) {
+        const catKey = finalCategory.toLowerCase().replace(/\s+/g, '-');
+        const orderList = collectionOrdersMap[catKey] || collectionOrdersMap[finalCategory.toLowerCase()];
+        if (orderList) {
+          const idx = orderList.indexOf(node.handle);
+          if (idx !== -1) {
+            collectionOrders[catKey] = idx;
+          }
+        }
+      }
+
       // Real Judge.me review stats
       const rawId = node.id ? node.id.split('/').pop() : '';
       const stat = (reviewStats && (reviewStats[node.handle] || reviewStats[rawId])) || null;
@@ -236,6 +288,7 @@ export async function getProducts(forceRefresh = false) {
         id: node.id,
         slug: node.handle,
         name: node.title,
+        tags: node.tags || [],
         category: finalCategory,
         collections: collectionHandles,
         collectionTitles: collectionTitles,
@@ -255,6 +308,7 @@ export async function getProducts(forceRefresh = false) {
         rating: realRating,
         reviewCount: realReviewCount,
         inStock: node.variants.edges.some(v => v.node.availableForSale),
+        collectionOrders: collectionOrders,
         variants: node.variants.edges.map(v => {
           const vPrice = parseFloat(v.node.price?.amount || 0);
           const vMrp = v.node.compareAtPrice?.amount ? parseFloat(v.node.compareAtPrice.amount) : vPrice;
@@ -281,7 +335,7 @@ export async function getProducts(forceRefresh = false) {
     productsCacheTimestamp = Date.now();
     try {
       if (typeof window !== 'undefined' && window.sessionStorage) {
-        sessionStorage.setItem('altooba_products_cache', JSON.stringify({
+        sessionStorage.setItem('altooba_products_cache_v3', JSON.stringify({
           timestamp: Date.now(),
           data: products
         }));
@@ -296,6 +350,16 @@ export async function getProducts(forceRefresh = false) {
   }
 }
 
+export function sortProductsByCollectionSequence(items = [], collectionHandleOrName = '') {
+  if (!items || items.length === 0 || !collectionHandleOrName) return items;
+  const key = collectionHandleOrName.toLowerCase().replace(/\s+/g, '-');
+  return [...items].sort((a, b) => {
+    const posA = a.collectionOrders?.[key] ?? a.collectionOrders?.[collectionHandleOrName.toLowerCase()] ?? 999;
+    const posB = b.collectionOrders?.[key] ?? b.collectionOrders?.[collectionHandleOrName.toLowerCase()] ?? 999;
+    return posA - posB;
+  });
+}
+
 export async function getProductBySlug(slug) {
   // Fast path: check sync cache first
   const syncCached = getCachedProductBySlugSync(slug);
@@ -308,6 +372,7 @@ export async function getProductBySlug(slug) {
         id
         title
         handle
+        tags
         description
         descriptionHtml
         productType
@@ -407,6 +472,7 @@ export async function getProductBySlug(slug) {
     id: node.id,
     slug: node.handle,
     name: node.title,
+    tags: node.tags || [],
     category: finalCategory,
     collections: collectionHandles,
     price: price,

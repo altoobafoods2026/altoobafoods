@@ -28,7 +28,7 @@ export default function Home() {
     async function loadData() {
       try {
         const [fetchedProducts, fetchedHeroVideo] = await Promise.all([
-          getProducts(),
+          getProducts(true),
           getHeroVideo()
         ]);
         if (isMounted) {

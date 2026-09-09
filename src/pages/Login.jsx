@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useToastStore } from '../store/toastStore';
 import { triggerKwikpassLogin, setupKwikPassListeners, isKwikPassLoggedIn, handleKwikPassLogout, ensureKwikpassIframe } from '../services/kwikpass';
 import logoImg from '../assets/logo.webp';
 
@@ -15,8 +14,6 @@ export default function Login() {
     }
   });
   const [isTriggering, setIsTriggering] = useState(false);
-
-  const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
 
   // Setup KwikPass listeners & preload iframe
@@ -32,13 +29,11 @@ export default function Login() {
           localStorage.setItem('kp_user_phone', phone);
         } catch (e) {}
       }
-      showToast('Welcome to Al-Tooba! Login successful.');
     });
 
     const handleLogoutEvent = () => {
       setIsLoggedIn(false);
       setUserPhone('');
-      showToast('Logged out successfully');
     };
 
     window.addEventListener('kp-logout-success', handleLogoutEvent);
@@ -47,14 +42,11 @@ export default function Login() {
       cleanup?.();
       window.removeEventListener('kp-logout-success', handleLogoutEvent);
     };
-  }, [showToast]);
+  }, []);
 
   const handleLaunchKwikPass = () => {
     setIsTriggering(true);
-    const triggered = triggerKwikpassLogin();
-    if (!triggered) {
-      showToast('Opening KwikPass Login...');
-    }
+    triggerKwikpassLogin();
     setTimeout(() => setIsTriggering(false), 2000);
   };
 
@@ -62,7 +54,6 @@ export default function Login() {
     handleKwikPassLogout();
     setIsLoggedIn(false);
     setUserPhone('');
-    showToast('Logged out successfully');
   };
 
   return (
@@ -105,6 +96,24 @@ export default function Login() {
               <h2 className="text-2xl font-serif font-bold text-[#0D3B2A] mb-1">Welcome Back!</h2>
               <p className="text-xs text-gray-500 font-sans">
                 {userPhone ? `Logged in with ${userPhone}` : 'You are logged in via KwikPass'}
+              </p>
+            </div>
+
+            {/* My Orders Section */}
+            <div className="bg-[#FAF7F2] border border-[#0D3B2A]/10 rounded-2xl p-4 text-left space-y-2.5 shadow-sm">
+              <div className="flex items-center justify-between pb-2 border-b border-[#0D3B2A]/10">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-[#0D3B2A]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                  <span className="font-bold text-[#0D3B2A] text-sm">My Orders</span>
+                </div>
+                <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
+                  Live Dispatch
+                </span>
+              </div>
+              <p className="text-gray-600 text-xs leading-relaxed">
+                All order tracking links and real-time shipping updates are sent instantly via SMS &amp; WhatsApp to <strong className="text-[#0D3B2A]">{userPhone || 'your registered number'}</strong>.
               </p>
             </div>
 

@@ -5,20 +5,27 @@ import { Link } from 'react-router-dom';
 import { useCartStore } from '../../store/cartStore';
 import { useToastStore } from '../../store/toastStore';
 import { optimizeShopifyImage } from '../../utils/imageOptimizer';
+import OfferCountdownBadge from '../OfferCountdownBadge';
 
 export default function NoorBundles({ products = [] }) {
   const addItem = useCartStore((state) => state.addItem);
   const showToast = useToastStore((state) => state.showToast);
 
-  // Filter real Wellness Kits and Combos from Shopify products
-  const kits = products.filter(p => 
-    p.category === 'Wellness Kit' ||
-    p.collections?.some(c => c.toLowerCase().includes('wellness')) ||
-    p.name.toLowerCase().includes('kit') ||
-    p.name.toLowerCase().includes('hamper') ||
-    p.slug.includes('wellness') ||
-    p.slug.includes('kit')
-  );
+  // Filter real Wellness Kits and Combos from Shopify products in exact Shopify sequence
+  const kits = products
+    .filter(p => 
+      p.category === 'Wellness Kit' ||
+      p.collections?.some(c => c.toLowerCase().includes('wellness')) ||
+      p.name.toLowerCase().includes('kit') ||
+      p.name.toLowerCase().includes('hamper') ||
+      p.slug.includes('wellness') ||
+      p.slug.includes('kit')
+    )
+    .sort((a, b) => {
+      const orderA = a.collectionOrders?.['wellness-kit'] ?? 999;
+      const orderB = b.collectionOrders?.['wellness-kit'] ?? 999;
+      return orderA - orderB;
+    });
 
   // Fallbacks from top store remedies if fewer than 3 kits are in catalog
   const otherCombos = products.filter(p => 
@@ -122,7 +129,7 @@ export default function NoorBundles({ products = [] }) {
               transition={{ delay: 0.1 }}
               className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-serif text-[#0D3B2A] font-bold mb-2 sm:mb-3 tracking-tight"
             >
-              Wellness Kits & Hampers
+              Offers & Hampers
             </motion.h2>
 
             <motion.p 
@@ -148,7 +155,7 @@ export default function NoorBundles({ products = [] }) {
               to="/studio?category=Wellness%20Kit"
               className="inline-flex items-center gap-2 bg-transparent border border-[#D4A24C] text-[#0D3B2A] hover:bg-[#0D3B2A] hover:text-[#FAF7F2] hover:border-transparent px-5 sm:px-8 py-2 sm:py-3.5 rounded-full font-sans font-bold text-[10px] sm:text-xs uppercase tracking-[0.15em] sm:tracking-[0.2em] transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer group/btn"
             >
-              <span>Explore All Wellness Kits</span>
+              <span>Explore All Offers & Hampers</span>
               <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transform group-hover/btn:translate-x-1 transition-transform text-[#D4A24C]" />
             </Link>
           </motion.div>
@@ -178,6 +185,11 @@ export default function NoorBundles({ products = [] }) {
                     className="w-full h-full max-h-[240px] sm:max-h-[330px] md:max-h-[350px] object-cover sm:object-contain transform group-hover:scale-105 transition-transform duration-700 ease-out"
                   />
                 </Link>
+
+                {/* Top-Right Offer Countdown Capsule */}
+                <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 pointer-events-none">
+                  <OfferCountdownBadge tags={heroProduct.tags} productId={heroProduct.id} />
+                </div>
               </div>
 
               {/* Bottom Info Bar */}

@@ -1,8 +1,7 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import Toast from './components/Toast';
 import OrderSuccessModal from './components/OrderSuccessModal';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -22,8 +21,6 @@ const About = lazy(() => import('./pages/About'));
 const Journal = lazy(() => import('./pages/Journal'));
 const JournalPost = lazy(() => import('./pages/JournalPost'));
 const ContactUs = lazy(() => import('./pages/ContactUs'));
-const Wishlist = lazy(() => import('./pages/Wishlist'));
-const Login = lazy(() => import('./pages/Login'));
 const PolicyPage = lazy(() => import('./pages/PolicyPage'));
 
 import SplashScreen from './components/SplashScreen';
@@ -71,9 +68,6 @@ export default function App() {
         {/* Global sticky navigation bar */}
         <Navbar />
 
-        {/* Global dynamic toasts notification system */}
-        <Toast />
-
         {/* Global on-screen GoKwik order confirmation modal */}
         <OrderSuccessModal />
 
@@ -91,9 +85,9 @@ export default function App() {
               <Route path="/booking" element={<Booking />} />
               <Route path="/journal/:slug" element={<JournalPost />} />
               <Route path="/contact-us" element={<ContactUs />} />
-              <Route path="/wishlist" element={<Wishlist />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/account" element={<Login />} />
+              <Route path="/wishlist" element={<Navigate to="/" replace />} />
+              <Route path="/login" element={<Navigate to="/" replace />} />
+              <Route path="/account" element={<Navigate to="/" replace />} />
               
               {/* Policy Pages */}
               <Route path="/privacy-policy" element={<PolicyPage title="Privacy Policy" />} />

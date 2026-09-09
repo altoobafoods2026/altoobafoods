@@ -1,15 +1,11 @@
 import { Link } from 'react-router-dom';
-import { useToastStore } from '../store/toastStore';
 import logoSrc from '../assets/logo.webp';
 
 export default function Footer() {
-  const showToast = useToastStore((state) => state.showToast);
-
   const handleSubscribeSubmit = (e) => {
     e.preventDefault();
     const email = e.target.email.value;
     if (email) {
-      showToast(`Thank you for subscribing, ${email}!`);
       e.target.reset();
     }
   };

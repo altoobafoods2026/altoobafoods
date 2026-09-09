@@ -6,6 +6,7 @@ import { useToastStore } from '../store/toastStore';
 import { initiateGokwikCheckout } from '../services/gokwik';
 import TrustedBy from '../components/TrustedBy';
 import ProductCard from '../components/ProductCard';
+import OfferCountdownBadge from '../components/OfferCountdownBadge';
 
 export default function ProductDetail() {
   const { slug } = useParams();
@@ -301,6 +302,13 @@ export default function ProductDetail() {
                 Save {discountPercent}%
               </span>
             </div>
+
+            {/* Limited Time Offer Countdown Badge */}
+            {product.tags && (
+              <div className="mb-4">
+                <OfferCountdownBadge tags={product.tags} productId={product.id} />
+              </div>
+            )}
 
             {/* Multi-Weight / Size Variant Selector (RuhaniSouq Style) */}
             {product.variants && product.variants.length > 1 && product.variants[0].title !== 'Default Title' && (

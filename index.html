@@ -440,37 +440,38 @@
           if (!e || !e.data) return;
           const data = e.data;
 
-          // A. Intercept Order Success Data
-          if (data.type === 'orderSuccess' && data.response) {
+          // A. Real GoKwik Order Success Data (Dispatched only after successful payment or COD confirmation)
+          if ((data.type === 'orderSuccess' || data.type === 'order_success' || data.type === 'payment_success') && data.response) {
             lastGoKwikOrder = data.response;
             const orderInfo = extractOrderDetails(data.response, '');
             triggerOrderSuccess(orderInfo);
+            return;
           }
 
-          // B. Intercept Order Create Success
-          if (data === 'order_create_success' || data.type === 'order_create_success') {
-            const orderInfo = extractOrderDetails(lastGoKwikOrder, '');
-            triggerOrderSuccess(orderInfo);
+          // B. Store order session / draft order info without triggering success prematurely
+          if (data?.type === 'order_create_success' || data === 'order_create_success' || data?.type === 'orderCreated') {
+            if (data?.response) {
+              lastGoKwikOrder = data.response;
+            }
           }
 
-          // C. Intercept Redirects to Shopify (External order status page)
+          // C. Intercept Redirects to Shopify ONLY if they go to the final completed thank_you page
           if (
             (data.type === 'redirect' || data.type === 'shopifyRedirect') &&
             (typeof data.url === 'string' || typeof data.link === 'string')
           ) {
             const targetUrl = data.url || data.link || '';
-            if (
-              targetUrl.includes('shopify.com') ||
-              targetUrl.includes('account/orders') ||
-              targetUrl.includes('/orders/') ||
-              targetUrl.includes('/checkouts/') ||
-              targetUrl.includes('buyer_token_attempted') ||
-              targetUrl.includes('thank_you')
-            ) {
-              // STOP PROPAGATION SO GOKWIK SDK DOES NOT REDIRECT THE PAGE AWAY
+            const isCompletedOrder = (
+              targetUrl.includes('/thank_you') ||
+              targetUrl.includes('thank_you') ||
+              (targetUrl.includes('/orders/') && !targetUrl.includes('buyer_token') && !targetUrl.includes('/checkouts/'))
+            );
+
+            if (isCompletedOrder) {
+              // STOP PROPAGATION SO GOKWIK SDK DOES NOT REDIRECT THE PAGE AWAY TO EXTERNAL SHOPIFY
               e.stopImmediatePropagation();
               e.preventDefault();
-              console.log('[GoKwik Interceptor] Intercepted and blocked Shopify redirect to:', targetUrl);
+              console.log('[GoKwik Interceptor] Intercepted and blocked Shopify thank-you redirect to:', targetUrl);
 
               const orderInfo = extractOrderDetails(lastGoKwikOrder, targetUrl);
               triggerOrderSuccess(orderInfo);
@@ -489,17 +490,21 @@
           }
         }, true); // Important: true = capture phase!
 
-        // Safeguard against any window.open to Shopify order page
+        // Safeguard against any window.open to Shopify completed order thank_you page
         const origOpen = window.open;
         window.open = function(url, target, features) {
-          if (
-            typeof url === 'string' &&
-            (url.includes('shopify.com') || url.includes('account/orders') || url.includes('/orders/'))
-          ) {
-            console.log('[GoKwik Interceptor] Prevented window.open to Shopify order page:', url);
-            const orderInfo = extractOrderDetails(lastGoKwikOrder, url);
-            triggerOrderSuccess(orderInfo);
-            return null;
+          if (typeof url === 'string') {
+            const isCompletedOrder = (
+              url.includes('/thank_you') ||
+              url.includes('thank_you') ||
+              (url.includes('/orders/') && !url.includes('buyer_token') && !url.includes('/checkouts/'))
+            );
+            if (isCompletedOrder) {
+              console.log('[GoKwik Interceptor] Prevented window.open to Shopify order page:', url);
+              const orderInfo = extractOrderDetails(lastGoKwikOrder, url);
+              triggerOrderSuccess(orderInfo);
+              return null;
+            }
           }
           return origOpen.apply(this, arguments);
         };

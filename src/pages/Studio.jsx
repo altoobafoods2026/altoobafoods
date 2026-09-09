@@ -98,6 +98,14 @@ export default function Studio() {
     if (sortBy === 'price-low') return a.price - b.price;
     if (sortBy === 'price-high') return b.price - a.price;
     if (sortBy === 'rating') return b.rating - a.rating;
+    
+    // Featured (Default): Sort by exact Shopify collection sequence
+    if (selectedCategory && selectedCategory !== 'All') {
+      const catKey = selectedCategory.toLowerCase().replace(/\s+/g, '-');
+      const orderA = a.collectionOrders?.[catKey] ?? a.collectionOrders?.[selectedCategory.toLowerCase()] ?? 999;
+      const orderB = b.collectionOrders?.[catKey] ?? b.collectionOrders?.[selectedCategory.toLowerCase()] ?? 999;
+      if (orderA !== orderB) return orderA - orderB;
+    }
     return 0; // Featured
   });
 
