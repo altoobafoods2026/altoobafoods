@@ -1,15 +1,33 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
+import { useToastStore } from '../store/toastStore';
 import { formatPrice } from '../utils/formatPrice';
+import { initiateGokwikCheckout } from '../services/gokwik';
 
 export default function CartDrawer({ isOpen, onClose }) {
   const items = useCartStore((state) => state.items);
   const updateQty = useCartStore((state) => state.updateQty);
   const removeItem = useCartStore((state) => state.removeItem);
+  const showToast = useToastStore((state) => state.showToast);
   
   const total = useCartStore((state) => state.total);
   const count = useCartStore((state) => state.count);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+  const handleCheckout = async () => {
+    if (items.length === 0) return;
+    try {
+      setIsCheckingOut(true);
+      await initiateGokwikCheckout(items);
+      onClose();
+    } catch (err) {
+      console.error('GoKwik checkout failed:', err);
+      showToast(err.message || 'Failed to open checkout. Please try again.', 'error');
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
 
   // Prevent background scrolling when open
   useEffect(() => {
@@ -129,22 +147,41 @@ export default function CartDrawer({ isOpen, onClose }) {
               <span className="text-2xl font-serif font-bold text-forest">{formatPrice(total)}</span>
             </div>
             <p className="text-xs text-forest/60 mb-6">Taxes and shipping computed at checkout.</p>
-            <div className="space-y-3">
-              <Link
-                to="/checkout"
-                onClick={onClose}
-                className="block text-center w-full rounded-full py-4 text-xs font-sans font-bold uppercase tracking-wider bg-forest text-parchment hover:bg-[#2b4c29] transition-colors cursor-pointer"
+              <button
+                onClick={handleCheckout}
+                disabled={isCheckingOut}
+                className="w-full rounded-full py-4 text-xs font-sans font-bold uppercase tracking-widest bg-forest text-parchment hover:bg-[#2b4c29] transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75"
               >
-                Proceed to Checkout
-              </Link>
+                {isCheckingOut ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-parchment/30 border-t-parchment rounded-full animate-spin" />
+                    <span>Securing Checkout...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 text-[#D4A24C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <span>Instant 1-Click Checkout</span>
+                  </>
+                )}
+              </button>
+              <div className="flex items-center justify-center gap-3 text-[10px] uppercase font-sans font-bold tracking-wider text-forest/60 pt-1">
+                <span>⚡ UPI</span>
+                <span>•</span>
+                <span>COD</span>
+                <span>•</span>
+                <span>Cards</span>
+                <span>•</span>
+                <span className="text-[#8A5E12]">100% Safe</span>
+              </div>
               <Link
                 to="/cart"
                 onClick={onClose}
-                className="block text-center w-full rounded-full py-4 text-xs font-sans font-bold uppercase tracking-wider border border-forest/20 text-forest hover:bg-forest/5 transition-colors cursor-pointer"
+                className="block text-center w-full rounded-full py-3 text-xs font-sans font-bold uppercase tracking-wider border border-forest/20 text-forest hover:bg-forest/5 transition-colors cursor-pointer"
               >
-                View Cart Details
+                View Full Cart
               </Link>
-            </div>
           </div>
         )}
       </div>

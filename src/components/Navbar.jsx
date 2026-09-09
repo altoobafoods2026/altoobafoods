@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import { useWishlistStore } from '../store/wishlistStore';
+import { triggerKwikpassLogin, isKwikPassLoggedIn } from '../services/kwikpass';
 import CartDrawer from './CartDrawer';
 import logoSrc from '../assets/logo.webp';
 
@@ -11,8 +12,10 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileProductsOpen, setIsMobileProductsOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => isKwikPassLoggedIn());
   
   const location = useLocation();
+  const navigate = useNavigate();
   const navRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const linksRef = useRef([]);
@@ -21,6 +24,19 @@ export default function Navbar() {
   const isHome = location.pathname === '/';
   const cartCount = useCartStore((state) => state.items.reduce((sum, item) => sum + item.quantity, 0));
   const wishlistCount = useWishlistStore((state) => state.items.length);
+
+  // Sync login status
+  useEffect(() => {
+    const handleLoginChange = () => setIsLoggedIn(isKwikPassLoggedIn());
+    window.addEventListener('kp_data_sent', handleLoginChange);
+    window.addEventListener('kp-data-sent', handleLoginChange);
+    window.addEventListener('kp-logout-success', handleLoginChange);
+    return () => {
+      window.removeEventListener('kp_data_sent', handleLoginChange);
+      window.removeEventListener('kp-data-sent', handleLoginChange);
+      window.removeEventListener('kp-logout-success', handleLoginChange);
+    };
+  }, []);
 
   const productCategories = [
     { name: 'All Products', path: '/studio' },
@@ -138,16 +154,24 @@ export default function Navbar() {
           {/* Right Area Controls */}
           <div className={`flex items-center space-x-2 sm:space-x-4 ${isTransparent ? 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]' : 'text-forest'}`}>
             
-            {/* Login */}
-            <Link
-              to="/login"
-              className={`p-2 rounded-full transition-colors relative ${isTransparent ? 'hover:bg-white/10 hover:text-white' : 'hover:bg-forest/5 hover:text-forest/80'}`}
-              aria-label="Login"
+            {/* Login with KwikPass */}
+            <button
+              onClick={() => {
+                const triggered = triggerKwikpassLogin();
+                if (!triggered) {
+                  navigate('/login');
+                }
+              }}
+              className={`p-2 rounded-full transition-colors relative cursor-pointer ${isTransparent ? 'hover:bg-white/10 hover:text-white' : 'hover:bg-forest/5 hover:text-forest/80'}`}
+              aria-label={isLoggedIn ? "Account Profile" : "Sign In with KwikPass"}
             >
               <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
               </svg>
-            </Link>
+              {isLoggedIn && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
+              )}
+            </button>
 
             {/* Shopping Cart */}
             <button
@@ -265,18 +289,24 @@ export default function Navbar() {
             );
           })}
 
-          <Link
+          <button
             ref={(el) => (linksRef.current[menuItems.length] = el)}
-            to="/login"
             onClick={() => {
               setIsMobileMenuOpen(false);
               setIsMobileProductsOpen(false);
+              const triggered = triggerKwikpassLogin();
+              if (!triggered) {
+                navigate('/login');
+              }
             }}
-            className="liquid mt-2 rounded-full px-10 py-3 bg-[#D4A24C] text-[#0D3B2A] text-sm font-sans font-bold uppercase tracking-widest transition-all duration-300 shadow-lg border-none"
+            className="kwik-pass-login liquid mt-2 rounded-full px-8 py-3 bg-[#D4A24C] text-[#0D3B2A] text-sm font-sans font-bold uppercase tracking-widest transition-all duration-300 shadow-lg border-none cursor-pointer flex items-center justify-center gap-2"
             style={{ '--liquid-bg': '#FAF7F2', '--liquid-text': '#0D3B2A' }}
           >
-            LOGIN
-          </Link>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+            </svg>
+            <span>{isLoggedIn ? "MY ACCOUNT" : "LOGIN WITH KWIKPASS"}</span>
+          </button>
         </div>
       </div>
 

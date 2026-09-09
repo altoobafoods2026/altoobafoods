@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getProductBySlug, getProducts, getCachedProductBySlugSync, getCachedProductsSync } from '../services/shopify';
 import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
+import { initiateGokwikCheckout } from '../services/gokwik';
 import TrustedBy from '../components/TrustedBy';
 import ProductCard from '../components/ProductCard';
 
@@ -11,6 +12,7 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [isBuyingNow, setIsBuyingNow] = useState(false);
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [isZooming, setIsZooming] = useState(false);
   const [zoomStyle, setZoomStyle] = useState({ transform: 'scale(1)', transformOrigin: 'center center' });
@@ -103,7 +105,7 @@ export default function ProductDetail() {
     showToast(`Added ${quantity}x ${product.name}${variantSuffix} to cart`);
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     if (!product.inStock) {
       showToast('Product is out of stock', 'error');
       return;
@@ -111,8 +113,24 @@ export default function ProductDetail() {
     for (let i = 0; i < quantity; i++) {
       addItem(product, selectedVariant?.title || null);
     }
-    window.scrollTo(0, 0);
-    navigate('/checkout');
+    try {
+      setIsBuyingNow(true);
+      const buyItem = [
+        {
+          product,
+          selectedVariant: selectedVariant?.title || null,
+          price: currentPrice,
+          quantity,
+        },
+      ];
+      await initiateGokwikCheckout(buyItem);
+    } catch (err) {
+      console.error('Buy Now GoKwik checkout failed:', err);
+      window.scrollTo(0, 0);
+      navigate('/checkout');
+    } finally {
+      setIsBuyingNow(false);
+    }
   };
 
   const [touchStartX, setTouchStartX] = useState(0);
@@ -434,14 +452,31 @@ export default function ProductDetail() {
               {/* Instant Checkout / Buy Now Button */}
               <button
                 onClick={handleBuyNow}
-                disabled={!product.inStock}
+                disabled={!product.inStock || isBuyingNow}
                 className="w-full bg-[#153423] hover:bg-[#1f4a33] text-[#FAF7F2] transition-all duration-300 py-3.5 rounded-[14px] font-sans font-bold text-[13px] uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_16px_rgba(21,52,35,0.2)] hover:shadow-lg hover:scale-[1.008] active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2.5"
               >
-                <span>Proceed to Checkout</span>
-                <svg className="w-4 h-4 text-[#D4A24C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
+                {isBuyingNow ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-parchment/30 border-t-parchment rounded-full animate-spin" />
+                    <span>Opening 1-Click Checkout...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-[#D4A24C] text-base">⚡</span>
+                    <span>Instant 1-Click Buy Now</span>
+                    <svg className="w-4 h-4 text-[#D4A24C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                  </>
+                )}
               </button>
+              <div className="flex items-center justify-center gap-3 text-[10px] uppercase font-sans font-bold tracking-wider text-gray-500 pt-0.5">
+                <span>⚡ UPI</span>
+                <span>•</span>
+                <span>Cash On Delivery</span>
+                <span>•</span>
+                <span>Cards</span>
+              </div>
             </div>
 
           </div>

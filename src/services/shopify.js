@@ -784,3 +784,90 @@ export const getCarouselMetaobjectImages = async () => {
   return data.map(item => item.image);
 };
 
+/**
+ * Creates an official Shopify Cart via Storefront GraphQL API
+ * Required for headless checkout integrations like GoKwik (Scenario 2)
+ *
+ * @param {Array} items - Array of cart items [{ product, selectedVariant, quantity }]
+ * @returns {Promise<{ cartId: string, checkoutUrl: string, totalQuantity: number }>}
+ */
+export async function createShopifyCart(items = []) {
+  if (!items || items.length === 0) {
+    throw new Error('Cart is empty');
+  }
+
+  const lines = items
+    .map((item) => {
+      let variantId = null;
+      if (item.selectedVariant && item.product?.variants?.length > 0) {
+        const match = item.product.variants.find(
+          (v) => v.name === item.selectedVariant || v.title === item.selectedVariant
+        );
+        if (match && match.id) variantId = match.id;
+      }
+
+      if (!variantId && item.product?.variants?.length > 0) {
+        variantId = item.product.variants[0].id;
+      }
+
+      if (!variantId && item.product?.id) {
+        variantId = item.product.id;
+      }
+
+      if (variantId && !variantId.startsWith('gid://')) {
+        variantId = `gid://shopify/ProductVariant/${variantId}`;
+      }
+
+      return {
+        merchandiseId: variantId,
+        quantity: item.quantity || 1,
+      };
+    })
+    .filter((line) => Boolean(line.merchandiseId));
+
+  if (lines.length === 0) {
+    throw new Error('No valid products found in cart');
+  }
+
+  const query = `
+    mutation createCart($lines: [CartLineInput!]) {
+      cartCreate(input: { lines: $lines }) {
+        cart {
+          id
+          checkoutUrl
+          totalQuantity
+        }
+        userErrors {
+          code
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  const response = await shopifyFetch({ query, variables: { lines } });
+
+  if (response.body?.errors) {
+    console.error('Shopify cartCreate error:', response.body.errors);
+    throw new Error(response.body.errors[0]?.message || 'Failed to create Shopify cart');
+  }
+
+  const cartData = response.body?.data?.cartCreate;
+  if (cartData?.userErrors?.length > 0) {
+    console.error('Shopify cart userErrors:', cartData.userErrors);
+    throw new Error(cartData.userErrors[0].message);
+  }
+
+  if (!cartData?.cart?.id) {
+    throw new Error('Invalid cart response from Shopify');
+  }
+
+  return {
+    cartId: cartData.cart.id,
+    checkoutUrl: cartData.cart.checkoutUrl,
+    totalQuantity: cartData.cart.totalQuantity,
+  };
+}
+
+

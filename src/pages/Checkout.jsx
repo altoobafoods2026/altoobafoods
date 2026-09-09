@@ -3,12 +3,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
 import { formatPrice } from '../utils/formatPrice';
+import { initiateGokwikCheckout } from '../services/gokwik';
 
 export default function Checkout() {
   const location = useLocation();
   const navigate = useNavigate();
   const items = useCartStore((state) => state.items);
   const showToast = useToastStore((state) => state.showToast);
+  const [isGokwikLoading, setIsGokwikLoading] = useState(false);
 
   // Read discount info passed from Cart state
   const { discountPercent = 0, discountAmount = 0, promoCode = '' } = location.state || {};
@@ -71,6 +73,22 @@ export default function Checkout() {
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
+  };
+
+  const handleGokwikCheckout = async () => {
+    if (items.length === 0) {
+      showToast('Your cart is empty', 'error');
+      return;
+    }
+    try {
+      setIsGokwikLoading(true);
+      await initiateGokwikCheckout(items);
+    } catch (err) {
+      console.error('GoKwik checkout failed:', err);
+      showToast(err.message || 'Failed to open GoKwik checkout', 'error');
+    } finally {
+      setIsGokwikLoading(false);
+    }
   };
 
   const handlePlaceOrder = (e) => {
@@ -155,6 +173,51 @@ export default function Checkout() {
           {/* Billing & Shipping Details Form */}
           <div className="lg:col-span-7 space-y-8 bg-white border border-forest/10 rounded-3xl p-6 sm:p-10 shadow-[0_4px_12px_rgba(0,0,0,0.01)]">
             
+            {/* Express 1-Click GoKwik Checkout Box */}
+            <div className="bg-[#FAF7F2] border-2 border-[#D4A24C]/40 rounded-2xl p-5 sm:p-6 text-center space-y-3">
+              <div className="flex items-center justify-center gap-2 text-forest font-serif font-bold text-lg">
+                <span className="text-[#D4A24C] text-xl">⚡</span>
+                <span>Express 1-Click Checkout</span>
+              </div>
+              <p className="text-xs text-forest/70 max-w-md mx-auto leading-relaxed">
+                Skip manual address filling! Pay in seconds with <strong>UPI (PhonePe, GPay, Paytm)</strong>, <strong>COD</strong>, or <strong>Cards</strong>.
+              </p>
+              <button
+                type="button"
+                onClick={handleGokwikCheckout}
+                disabled={isGokwikLoading || items.length === 0}
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#0D3B2A] text-parchment text-xs font-sans font-bold uppercase tracking-widest hover:bg-[#15533c] transition-all shadow-md inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75"
+              >
+                {isGokwikLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-parchment/30 border-t-parchment rounded-full animate-spin" />
+                    <span>Opening GoKwik Checkout...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>⚡ Pay with GoKwik</span>
+                  </>
+                )}
+              </button>
+              <div className="flex items-center justify-center gap-3 text-[10px] uppercase font-sans font-bold tracking-wider text-forest/60 pt-1">
+                <span>PhonePe</span>
+                <span>•</span>
+                <span>GPay</span>
+                <span>•</span>
+                <span>Paytm</span>
+                <span>•</span>
+                <span>COD</span>
+                <span>•</span>
+                <span>Cards</span>
+              </div>
+            </div>
+
+            <div className="relative flex py-1 items-center">
+              <div className="flex-grow border-t border-forest/10"></div>
+              <span className="flex-shrink mx-4 text-xs uppercase font-sans font-bold tracking-widest text-forest/40">Or Fill Details Manually</span>
+              <div className="flex-grow border-t border-forest/10"></div>
+            </div>
+
             {/* Contact Details */}
             <div>
               <h3 className="font-serif font-bold text-xl text-forest mb-6 border-b border-forest/5 pb-2">1. Contact Information</h3>

@@ -150,6 +150,21 @@
       ]
     }
     </script>
+    
+    <!-- GoKwik 1-Click Checkout & KwikPass SDK (Scenario 2: Custom Headless Storefront) -->
+    <script>
+      window.merchantInfo = {
+        mid: "190a1eh49i07",
+        appId: "bc9a49119e000ac2bd57f0b02d5323b3",
+        storeId: "81970725115",
+        environment: "production",
+        type: "merchantInfo",
+        gkPlatform: "SHOPIFY",
+        integrationType: "CUSTOM_SHOPIFY"
+      };
+    </script>
+    <script src="https://pdp.gokwik.co/kwikpass/kwikpass-core-functions.js" defer></script>
+    <script src="https://pdp.gokwik.co/merchant-integration/build/merchant.integration.js?v4" defer></script>
   </head>
   <body>
     <div id="root"></div>

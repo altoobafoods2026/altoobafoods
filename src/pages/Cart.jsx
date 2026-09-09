@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
 import { formatPrice } from '../utils/formatPrice';
+import { initiateGokwikCheckout } from '../services/gokwik';
 
 export default function Cart() {
   const items = useCartStore((state) => state.items);
@@ -10,6 +11,7 @@ export default function Cart() {
   const removeItem = useCartStore((state) => state.removeItem);
   const showToast = useToastStore((state) => state.showToast);
 
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [promoCode, setPromoCode] = useState('');
   const [discountPercent, setDiscountPercent] = useState(0);
   const [promoError, setPromoError] = useState('');
@@ -58,6 +60,19 @@ export default function Cart() {
   const handleRemove = (itemId, variant, name) => {
     removeItem(itemId, variant);
     showToast(`Removed ${name} from cart`);
+  };
+
+  const handleCheckout = async () => {
+    if (items.length === 0) return;
+    try {
+      setIsCheckingOut(true);
+      await initiateGokwikCheckout(items);
+    } catch (err) {
+      console.error('GoKwik checkout failed:', err);
+      showToast(err.message || 'Failed to open checkout. Please try again.', 'error');
+    } finally {
+      setIsCheckingOut(false);
+    }
   };
 
   // Contact form handlers
@@ -246,12 +261,38 @@ export default function Cart() {
                   </div>
                 </div>
 
+                <button
+                  onClick={handleCheckout}
+                  disabled={isCheckingOut || items.length === 0}
+                  className="w-full text-center flex items-center justify-center gap-2 rounded-full py-4 bg-forest text-parchment text-xs font-sans font-bold uppercase tracking-widest hover:bg-[#2b4c29] transition-all shadow-md mb-2 cursor-pointer disabled:opacity-70"
+                >
+                  {isCheckingOut ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-parchment/30 border-t-parchment rounded-full animate-spin" />
+                      <span>Securing 1-Click Checkout...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4 text-[#D4A24C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                      <span>Instant 1-Click Checkout</span>
+                    </>
+                  )}
+                </button>
+                <div className="flex items-center justify-center gap-2.5 text-[10px] uppercase font-sans font-bold tracking-wider text-forest/60 mb-4">
+                  <span>⚡ UPI</span>
+                  <span>•</span>
+                  <span>Cash On Delivery</span>
+                  <span>•</span>
+                  <span>Cards</span>
+                </div>
                 <Link
                   to="/checkout"
                   state={{ discountPercent, discountAmount, promoCode }}
-                  className="w-full text-center block rounded-full py-4 bg-forest text-parchment text-xs font-sans font-bold uppercase tracking-widest hover:bg-[#2b4c29] transition-colors shadow-md mb-4"
+                  className="block text-center text-xs text-forest/60 hover:text-forest underline transition-colors"
                 >
-                  Proceed to Checkout
+                  Or manual address &amp; standard checkout &rarr;
                 </Link>
 
                 <div className="flex items-center justify-center gap-2 text-[10px] font-sans font-bold uppercase tracking-wider text-forest/40 mt-6">
