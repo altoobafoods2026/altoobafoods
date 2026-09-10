@@ -17,6 +17,7 @@ export default function ProductDetail() {
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [isZooming, setIsZooming] = useState(false);
   const [zoomStyle, setZoomStyle] = useState({ transform: 'scale(1)', transformOrigin: 'center center' });
+  const [touchStartX, setTouchStartX] = useState(0);
 
   const [product, setProduct] = useState(() => getCachedProductBySlugSync(slug));
   const [selectedVariant, setSelectedVariant] = useState(() => {
@@ -28,6 +29,14 @@ export default function ProductDetail() {
 
   const addItem = useCartStore((state) => state.addItem);
   const showToast = useToastStore((state) => state.showToast);
+
+  useEffect(() => {
+    const container = document.getElementById('product-thumbnails-container');
+    const activeBtn = container?.children?.[activeImage];
+    if (activeBtn) {
+      activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  }, [activeImage]);
 
   useEffect(() => {
     async function loadProduct() {
@@ -132,8 +141,6 @@ export default function ProductDetail() {
     }
   };
 
-  const [touchStartX, setTouchStartX] = useState(0);
-
   const handlePrevImage = () => {
     setActiveImage((prev) => (prev > 0 ? prev - 1 : finalImages.length - 1));
   };
@@ -141,14 +148,6 @@ export default function ProductDetail() {
   const handleNextImage = () => {
     setActiveImage((prev) => (prev < finalImages.length - 1 ? prev + 1 : 0));
   };
-
-  useEffect(() => {
-    const container = document.getElementById('product-thumbnails-container');
-    const activeBtn = container?.children?.[activeImage];
-    if (activeBtn) {
-      activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-    }
-  }, [activeImage]);
 
   const handleMouseMove = (e) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
