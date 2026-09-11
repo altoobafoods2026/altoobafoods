@@ -89,13 +89,19 @@ export function populateGokwikCartPayload(cartId = '', items = null) {
       if (!vId && it.product?.variants?.[0]?.id) vId = it.product.variants[0].id;
       if (!vId) vId = it.variantId || it.id || '1';
 
+      let title = it.product?.title || it.title || it.name || '';
+      if (it.complimentaryGift) {
+        title = `${title} (+ Free ${it.complimentaryGift.title})`;
+      }
+
       return {
         id: vId,
         variantId: vId,
-        title: it.product?.title || it.title || it.name || '',
+        title: title,
         price: it.price,
         quantity: it.quantity || 1,
         image: it.product?.images?.[0]?.url || it.image || '',
+        complimentaryGift: it.complimentaryGift || null,
       };
     });
   }
@@ -130,11 +136,15 @@ export function populateGokwikCartPayload(cartId = '', items = null) {
       items: cartItems.map((it) => {
         const rawId = it.variantId || it.id || '1';
         const numericId = String(rawId).replace(/\D/g, '') || 1;
+        let lineTitle = it.title || it.name || '';
+        if (it.complimentaryGift && !lineTitle.includes('Free')) {
+          lineTitle = `${lineTitle} (+ Free ${it.complimentaryGift.title})`;
+        }
         return {
           id: Number(numericId),
           variant_id: Number(numericId),
           quantity: it.quantity || 1,
-          title: it.title || it.name || '',
+          title: lineTitle,
           price: Math.round(Number(it.price || 0) * 100),
           original_price: Math.round(Number(it.price || 0) * 100),
           line_price: Math.round(Number(it.price || 0) * (it.quantity || 1) * 100),

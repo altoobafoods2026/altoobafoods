@@ -10,17 +10,21 @@ function saveCartToStorage(items) {
       if (!variantId && it.product?.variants?.[0]?.id) variantId = it.product.variants[0].id;
       if (!variantId) variantId = it.product?.id || '1';
 
+      const firstImg = it.product?.images?.[0];
+      const imgUrl = typeof firstImg === 'string' ? firstImg : (firstImg?.url || it.product?.image || '');
+
       return {
         id: variantId,
         variantId: variantId,
-        title: it.product?.title || it.title || it.name || '',
-        name: it.product?.title || it.title || it.name || '',
+        title: it.product?.title || it.product?.name || it.title || it.name || '',
+        name: it.product?.title || it.product?.name || it.title || it.name || '',
         selectedVariant: it.selectedVariant,
         price: it.price,
         quantity: it.quantity,
-        image: it.product?.images?.[0]?.url || it.product?.image || '',
-        featuredImage: it.product?.images?.[0]?.url || it.product?.image || '',
-        product: it.product
+        image: imgUrl,
+        featuredImage: imgUrl,
+        product: it.product,
+        complimentaryGift: it.complimentaryGift || null
       };
     });
 
@@ -38,17 +42,28 @@ function loadInitialCart() {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.map((it) => ({
-      product: it.product || {
-        id: it.id,
-        title: it.title || it.name,
-        price: it.price,
-        images: it.image ? [{ url: it.image }] : []
-      },
-      selectedVariant: it.selectedVariant || null,
-      price: Number(it.price || 0),
-      quantity: Number(it.quantity || 1)
-    }));
+    return parsed.map((it) => {
+      const firstImg = it.product?.images?.[0];
+      const imgUrl = it.image || it.featuredImage || (typeof firstImg === 'string' ? firstImg : firstImg?.url) || it.product?.image || '';
+      return {
+        product: it.product ? {
+          ...it.product,
+          images: Array.isArray(it.product.images) && it.product.images.length > 0 
+            ? it.product.images.map(img => typeof img === 'string' ? img : img?.url || '')
+            : (imgUrl ? [imgUrl] : [])
+        } : {
+          id: it.id,
+          title: it.title || it.name,
+          name: it.name || it.title,
+          price: it.price,
+          images: imgUrl ? [imgUrl] : []
+        },
+        selectedVariant: it.selectedVariant || null,
+        price: Number(it.price || 0),
+        quantity: Number(it.quantity || 1),
+        complimentaryGift: it.complimentaryGift || null
+      };
+    });
   } catch (e) {
     return [];
   }
@@ -68,10 +83,12 @@ export const useCartStore = create((set, get) => ({
   closeDrawer: () => set({ isDrawerOpen: false }),
   setIsDrawerOpen: (isOpen) => set({ isDrawerOpen: isOpen }),
   
-  addItem: (product, variantName = null, openDrawer = true) => {
+  addItem: (product, variantName = null, openDrawer = true, complimentaryGift = null) => {
     const items = get().items;
     const existingIndex = items.findIndex(
-      item => item.product.id === product.id && item.selectedVariant === variantName
+      item => item.product.id === product.id && 
+              item.selectedVariant === variantName &&
+              (item.complimentaryGift?.id === complimentaryGift?.id || (!item.complimentaryGift && !complimentaryGift))
     );
 
     let price = product.price;
@@ -85,7 +102,7 @@ export const useCartStore = create((set, get) => ({
       newItems = [...items];
       newItems[existingIndex].quantity += 1;
     } else {
-      newItems = [...items, { product, selectedVariant: variantName, price, quantity: 1 }];
+      newItems = [...items, { product, selectedVariant: variantName, price, quantity: 1, complimentaryGift: complimentaryGift || null }];
     }
 
     const total = newItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -94,10 +111,14 @@ export const useCartStore = create((set, get) => ({
     set({ items: newItems, total, count, ...(openDrawer ? { isDrawerOpen: true } : {}) });
   },
 
-  removeItem: (productId, variantName = null) => {
+  removeItem: (productId, variantName = null, giftId = null) => {
     const items = get().items;
     const newItems = items.filter(
-      item => !(item.product.id === productId && item.selectedVariant === variantName)
+      item => !(
+        item.product.id === productId && 
+        item.selectedVariant === variantName &&
+        (giftId !== null ? item.complimentaryGift?.id === giftId : true)
+      )
     );
     const total = newItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const count = newItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -105,10 +126,12 @@ export const useCartStore = create((set, get) => ({
     set({ items: newItems, total, count });
   },
 
-  updateQty: (productId, quantity, variantName = null) => {
+  updateQty: (productId, quantity, variantName = null, giftId = null) => {
     const items = get().items;
     const existingIndex = items.findIndex(
-      item => item.product.id === productId && item.selectedVariant === variantName
+      item => item.product.id === productId && 
+              item.selectedVariant === variantName &&
+              (giftId !== null ? item.complimentaryGift?.id === giftId : true)
     );
 
     if (existingIndex > -1) {

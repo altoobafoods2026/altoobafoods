@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import { triggerKwikpassLogin, isKwikPassLoggedIn, handleKwikPassLogout } from '../services/kwikpass';
 import CartDrawer from './CartDrawer';
@@ -17,7 +17,6 @@ export default function Navbar() {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   
   const location = useLocation();
-  const navigate = useNavigate();
   const navRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const userDropdownRef = useRef(null);

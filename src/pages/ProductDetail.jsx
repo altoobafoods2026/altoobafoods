@@ -1,12 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getProductBySlug, getProducts, getCachedProductBySlugSync, getCachedProductsSync } from '../services/shopify';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { 
+  getProductBySlug, 
+  getProducts,
+  getCachedProductBySlugSync, 
+  getCachedProductsSync,
+  getCollectionProducts,
+  getCachedCollectionProductsSync 
+} from '../services/shopify';
 import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
 import { initiateGokwikCheckout } from '../services/gokwik';
+import { optimizeShopifyImage } from '../utils/imageOptimizer';
 import TrustedBy from '../components/TrustedBy';
 import ProductCard from '../components/ProductCard';
 import OfferCountdownBadge from '../components/OfferCountdownBadge';
+import FreeGiftSelector from '../components/FreeGiftSelector';
+import { getFreeGiftOffer } from '../config/freeGiftOffers';
 
 export default function ProductDetail() {
   const { slug } = useParams();
@@ -24,11 +34,85 @@ export default function ProductDetail() {
     const cached = getCachedProductBySlugSync(slug);
     return cached?.variants?.[0] || null;
   });
-  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [relatedProducts, setRelatedProducts] = useState(() => {
+    const cached = getCachedProductsSync();
+    const initialProduct = getCachedProductBySlugSync(slug);
+    if (cached && initialProduct) {
+      return cached
+        .filter(p => 
+          p.category === initialProduct.category && 
+          p.id !== initialProduct.id &&
+          !p.name.toLowerCase().includes('al-rayhan') &&
+          !p.name.toLowerCase().includes('tulsi')
+        )
+        .slice(0, 4);
+    }
+    return [];
+  });
   const [isLoading, setIsLoading] = useState(() => !getCachedProductBySlugSync(slug));
+
+  const freeGiftOffer = useMemo(() => {
+    return getFreeGiftOffer(slug, selectedVariant?.title);
+  }, [slug, selectedVariant?.title]);
+
+  const [liveGifts, setLiveGifts] = useState(() => {
+    if (!freeGiftOffer?.collectionHandle) return null;
+    return getCachedCollectionProductsSync(freeGiftOffer.collectionHandle, selectedVariant?.title);
+  });
+
+  const [selectedGift, setSelectedGift] = useState(() => {
+    const initialGifts = liveGifts && liveGifts.length > 0 ? liveGifts : freeGiftOffer?.gifts;
+    return initialGifts?.[0] || null;
+  });
+
+  const activeOffer = useMemo(() => {
+    if (!freeGiftOffer) return null;
+    return {
+      ...freeGiftOffer,
+      gifts: liveGifts && liveGifts.length > 0 ? liveGifts : freeGiftOffer.gifts,
+    };
+  }, [freeGiftOffer, liveGifts]);
 
   const addItem = useCartStore((state) => state.addItem);
   const showToast = useToastStore((state) => state.showToast);
+
+  useEffect(() => {
+    let isMounted = true;
+    if (!freeGiftOffer?.collectionHandle) {
+      setLiveGifts(null);
+      return;
+    }
+
+    // Check synchronous cache first (0ms instantaneous)
+    const cached = getCachedCollectionProductsSync(freeGiftOffer.collectionHandle, selectedVariant?.title);
+    if (cached && cached.length > 0) {
+      setLiveGifts(cached);
+      setSelectedGift((prev) => {
+        const found = cached.find((g) => g.id === prev?.id);
+        return found || cached[0];
+      });
+      return;
+    }
+
+    async function loadCollectionGifts() {
+      try {
+        const gifts = await getCollectionProducts(freeGiftOffer.collectionHandle, selectedVariant?.title);
+        if (isMounted && gifts && gifts.length > 0) {
+          setLiveGifts(gifts);
+          setSelectedGift((prev) => {
+            const found = gifts.find((g) => g.id === prev?.id);
+            return found || gifts[0];
+          });
+        }
+      } catch (err) {
+        console.warn('Could not fetch live collection gifts, using fallback:', err);
+      }
+    }
+    loadCollectionGifts();
+    return () => {
+      isMounted = false;
+    };
+  }, [freeGiftOffer?.collectionHandle, selectedVariant?.title]);
 
   useEffect(() => {
     const container = document.getElementById('product-thumbnails-container');
@@ -108,8 +192,9 @@ export default function ProductDetail() {
       showToast('Product is out of stock', 'error');
       return;
     }
+    const giftToApply = activeOffer?.isActiveForVariant ? selectedGift : null;
     for (let i = 0; i < quantity; i++) {
-      addItem(product, selectedVariant?.title || null);
+      addItem(product, selectedVariant?.title || null, true, giftToApply);
     }
   };
 
@@ -118,8 +203,9 @@ export default function ProductDetail() {
       showToast('Product is out of stock', 'error');
       return;
     }
+    const giftToApply = activeOffer?.isActiveForVariant ? selectedGift : null;
     for (let i = 0; i < quantity; i++) {
-      addItem(product, selectedVariant?.title || null, false);
+      addItem(product, selectedVariant?.title || null, false, giftToApply);
     }
     try {
       setIsBuyingNow(true);
@@ -129,6 +215,7 @@ export default function ProductDetail() {
           selectedVariant: selectedVariant?.title || null,
           price: currentPrice,
           quantity,
+          complimentaryGift: giftToApply,
         },
       ];
       await initiateGokwikCheckout(buyItem);
@@ -138,6 +225,17 @@ export default function ProductDetail() {
       navigate('/checkout');
     } finally {
       setIsBuyingNow(false);
+    }
+  };
+
+  const handleSwitchTo500g = () => {
+    const target = product.variants?.find(v => v.title.toLowerCase().includes('500'));
+    if (target) {
+      setSelectedVariant(target);
+      if (target.image) {
+        const imgIdx = finalImages.findIndex(img => img === target.image);
+        if (imgIdx > -1) setActiveImage(imgIdx);
+      }
     }
   };
 
@@ -175,8 +273,9 @@ export default function ProductDetail() {
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-10 items-start">
           
-          {/* Left Column: Gallery */}
-          <div className="flex flex-col-reverse lg:flex-row gap-4 lg:gap-6 sticky top-28 self-start">
+          {/* Left Column: Gallery & Free Gift Selector */}
+          <div className="flex flex-col gap-6 lg:self-start">
+            <div className="flex flex-col-reverse lg:flex-row gap-4 lg:gap-6">
             
             {/* Thumbnails */}
             <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-visible items-center scrollbar-none py-1">
@@ -202,8 +301,12 @@ export default function ProductDetail() {
                     }`}
                   >
                     <img 
-                      src={img} 
+                      src={optimizeShopifyImage(img, 160)} 
                       alt="" 
+                      width="80"
+                      height="80"
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-contain p-1.5 mix-blend-multiply"
                     />
                   </button>
@@ -265,12 +368,29 @@ export default function ProductDetail() {
               )}
               
               <img 
-                src={finalImages[activeImage]} 
+                src={optimizeShopifyImage(finalImages[activeImage], 900)} 
                 alt={product.name} 
+                width="600"
+                height="600"
+                decoding="async"
                 className={`w-full h-full object-contain mix-blend-multiply transition-transform duration-300 ${isZooming ? 'ease-out' : 'ease-in-out'}`}
                 style={isZooming ? zoomStyle : { transform: 'scale(1)', transformOrigin: 'center center' }}
               />
             </div>
+            </div>
+
+            {/* Free Gift / Complimentary Combo Selector (Desktop Only: Left Column under Image) */}
+            {activeOffer && (
+              <div className="hidden lg:block w-full">
+                <FreeGiftSelector
+                  offer={activeOffer}
+                  selectedGift={selectedGift}
+                  onSelectGift={setSelectedGift}
+                  isActiveForVariant={activeOffer.isActiveForVariant}
+                  onSwitchTo500g={handleSwitchTo500g}
+                />
+              </div>
+            )}
           </div>
 
           {/* Right Column: Info */}
@@ -311,15 +431,15 @@ export default function ProductDetail() {
 
             {/* Multi-Weight / Size Variant Selector (RuhaniSouq Style) */}
             {product.variants && product.variants.length > 1 && product.variants[0].title !== 'Default Title' && (
-              <div className="mb-5 bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-200/90 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
-                <div className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#0D3B2A] mb-3 flex items-center justify-between">
+              <div className="mb-5 bg-white py-6 sm:py-7 px-4 sm:px-5 rounded-2xl border border-gray-200/90 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+                <div className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#0D3B2A] mb-4 sm:mb-5 flex items-center justify-between">
                   <span>
                     OPTION: <strong className="text-[#0D3B2A] font-extrabold text-[12px] bg-[#FAF7F2] px-2.5 py-0.5 rounded border border-[#0D3B2A]/10 ml-1">{selectedVariant?.title}</strong>
                   </span>
                   <span className="text-[10px] text-gray-400 font-medium">{product.variants.length} options available</span>
                 </div>
 
-                <div className="flex flex-wrap gap-2.5 sm:gap-3">
+                <div className="flex flex-wrap gap-3 sm:gap-4">
                   {product.variants.map((v) => {
                     const isSelected = selectedVariant?.id === v.id;
                     const vThumb = v.image || product.images[0];
@@ -337,23 +457,27 @@ export default function ProductDetail() {
                             }
                           }
                         }}
-                        className={`flex flex-col items-center justify-between p-2.5 rounded-2xl border-2 transition-all duration-200 min-w-[90px] sm:min-w-[105px] bg-white cursor-pointer relative ${
+                        className={`flex flex-col items-center justify-between py-5 px-3.5 sm:py-6 sm:px-4 rounded-2xl border-2 transition-all duration-200 min-w-[105px] sm:min-w-[122px] min-h-[180px] sm:min-h-[196px] bg-white cursor-pointer relative ${
                           isSelected
                             ? 'border-[#0D3B2A] shadow-[0_6px_20px_rgba(13,59,42,0.18)] bg-[#FAF7F2]/60 ring-2 ring-[#0D3B2A]/20 scale-[1.03]'
                             : 'border-gray-200 hover:border-gray-400 opacity-80 hover:opacity-100'
                         }`}
                       >
                         {/* Thumbnail Image */}
-                        <div className="w-12 h-12 sm:w-14 sm:h-14 mb-2 flex items-center justify-center overflow-hidden rounded-xl bg-[#FAF7F2] p-1">
+                        <div className="w-[72px] h-[72px] sm:w-[82px] sm:h-[82px] mb-3 flex items-center justify-center overflow-hidden rounded-xl bg-[#FAF7F2] p-1">
                           <img
-                            src={vThumb}
+                            src={optimizeShopifyImage(vThumb, 180)}
                             alt={v.title}
+                            width="82"
+                            height="82"
+                            loading="lazy"
+                            decoding="async"
                             className="w-full h-full object-contain mix-blend-multiply transition-transform hover:scale-105"
                           />
                         </div>
 
                         {/* Variant Weight / Name */}
-                        <span className={`text-[11px] sm:text-[12px] font-bold font-sans mb-0.5 ${
+                        <span className={`text-[12px] sm:text-[13px] font-bold font-sans mb-1 ${
                           isSelected ? 'text-[#0D3B2A]' : 'text-gray-700'
                         }`}>
                           {v.title}
@@ -361,11 +485,11 @@ export default function ProductDetail() {
 
                         {/* Price & Strikethrough MRP */}
                         <div className="flex flex-col items-center">
-                          <span className="text-[12px] sm:text-[13px] font-extrabold text-[#0D3B2A] font-sans">
+                          <span className="text-[13px] sm:text-[14.5px] font-extrabold text-[#0D3B2A] font-sans">
                             ₹{v.price.toFixed(0)}
                           </span>
                           {v.mrp > v.price && (
-                            <span className="text-[9px] text-gray-400 line-through font-medium">
+                            <span className="text-[10px] text-gray-400 line-through font-medium">
                               ₹{v.mrp.toFixed(0)}
                             </span>
                           )}
@@ -377,8 +501,21 @@ export default function ProductDetail() {
               </div>
             )}
 
-            {/* Feature Grid */}
-            <div className="grid grid-cols-2 gap-y-4 gap-x-4 mb-5">
+            {/* Free Gift / Complimentary Combo Selector (Mobile Only: Appears right after Options) */}
+            {activeOffer && (
+              <div className="block lg:hidden w-full mb-3">
+                <FreeGiftSelector
+                  offer={activeOffer}
+                  selectedGift={selectedGift}
+                  onSelectGift={setSelectedGift}
+                  isActiveForVariant={activeOffer.isActiveForVariant}
+                  onSwitchTo500g={handleSwitchTo500g}
+                />
+              </div>
+            )}
+
+            {/* Product Key Highlights */}
+            <div className="grid grid-cols-2 gap-y-2.5 gap-x-4 my-3 py-3 border-y border-gray-200">
               <div className="flex items-center gap-2.5">
                 <svg className="w-4 h-4 text-[#c8a86a]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                 <span className="text-[11px] sm:text-[12px] font-bold text-gray-800">100% Pure & Natural</span>
@@ -397,27 +534,25 @@ export default function ProductDetail() {
               </div>
             </div>
 
-            <hr className="border-t border-gray-200 mb-5" />
-
             {/* Description */}
-            <div className="mb-2">
+            <div className="mb-1.5">
               <div 
-                className={`text-[13px] text-gray-500 font-sans leading-relaxed [&>p]:mb-3 [&>ul]:list-disc [&>ul]:pl-5 [&>ul>li]:mb-1 [&>h2]:font-bold [&>h2]:text-gray-800 [&>h2]:mb-2 [&>h2]:mt-4 [&>h3]:font-bold [&>h3]:text-gray-800 [&>h3]:mb-2 [&>h3]:mt-4 [&>strong]:font-bold [&>strong]:text-gray-800 ${!showFullDesc ? 'line-clamp-3' : ''}`}
+                className={`text-[13px] text-gray-500 font-sans leading-relaxed [&>p]:mb-2 [&>ul]:list-disc [&>ul]:pl-5 [&>ul>li]:mb-1 [&>h2]:font-bold [&>h2]:text-gray-800 [&>h2]:mb-2 [&>h2]:mt-3 [&>h3]:font-bold [&>h3]:text-gray-800 [&>h3]:mb-2 [&>h3]:mt-3 [&>strong]:font-bold [&>strong]:text-gray-800 ${!showFullDesc ? 'line-clamp-3' : ''}`}
                 dangerouslySetInnerHTML={{ __html: (product.descriptionHtml || product.description || product.shortDesc || '').replace(/<img[^>]*>/gi, '') }}
               />
             </div>
             
             <button 
               onClick={() => setShowFullDesc(!showFullDesc)}
-              className="text-[10px] font-bold text-[#0D3B2A] uppercase tracking-widest flex items-center gap-1 mb-6 hover:text-[#c8a86a] transition-colors w-fit"
+              className="text-[10px] font-bold text-[#0D3B2A] uppercase tracking-widest flex items-center gap-1 mb-4 hover:text-[#c8a86a] transition-colors w-fit cursor-pointer"
             >
               READ {showFullDesc ? 'LESS' : 'MORE'} 
               <svg className={`w-3 h-3 transform transition-transform ${showFullDesc ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
 
             {/* Quantity and Action Row */}
-            <div className="flex flex-col gap-3.5">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3">
                 <div className="flex items-center gap-4 shrink-0">
                   <span className="text-[11px] font-bold tracking-widest text-gray-900 uppercase">QUANTITY:</span>
                   <div className="flex items-center justify-between border border-gray-300 rounded-full px-4 py-1.5 bg-white min-w-[100px]">

@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageSquare } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
@@ -6,8 +5,6 @@ import { useToastStore } from '../store/toastStore';
 import { optimizeShopifyImage } from '../utils/imageOptimizer';
 
 export default function ProductCard({ product, index = 0 }) {
-  const cardRef = useRef(null);
-
   const addItem = useCartStore((state) => state.addItem);
   const showToast = useToastStore((state) => state.showToast);
 
@@ -25,7 +22,6 @@ export default function ProductCard({ product, index = 0 }) {
 
   return (
     <div
-      ref={cardRef}
       className="group bg-[#FAF7F2] rounded-[16px] sm:rounded-[20px] p-2.5 sm:p-3 flex flex-col h-full border border-[#D4A24C]/10 hover:border-[#D4A24C]/30 shadow-[0_8px_30px_rgba(13,59,42,0.03)] hover:shadow-[0_20px_40px_rgba(13,59,42,0.1)] transition-all duration-500 relative overflow-hidden gap-2 md:gap-0 w-full"
     >
       {/* Subtle Background Glow */}

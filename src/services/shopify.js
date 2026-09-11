@@ -1,4 +1,5 @@
 import { getAllProductReviewStats, getCachedReviewStatsSync } from './judgeme';
+import { optimizeShopifyImage } from '../utils/imageOptimizer';
 
 const domain = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN;
 const storefrontAccessToken = import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN;
@@ -215,10 +216,18 @@ export async function getProducts(forceRefresh = false) {
     // Map to our local schema
     const products = response.body.data.products.edges
       .filter(({ node }) => {
-        // Exclude products that are only meant for the videos or hero section
         const handles = node.collections?.edges.map(e => e.node.handle) || [];
+        // Exclude products that are only meant for the videos or hero section
         if (handles.includes('videos_instagram') || handles.includes('videos-instagram')) return false;
         if (node.handle.startsWith('hero_section') || node.handle.startsWith('hero-section')) return false;
+
+        // Exclude standalone complimentary gift products (only in free-gift collections or tagged as gift-only)
+        const isFreeGiftOnly = handles.length > 0 && handles.every(h => h.includes('free-gift') || h.includes('free-gifts'));
+        if (isFreeGiftOnly) return false;
+
+        const tags = (node.tags || []).map(t => t.toLowerCase());
+        if (tags.includes('gift-only') || tags.includes('free-gift-only') || tags.includes('hidden')) return false;
+
         return true;
       })
       .map(({ node }) => {
@@ -884,10 +893,21 @@ export async function createShopifyCart(items = []) {
         variantId = `gid://shopify/ProductVariant/${variantId}`;
       }
 
-      return {
+      const line = {
         merchandiseId: variantId,
         quantity: item.quantity || 1,
       };
+
+      if (item.complimentaryGift) {
+        line.attributes = [
+          {
+            key: 'Complimentary Gift',
+            value: `${item.complimentaryGift.title} (FREE)`,
+          },
+        ];
+      }
+
+      return line;
     })
     .filter((line) => Boolean(line.merchandiseId));
 
@@ -936,4 +956,155 @@ export async function createShopifyCart(items = []) {
   };
 }
 
+const collectionProductsCache = new Map();
 
+/**
+ * Synchronous cache getter for collection products (0ms instant load)
+ */
+export function getCachedCollectionProductsSync(collectionHandle, currentVariantTitle = '') {
+  if (!collectionHandle) return null;
+  const cacheKey = `${collectionHandle}-${currentVariantTitle || 'default'}`;
+  if (collectionProductsCache.has(cacheKey)) {
+    return collectionProductsCache.get(cacheKey);
+  }
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      const stored = sessionStorage.getItem(`altooba_gift_coll_${cacheKey}`);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        collectionProductsCache.set(cacheKey, parsed);
+        return parsed;
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
+/**
+ * Fetch all products belonging to a specific collection by its handle (cached)
+ */
+export async function getCollectionProducts(collectionHandle, currentVariantTitle = '') {
+  if (!collectionHandle) return [];
+  const syncCached = getCachedCollectionProductsSync(collectionHandle, currentVariantTitle);
+  if (syncCached && syncCached.length > 0) {
+    return syncCached;
+  }
+
+  const cacheKey = `${collectionHandle}-${currentVariantTitle || 'default'}`;
+
+  const query = `
+    query getCollection($handle: String!) {
+      collection(handle: $handle) {
+        id
+        title
+        products(first: 30) {
+          edges {
+            node {
+              id
+              title
+              handle
+              availableForSale
+              featuredImage {
+                url
+              }
+              images(first: 2) {
+                edges {
+                  node {
+                    url
+                  }
+                }
+              }
+              variants(first: 5) {
+                edges {
+                  node {
+                    id
+                    title
+                    availableForSale
+                    price {
+                      amount
+                    }
+                    compareAtPrice {
+                      amount
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  try {
+    const res = await shopifyFetch({ query, variables: { handle: collectionHandle } });
+    const collection = res.body?.data?.collection;
+    if (!collection || !collection.products?.edges || collection.products.edges.length === 0) {
+      return [];
+    }
+
+    const vTitleLower = (currentVariantTitle || '').toLowerCase();
+
+    const mappedGifts = collection.products.edges.map((e, idx) => {
+      const node = e.node;
+      const isTalbina = node.handle?.includes('talbina') || node.title?.toLowerCase().includes('talbina');
+
+      let chosenVariant = node.variants?.edges?.[0]?.node;
+      let displayTitle = node.title;
+
+      // Smart variant picker if Talbina is inside the collection
+      if (isTalbina && node.variants?.edges?.length > 1) {
+        if (vTitleLower.includes('1kg')) {
+          const match500 = node.variants.edges.find((v) => v.node.title.toLowerCase().includes('500'));
+          if (match500) {
+            chosenVariant = match500.node;
+            displayTitle = 'Talbina (500gm Pack)';
+          }
+        } else if (vTitleLower.includes('500')) {
+          const match250 = node.variants.edges.find((v) => v.node.title.toLowerCase().includes('250'));
+          if (match250) {
+            chosenVariant = match250.node;
+            displayTitle = 'Talbina (250gm Pack)';
+          }
+        }
+      }
+
+      const isAvailable = Boolean(chosenVariant ? chosenVariant.availableForSale : node.availableForSale);
+      const price = parseFloat(chosenVariant?.price?.amount || '0');
+      const mrp = parseFloat(chosenVariant?.compareAtPrice?.amount || chosenVariant?.price?.amount || '0');
+      const rawImg = node.featuredImage?.url || node.images?.edges?.[0]?.node?.url || '';
+      const img = optimizeShopifyImage(rawImg, 250);
+
+      const badges = ['POPULAR CHOICE', 'PREMIUM GIFT', 'HERBAL WELLNESS', 'CLASSIC COMBO'];
+      const badge = badges[idx % badges.length];
+
+      return {
+        id: chosenVariant?.id ? `${node.id}-${chosenVariant.id}` : node.id,
+        productId: node.id,
+        title: displayTitle,
+        handle: node.handle,
+        variantId: chosenVariant?.id || '',
+        price: 0,
+        mrp: mrp > 0 ? mrp : price,
+        image: img,
+        badge: badge,
+        availableForSale: isAvailable,
+      };
+    });
+
+    // Filter out Out-of-Stock gifts (Option A)
+    const inStockGifts = mappedGifts.filter((g) => g.availableForSale === true);
+
+    collectionProductsCache.set(cacheKey, inStockGifts);
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        sessionStorage.setItem(`altooba_gift_coll_${cacheKey}`, JSON.stringify(inStockGifts));
+      }
+    } catch (e) {}
+
+    return inStockGifts;
+  } catch (err) {
+    console.error('Error fetching collection products:', err);
+    return [];
+  }
+}

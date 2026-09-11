@@ -16,12 +16,12 @@ export default function Cart() {
   const shippingCost = subtotal >= shippingThreshold || subtotal === 0 ? 0 : 100;
   const total = subtotal + shippingCost;
 
-  const handleQtyChange = (itemId, newQty, variant) => {
-    updateQty(itemId, newQty, variant);
+  const handleQtyChange = (itemId, newQty, variant, giftId = null) => {
+    updateQty(itemId, newQty, variant, giftId);
   };
 
-  const handleRemove = (itemId, variant) => {
-    removeItem(itemId, variant);
+  const handleRemove = (itemId, variant, name, giftId = null) => {
+    removeItem(itemId, variant, giftId);
   };
 
   const handleCheckout = async () => {
@@ -81,17 +81,23 @@ export default function Cart() {
 
                   {/* Items */}
                   <div className="divide-y divide-forest/5">
-                    {items.map((item, idx) => (
-                      <div key={`${item.product.id}-${item.selectedVariant || 'default'}`} className="p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-                        {/* Product Detail */}
-                        <div className="col-span-1 sm:col-span-6 flex items-center gap-4">
-                          <div className="w-20 h-20 rounded-2xl overflow-hidden border border-forest/5 flex-shrink-0 bg-parchment/20">
-                            <img
-                              src={item.product.images[0]}
-                              alt={item.product.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
+                    {items.map((item, idx) => {
+                      const variantObj = item.selectedVariant && item.product?.variants?.find(v => (v.name === item.selectedVariant || v.title === item.selectedVariant));
+                      const rawImg = item.product?.images?.[0];
+                      const productImg = typeof rawImg === 'string' ? rawImg : (rawImg?.url || item.product?.image || '');
+                      const displayThumb = variantObj?.image || productImg;
+
+                      return (
+                        <div key={`${item.product.id}-${item.selectedVariant || 'default'}-${item.complimentaryGift?.id || 'none'}`} className="p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+                          {/* Product Detail */}
+                          <div className="col-span-1 sm:col-span-6 flex items-center gap-4">
+                            <div className="w-20 h-20 rounded-2xl overflow-hidden border border-forest/5 flex-shrink-0 bg-parchment/20 flex items-center justify-center">
+                              <img
+                                src={displayThumb}
+                                alt={item.product.name}
+                                className="w-full h-full object-contain mix-blend-multiply"
+                              />
+                            </div>
                           <div>
                             <Link to={`/product/${item.product.slug}`} className="font-serif font-bold text-base text-forest hover:text-gold transition-colors">
                               {item.product.name}
@@ -101,8 +107,22 @@ export default function Cart() {
                                 Size: {item.selectedVariant}
                               </span>
                             )}
+                            {item.complimentaryGift && (
+                              <div className="mt-2.5 p-2.5 rounded-xl bg-[#FAF7F2] border border-[#0D3B2A]/15 flex items-center gap-2.5 max-w-sm">
+                                <div className="w-10 h-10 rounded-lg bg-white p-0.5 border border-gray-200 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                                  <img src={item.complimentaryGift.image} alt={item.complimentaryGift.title} className="w-full h-full object-contain mix-blend-multiply" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#15803d] bg-emerald-100/80 px-1.5 py-0.5 rounded">FREE GIFT</span>
+                                    <span className="text-[9px] text-gray-400 line-through">₹{item.complimentaryGift.mrp}</span>
+                                  </div>
+                                  <p className="text-[12px] font-bold text-[#0D3B2A] truncate leading-tight mt-0.5">{item.complimentaryGift.title}</p>
+                                </div>
+                              </div>
+                            )}
                             <button
-                              onClick={() => handleRemove(item.product.id, item.selectedVariant, item.product.name)}
+                              onClick={() => handleRemove(item.product.id, item.selectedVariant, item.product.name, item.complimentaryGift?.id)}
                               className="text-xs text-red-700 hover:text-red-950 font-sans font-semibold mt-2 flex items-center gap-1 cursor-pointer focus:outline-none"
                             >
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,14 +143,14 @@ export default function Cart() {
                         <div className="col-span-1 sm:col-span-2 flex justify-start sm:justify-center">
                           <div className="flex items-center justify-between border border-forest/15 rounded-full px-3 py-1.5 bg-white w-28">
                             <button
-                              onClick={() => handleQtyChange(item.product.id, item.quantity - 1, item.selectedVariant)}
+                              onClick={() => handleQtyChange(item.product.id, item.quantity - 1, item.selectedVariant, item.complimentaryGift?.id)}
                               className="text-forest hover:opacity-75 font-bold focus:outline-none"
                             >
                               -
                             </button>
                             <span className="font-sans font-bold text-xs text-forest">{item.quantity}</span>
                             <button
-                              onClick={() => handleQtyChange(item.product.id, item.quantity + 1, item.selectedVariant)}
+                              onClick={() => handleQtyChange(item.product.id, item.quantity + 1, item.selectedVariant, item.complimentaryGift?.id)}
                               className="text-forest hover:opacity-75 font-bold focus:outline-none"
                             >
                               +
@@ -144,7 +164,7 @@ export default function Cart() {
                           <span className="font-serif font-bold text-forest">{formatPrice(item.price * item.quantity)}</span>
                         </div>
                       </div>
-                    ))}
+                    )})}
                   </div>
                 </div>
 

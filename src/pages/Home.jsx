@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { getProducts, getHeroVideo, getCachedProductsSync, getCachedHeroVideoSync } from '../services/shopify';
 import HeroParticles from '../components/HeroParticles';
 import About3DCarousel from '../components/About3DCarousel';

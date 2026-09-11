@@ -8,7 +8,6 @@ export default function CartDrawer({ isOpen, onClose }) {
   const items = useCartStore((state) => state.items);
   const updateQty = useCartStore((state) => state.updateQty);
   const removeItem = useCartStore((state) => state.removeItem);
-  
   const total = useCartStore((state) => state.total);
   const count = useCartStore((state) => state.count);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
@@ -90,8 +89,10 @@ export default function CartDrawer({ isOpen, onClose }) {
             </div>
           ) : (
             items.map((item, idx) => {
-              const variantObj = item.selectedVariant && item.product.variants?.find(v => (v.name === item.selectedVariant || v.title === item.selectedVariant));
-              const itemThumb = variantObj?.image || item.product.images[0];
+              const variantObj = item.selectedVariant && item.product?.variants?.find(v => (v.name === item.selectedVariant || v.title === item.selectedVariant));
+              const rawImg = item.product?.images?.[0];
+              const productImg = typeof rawImg === 'string' ? rawImg : (rawImg?.url || item.product?.image || '');
+              const itemThumb = variantObj?.image || productImg;
 
               return (
                 <div key={idx} className="flex gap-4 border-b border-forest/5 pb-4">
@@ -106,7 +107,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                       <div className="flex justify-between items-start gap-2">
                         <h4 className="font-serif font-bold text-base text-forest leading-tight line-clamp-1">{item.product.name}</h4>
                         <button
-                          onClick={() => removeItem(item.product.id, item.selectedVariant)}
+                          onClick={() => removeItem(item.product.id, item.selectedVariant, item.complimentaryGift?.id)}
                           className="text-[#7a2020] hover:opacity-85 text-xs font-semibold cursor-pointer"
                         >
                           Remove
@@ -115,20 +116,34 @@ export default function CartDrawer({ isOpen, onClose }) {
                       {item.selectedVariant && (
                         <p className="text-xs text-[#c8a86a] font-sans font-bold mt-0.5">Option: {item.selectedVariant}</p>
                       )}
+                      {item.complimentaryGift && (
+                        <div className="mt-2 p-2 rounded-xl bg-[#FAF7F2] border border-[#0D3B2A]/15 flex items-center gap-2 shadow-xs">
+                          <div className="w-8 h-8 rounded-lg bg-white p-0.5 border border-gray-200 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                            <img src={item.complimentaryGift.image} alt={item.complimentaryGift.title} className="w-full h-full object-contain mix-blend-multiply" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#15803d] bg-emerald-100/80 px-1.5 py-0.5 rounded">FREE GIFT</span>
+                              <span className="text-[9px] text-gray-400 line-through">₹{item.complimentaryGift.mrp}</span>
+                            </div>
+                            <p className="text-[11px] font-bold text-[#0D3B2A] truncate leading-tight mt-0.5">{item.complimentaryGift.title}</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                   <div className="flex justify-between items-center mt-2">
                     {/* Quantity Selector */}
                     <div className="flex items-center border border-forest/15 rounded-full overflow-hidden">
                       <button
-                        onClick={() => updateQty(item.product.id, item.quantity - 1, item.selectedVariant)}
+                        onClick={() => updateQty(item.product.id, item.quantity - 1, item.selectedVariant, item.complimentaryGift?.id)}
                         className="px-2.5 py-1 text-forest hover:bg-forest/5 font-bold focus:outline-none"
                       >
                         -
                       </button>
                       <span className="px-2 text-sm text-forest font-semibold">{item.quantity}</span>
                       <button
-                        onClick={() => updateQty(item.product.id, item.quantity + 1, item.selectedVariant)}
+                        onClick={() => updateQty(item.product.id, item.quantity + 1, item.selectedVariant, item.complimentaryGift?.id)}
                         className="px-2.5 py-1 text-forest hover:bg-forest/5 font-bold focus:outline-none"
                       >
                         +
