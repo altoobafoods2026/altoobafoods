@@ -417,6 +417,34 @@
           // 1. Close the checkout modal immediately
           closeGokwikModal();
 
+          // Check if cart contained complimentary gifts to send warehouse dispatch alert
+          try {
+            const rawCart = localStorage.getItem('cart') || localStorage.getItem('altooba_cart');
+            if (rawCart) {
+              const parsed = JSON.parse(rawCart);
+              const items = Array.isArray(parsed) ? parsed : (parsed?.state?.items || []);
+              const gifts = items.filter(function(it) { return it && it.complimentaryGift; });
+              if (gifts.length > 0) {
+                const giftList = gifts.map(function(it) {
+                  return '• ' + it.complimentaryGift.title + ' (FREE with ' + (it.title || it.name || 'Talbina') + ')';
+                }).join('\n');
+                fetch('/api/contact', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    name: 'Order ' + (orderInfo.orderNumber || ''),
+                    email: orderInfo.email || 'altoobafoods2026@gmail.com',
+                    phone: orderInfo.phone || 'Provided via GoKwik',
+                    subject: '🎁 FREE GIFT ORDER ALERT: ' + (orderInfo.orderNumber || 'New Order'),
+                    message: 'Customer Order Placed with Free Gift Offer!\n\nOrder Number: ' + (orderInfo.orderNumber || 'N/A') + '\nCustomer Phone: ' + (orderInfo.phone || 'N/A') + '\nPayment: ' + (orderInfo.paymentMethod || 'COD') + '\n\nFREE GIFT(S) INCLUDED:\n' + giftList + '\n\nPlease verify that the packing slip / parcel includes the free gift items above.'
+                  })
+                }).catch(function(err) {
+                  console.warn('[Free Gift Alert Dispatch Error]', err);
+                });
+              }
+            }
+          } catch (e) {}
+
           // 2. Clear cart from storage
           try {
             localStorage.removeItem('cart');

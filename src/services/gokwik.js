@@ -90,8 +90,8 @@ export function populateGokwikCartPayload(cartId = '', items = null) {
       if (!vId) vId = it.variantId || it.id || '1';
 
       let title = it.product?.title || it.title || it.name || '';
-      if (it.complimentaryGift) {
-        title = `${title} (+ Free ${it.complimentaryGift.title})`;
+      if (it.complimentaryGift && !title.includes('FREE') && !title.includes('Free')) {
+        title = `${title} [INCLUDES FREE GIFT: ${it.complimentaryGift.title}]`;
       }
 
       return {
@@ -116,6 +116,32 @@ export function populateGokwikCartPayload(cartId = '', items = null) {
   }
   const token = effectiveCartId.replace('gid://shopify/Cart/', '').split('?')[0];
 
+  const giftItems = cartItems.filter((it) => Boolean(it.complimentaryGift));
+  let cartNote = '';
+  const noteAttributes = [];
+  const attributesObj = {};
+
+  if (giftItems.length > 0) {
+    const giftDescriptions = giftItems
+      .map((it) => `${it.complimentaryGift.title} (FREE with ${it.title || it.name || 'Talbina'})`)
+      .join(' | ');
+
+    cartNote = `🎁 FREE COMPLIMENTARY GIFT: ${giftDescriptions}`;
+
+    giftItems.forEach((it, idx) => {
+      const giftLabel = giftItems.length === 1 ? 'Free Gift' : `Free Gift ${idx + 1}`;
+      noteAttributes.push({ name: giftLabel, value: `${it.complimentaryGift.title} (100% FREE)` });
+      attributesObj[giftLabel] = `${it.complimentaryGift.title} (100% FREE)`;
+      if (it.complimentaryGift.variantId) {
+        noteAttributes.push({ name: `${giftLabel} Variant ID`, value: String(it.complimentaryGift.variantId) });
+        attributesObj[`${giftLabel} Variant ID`] = String(it.complimentaryGift.variantId);
+      }
+    });
+
+    noteAttributes.push({ name: 'Offer', value: 'Talbina Free Gift Combo' });
+    attributesObj['Offer'] = 'Talbina Free Gift Combo';
+  }
+
   window.merchantInfo = {
     mid: GOKWIK_MID,
     appId: GOKWIK_APP_ID,
@@ -133,13 +159,25 @@ export function populateGokwikCartPayload(cartId = '', items = null) {
       original_total_price: totalPaise,
       total_price: totalPaise,
       item_count: cartItems.reduce((acc, it) => acc + (it.quantity || 1), 0),
+      note: cartNote,
+      note_attributes: noteAttributes,
+      attributes: attributesObj,
+      tags: giftItems.length > 0 ? 'Free Gift, Talbina Free Gift' : '',
       items: cartItems.map((it) => {
         const rawId = it.variantId || it.id || '1';
         const numericId = String(rawId).replace(/\D/g, '') || 1;
         let lineTitle = it.title || it.name || '';
-        if (it.complimentaryGift && !lineTitle.includes('Free')) {
-          lineTitle = `${lineTitle} (+ Free ${it.complimentaryGift.title})`;
+        const properties = {};
+
+        if (it.complimentaryGift) {
+          if (!lineTitle.includes('FREE') && !lineTitle.includes('Free')) {
+            lineTitle = `${lineTitle} [INCLUDES FREE GIFT: ${it.complimentaryGift.title}]`;
+          }
+          properties['Free Gift Included'] = `${it.complimentaryGift.title} (100% FREE)`;
+          properties['Gift Item'] = it.complimentaryGift.title;
+          properties['_free_gift_variant_id'] = String(it.complimentaryGift.variantId || '');
         }
+
         return {
           id: Number(numericId),
           variant_id: Number(numericId),
@@ -149,6 +187,7 @@ export function populateGokwikCartPayload(cartId = '', items = null) {
           original_price: Math.round(Number(it.price || 0) * 100),
           line_price: Math.round(Number(it.price || 0) * (it.quantity || 1) * 100),
           image: it.image || '',
+          properties: properties,
         };
       }),
     },

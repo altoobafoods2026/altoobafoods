@@ -82,6 +82,7 @@ export default function App() {
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/about" element={<About />} />
               <Route path="/consultation" element={<Journal />} />
+              <Route path="/journal" element={<Journal />} />
               <Route path="/booking" element={<Booking />} />
               <Route path="/journal/:slug" element={<JournalPost />} />
               <Route path="/contact-us" element={<ContactUs />} />

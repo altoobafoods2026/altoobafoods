@@ -868,17 +868,48 @@ export const getCarouselMetaobjectImages = async () => {
  */
 export async function createShopifyCart(items = []) {
   if (!items || items.length === 0) {
-    throw new Error('Cart is empty');
+    throw new Error('No items provided to create cart');
+  }
+
+  const giftItems = items.filter((it) => Boolean(it.complimentaryGift));
+  let cartNote = '';
+  const cartAttributes = [];
+
+  if (giftItems.length > 0) {
+    const giftDescriptions = giftItems
+      .map((it) => `${it.complimentaryGift.title} (FREE with ${it.product?.title || it.title || it.name || 'Talbina'})`)
+      .join(' | ');
+
+    cartNote = `🎁 FREE COMPLIMENTARY GIFT: ${giftDescriptions}`;
+
+    giftItems.forEach((it, idx) => {
+      const giftLabel = giftItems.length === 1 ? 'Free Gift' : `Free Gift ${idx + 1}`;
+      cartAttributes.push({
+        key: giftLabel,
+        value: `${it.complimentaryGift.title} (100% FREE)`,
+      });
+      if (it.complimentaryGift.variantId) {
+        cartAttributes.push({
+          key: `${giftLabel} Variant ID`,
+          value: String(it.complimentaryGift.variantId),
+        });
+      }
+    });
+
+    cartAttributes.push({
+      key: 'Offer',
+      value: 'Talbina Free Gift Combo',
+    });
   }
 
   const lines = items
     .map((item) => {
-      let variantId = null;
-      if (item.selectedVariant && item.product?.variants?.length > 0) {
-        const match = item.product.variants.find(
-          (v) => v.name === item.selectedVariant || v.title === item.selectedVariant
-        );
-        if (match && match.id) variantId = match.id;
+      let variantId = item.selectedVariant && item.product?.variants?.find(
+        (v) => v.name === item.selectedVariant || v.title === item.selectedVariant
+      )?.id;
+
+      if (!variantId && item.variantId) {
+        variantId = item.variantId;
       }
 
       if (!variantId && item.product?.variants?.length > 0) {
@@ -901,8 +932,16 @@ export async function createShopifyCart(items = []) {
       if (item.complimentaryGift) {
         line.attributes = [
           {
-            key: 'Complimentary Gift',
-            value: `${item.complimentaryGift.title} (FREE)`,
+            key: 'Free Gift Included',
+            value: `${item.complimentaryGift.title} (100% FREE)`,
+          },
+          {
+            key: 'Gift Item',
+            value: item.complimentaryGift.title,
+          },
+          {
+            key: 'Offer',
+            value: 'Talbina Combo',
           },
         ];
       }
@@ -915,13 +954,24 @@ export async function createShopifyCart(items = []) {
     throw new Error('No valid products found in cart');
   }
 
+  const input = {
+    lines,
+    ...(cartNote ? { note: cartNote } : {}),
+    ...(cartAttributes.length > 0 ? { attributes: cartAttributes } : {}),
+  };
+
   const query = `
-    mutation createCart($lines: [CartLineInput!]) {
-      cartCreate(input: { lines: $lines }) {
+    mutation createCart($input: CartInput!) {
+      cartCreate(input: $input) {
         cart {
           id
           checkoutUrl
           totalQuantity
+          note
+          attributes {
+            key
+            value
+          }
         }
         userErrors {
           code
@@ -932,7 +982,7 @@ export async function createShopifyCart(items = []) {
     }
   `;
 
-  const response = await shopifyFetch({ query, variables: { lines } });
+  const response = await shopifyFetch({ query, variables: { input } });
 
   if (response.body?.errors) {
     console.error('Shopify cartCreate error:', response.body.errors);
