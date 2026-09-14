@@ -212,7 +212,7 @@ export default async function handler(req, res) {
       }
 
       let statusCode = isFulfilled ? 3 : 2;
-      let statusText = isFulfilled ? 'Fulfilled & Dispatched' : 'Processing & Packaging at Warehouse';
+      let statusText = isFulfilled ? 'Dispatched' : 'Processing';
 
       if (delhiveryStatus) {
         const sLower = delhiveryStatus.toLowerCase();
@@ -224,7 +224,7 @@ export default async function handler(req, res) {
           statusText = 'Out for Delivery';
         } else if (sLower.includes('in transit') || sLower.includes('dispatched') || sLower.includes('manifested')) {
           statusCode = 3;
-          statusText = `Dispatched (${delhiveryStatus}${delhiveryLocation ? ' - ' + delhiveryLocation : ''})`;
+          statusText = 'In Transit';
         }
       }
 
