@@ -77,27 +77,73 @@ export default defineConfig(({ mode }) => {
                   return;
                 }
 
-                const formattedOrders = matchedOrders.map((order) => {
+                const delhiveryToken = env.DELHIVERY_API_TOKEN || process.env.DELHIVERY_API_TOKEN || 'c6a63b5af6a8d820042441c738f0e8bbc69ff91f';
+
+                const formattedOrders = await Promise.all(matchedOrders.map(async (order) => {
                   const isFulfilled = order.fulfillment_status === 'fulfilled';
                   const fulfillment = (isFulfilled && order.fulfillments && order.fulfillments.length > 0) 
                     ? order.fulfillments[order.fulfillments.length - 1] 
                     : {};
                   
-                  const carrier = isFulfilled ? (fulfillment.tracking_company || 'Courier Partner') : 'Pending Dispatch';
-                  const trackingNumber = isFulfilled ? (fulfillment.tracking_number || '') : '';
+                  let carrier = isFulfilled ? (fulfillment.tracking_company || 'Courier Partner') : 'Pending Dispatch';
+                  let trackingNumber = isFulfilled ? (fulfillment.tracking_number || '') : '';
+                  let trackingUrl = isFulfilled ? (fulfillment.tracking_url || '') : '';
                   
-                  let trackingUrl = '';
-                  if (isFulfilled) {
-                    trackingUrl = fulfillment.tracking_url || '';
+                  let delhiveryStatus = null;
+                  let delhiveryLocation = null;
+
+                  const queryTarget = trackingNumber || cleanOrderNum;
+                  if (queryTarget && delhiveryToken) {
+                    try {
+                      const delhiveryUrl = trackingNumber 
+                        ? `https://track.delhivery.com/api/v1/packages/json/?waybill=${encodeURIComponent(trackingNumber)}&token=${delhiveryToken}`
+                        : `https://track.delhivery.com/api/v1/packages/json/?ref_ids=${encodeURIComponent(cleanOrderNum)}&token=${delhiveryToken}`;
+
+                      const dRes = await fetch(delhiveryUrl);
+                      if (dRes.ok) {
+                        const dData = await dRes.json();
+                        const pkg = dData.ShipmentData?.[0]?.Shipment || dData.packages?.[0];
+                        if (pkg && pkg.Status) {
+                          delhiveryStatus = pkg.Status.Status || pkg.Status.Instructions || null;
+                          delhiveryLocation = pkg.Status.StatusLocation || null;
+                          if (pkg.AWB && !trackingNumber) trackingNumber = pkg.AWB;
+                          if (!carrier || carrier === 'Courier Partner' || carrier === 'Pending Dispatch') {
+                            carrier = 'Delhivery';
+                          }
+                        }
+                      }
+                    } catch (dErr) {
+                      console.error('[Delhivery Live Tracking API Error]', dErr);
+                    }
+                  }
+
+                  if (isFulfilled || delhiveryStatus) {
                     if (!trackingUrl && trackingNumber) {
                       const lowerCarrier = carrier.toLowerCase();
-                      if (lowerCarrier.includes('maruti')) {
-                        trackingUrl = `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(trackingNumber)}`;
-                      } else if (lowerCarrier.includes('delhivery')) {
+                      if (lowerCarrier.includes('delhivery')) {
                         trackingUrl = `https://www.delhivery.com/track/package/${encodeURIComponent(trackingNumber)}`;
-                      } else {
+                      } else if (lowerCarrier.includes('maruti')) {
                         trackingUrl = `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(trackingNumber)}`;
+                      } else {
+                        trackingUrl = `https://www.delhivery.com/track/package/${encodeURIComponent(trackingNumber)}`;
                       }
+                    }
+                  }
+
+                  let statusCode = isFulfilled ? 3 : 2;
+                  let statusText = isFulfilled ? 'Fulfilled & Dispatched' : 'Processing & Packaging at Warehouse';
+
+                  if (delhiveryStatus) {
+                    const sLower = delhiveryStatus.toLowerCase();
+                    if (sLower.includes('delivered')) {
+                      statusCode = 5;
+                      statusText = 'Delivered';
+                    } else if (sLower.includes('out for delivery')) {
+                      statusCode = 4;
+                      statusText = 'Out for Delivery';
+                    } else if (sLower.includes('in transit') || sLower.includes('dispatched') || sLower.includes('manifested')) {
+                      statusCode = 3;
+                      statusText = `Dispatched (${delhiveryStatus}${delhiveryLocation ? ' - ' + delhiveryLocation : ''})`;
                     }
                   }
 
@@ -127,18 +173,19 @@ export default defineConfig(({ mode }) => {
                     orderNumber: order.name,
                     date: new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
                     financialStatus: order.financial_status,
-                    fulfillmentStatus: order.fulfillment_status || 'unfulfilled',
-                    statusText: isFulfilled ? 'Fulfilled & Dispatched' : 'Processing & Packaging at Warehouse',
-                    statusCode: isFulfilled ? 3 : 2,
+                    fulfillmentStatus: order.fulfillment_status || (delhiveryStatus ? 'fulfilled' : 'unfulfilled'),
+                    statusText: statusText,
+                    statusCode: statusCode,
                     carrier: carrier,
                     awbNumber: trackingNumber,
                     trackingUrl: trackingUrl,
+                    liveLocation: delhiveryLocation,
                     customerName: `${order.customer?.first_name || ''} ${order.customer?.last_name || ''}`.trim(),
                     items: items,
                     totalPrice: parseFloat(order.total_price || 0),
                     isRealFromShopify: true
                   };
-                });
+                }));
 
                 res.setHeader('Content-Type', 'application/json');
                 res.statusCode = 200;
