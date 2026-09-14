@@ -1,11 +1,10 @@
 export default async function handler(req, res) {
-  const queryParam = req.query?.orderId || req.query?.query || req.body?.query || req.body?.orderId || '';
+  const queryParam = req.query?.orderId || req.query?.query || req.body?.query || req.body?.orderId || req.query?.phone || '';
   
   if (!queryParam) {
     return res.status(400).json({ success: false, message: 'Order ID or Phone Number is required' });
   }
 
-  const cleanQuery = String(queryParam).replace(/^#/, '').trim();
   const storeDomain = process.env.VITE_SHOPIFY_STORE_DOMAIN || 'imrmuj-v6.myshopify.com';
   const adminToken = process.env.SHOPIFY_ADMIN_API_TOKEN || process.env.VITE_SHOPIFY_ADMIN_API_TOKEN;
 
@@ -14,13 +13,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Query Shopify Admin API for order by name (#1628, #1629) or phone
-    const isPhone = /^\d{10}$/.test(cleanQuery);
-    const searchUrl = isPhone
-      ? `https://${storeDomain}/admin/api/2024-01/orders.json?phone=${encodeURIComponent(cleanQuery)}&status=any`
-      : `https://${storeDomain}/admin/api/2024-01/orders.json?name=${encodeURIComponent(cleanQuery)}&status=any`;
+    const rawQuery = String(queryParam).trim();
+    const cleanDigits = rawQuery.replace(/\D/g, '').slice(-10);
+    const isPhone = cleanDigits.length === 10;
+    const cleanOrderNum = rawQuery.replace(/^#/, '').trim();
 
-    const response = await fetch(searchUrl, {
+    // Fetch recent orders from Shopify Admin API
+    const response = await fetch(`https://${storeDomain}/admin/api/2024-01/orders.json?status=any&limit=100`, {
       headers: {
         'X-Shopify-Access-Token': adminToken,
         'Content-Type': 'application/json'
@@ -29,16 +28,43 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    if (data.orders && data.orders.length > 0) {
-      const order = data.orders[0];
+    if (!data.orders || data.orders.length === 0) {
+      return res.status(200).json({ success: false, message: 'No orders found' });
+    }
+
+    // Filter matching orders
+    const matchedOrders = data.orders.filter((o) => {
+      // Order ID match (#1629 or 1629)
+      if (o.name === `#${cleanOrderNum}` || String(o.order_number) === cleanOrderNum) {
+        return true;
+      }
+      // Phone match
+      if (isPhone) {
+        const p1 = (o.phone || '').replace(/\D/g, '');
+        const p2 = (o.shipping_address?.phone || '').replace(/\D/g, '');
+        const p3 = (o.customer?.phone || '').replace(/\D/g, '');
+        return p1.endsWith(cleanDigits) || p2.endsWith(cleanDigits) || p3.endsWith(cleanDigits);
+      }
+      return false;
+    });
+
+    if (matchedOrders.length === 0) {
+      return res.status(200).json({
+        success: false,
+        message: `No orders found matching "${rawQuery}".`
+      });
+    }
+
+    // Format orders for UI
+    const formattedOrders = matchedOrders.map((order) => {
       const isFulfilled = order.fulfillment_status === 'fulfilled';
       const fulfillment = order.fulfillments?.[0] || {};
       
       const carrier = fulfillment.tracking_company || 'Shree Maruti Courier / Delhivery';
-      const trackingNumber = fulfillment.tracking_number || cleanQuery;
+      const trackingNumber = fulfillment.tracking_number || cleanOrderNum;
       
       let trackingUrl = fulfillment.tracking_url || '';
-      if (!trackingUrl) {
+      if (!trackingUrl && trackingNumber) {
         if (carrier.toLowerCase().includes('maruti')) {
           trackingUrl = `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(trackingNumber)}`;
         } else {
@@ -46,7 +72,6 @@ export default async function handler(req, res) {
         }
       }
 
-      // Check note_attributes for attached free gift info
       let giftFromNotes = null;
       if (Array.isArray(order.note_attributes)) {
         const giftAttr = order.note_attributes.find(a => a.name === 'Free Gift' || a.name?.startsWith('Free Gift'));
@@ -69,29 +94,28 @@ export default async function handler(req, res) {
         };
       });
 
-      return res.status(200).json({
-        success: true,
-        data: {
-          orderNumber: order.name,
-          date: new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-          financialStatus: order.financial_status,
-          fulfillmentStatus: order.fulfillment_status || 'unfulfilled',
-          statusText: isFulfilled ? 'Fulfilled & Dispatched' : 'Processing & Packaging at Warehouse',
-          statusCode: isFulfilled ? 3 : 2,
-          carrier: carrier,
-          awbNumber: trackingNumber,
-          trackingUrl: trackingUrl,
-          customerName: `${order.customer?.first_name || ''} ${order.customer?.last_name || ''}`.trim(),
-          items: items,
-          isRealFromShopify: true
-        }
-      });
-    } else {
-      return res.status(200).json({
-        success: false,
-        message: `Order #${cleanQuery} not found in Shopify Admin.`
-      });
-    }
+      return {
+        orderNumber: order.name,
+        date: new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+        financialStatus: order.financial_status,
+        fulfillmentStatus: order.fulfillment_status || 'unfulfilled',
+        statusText: isFulfilled ? 'Fulfilled & Dispatched' : 'Processing & Packaging at Warehouse',
+        statusCode: isFulfilled ? 3 : 2,
+        carrier: carrier,
+        awbNumber: trackingNumber,
+        trackingUrl: trackingUrl,
+        customerName: `${order.customer?.first_name || ''} ${order.customer?.last_name || ''}`.trim(),
+        items: items,
+        totalPrice: parseFloat(order.total_price || 0),
+        isRealFromShopify: true
+      };
+    });
+
+    return res.status(200).json({
+      success: true,
+      orders: formattedOrders,
+      data: formattedOrders[0] // Backward compatibility
+    });
   } catch (err) {
     console.error('Track order API error:', err);
     return res.status(500).json({ success: false, message: 'Server error querying Shopify Admin API' });
