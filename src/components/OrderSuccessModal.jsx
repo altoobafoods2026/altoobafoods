@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useCartStore } from '../store/cartStore';
 
 export default function OrderSuccessModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -8,15 +9,34 @@ export default function OrderSuccessModal() {
   useEffect(() => {
     const handleOrderCompleted = (event) => {
       const detail = event?.detail || {};
-      setOrderData({
+      const currentCartItems = useCartStore.getState().items || [];
+
+      const newOrder = {
         orderNumber: detail.orderNumber || '#1005',
         orderId: detail.orderId || '',
         totalPrice: detail.totalPrice || null,
         paymentMethod: detail.paymentMethod || 'Cash on Delivery (COD)',
         phone: detail.phone || '',
         email: detail.email || '',
-        address: detail.address || null
-      });
+        address: detail.address || null,
+        date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+        items: currentCartItems.map((it) => ({
+          name: it.product?.title || it.title || it.name || 'Al-Tooba Prophetic Remedy',
+          variant: it.selectedVariant || 'Standard',
+          quantity: it.quantity || 1,
+          price: it.price || 0,
+          image: typeof it.product?.images?.[0] === 'string' ? it.product.images[0] : (it.product?.images?.[0]?.url || it.image || '/products_banner.jpeg'),
+          complimentaryGift: it.complimentaryGift ? `${it.complimentaryGift.title} (100% FREE)` : null
+        }))
+      };
+
+      try {
+        const existing = JSON.parse(localStorage.getItem('altooba_orders') || '[]');
+        const updated = [newOrder, ...existing.filter(o => o.orderNumber !== newOrder.orderNumber)];
+        localStorage.setItem('altooba_orders', JSON.stringify(updated));
+      } catch (e) {}
+
+      setOrderData(newOrder);
       setIsOpen(true);
       document.body.style.overflow = 'hidden';
     };
@@ -123,15 +143,21 @@ export default function OrderSuccessModal() {
 
           {/* Action Buttons */}
           <div className="space-y-1.5 pt-0.5">
+            {/* Direct Track Order CTA button */}
+            <Link
+              to={`/track-order?orderId=${encodeURIComponent(orderData.orderNumber || '')}&phone=${encodeURIComponent(orderData.phone || '')}`}
+              onClick={handleClose}
+              className="w-full rounded-full py-2.5 bg-[#D4A24C] hover:bg-[#b08339] text-[#0D3B2A] text-xs font-sans font-extrabold uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <span>🚚 Track Order Status</span>
+            </Link>
+
             {/* Stay on this screen button */}
             <button
               onClick={handleClose}
-              className="w-full rounded-full py-2.5 bg-[#0D3B2A] text-[#FAF7F2] text-xs font-sans font-bold uppercase tracking-wider hover:bg-[#15533c] transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+              className="w-full rounded-full py-2 bg-[#0D3B2A] text-[#FAF7F2] text-xs font-sans font-bold uppercase tracking-wider hover:bg-[#15533c] transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
             >
               <span>Continue Browsing</span>
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
             </button>
 
             {/* Link to Studio */}

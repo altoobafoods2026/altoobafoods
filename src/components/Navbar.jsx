@@ -155,6 +155,7 @@ export default function Navbar() {
     { name: 'PRODUCTS', path: '/studio' },
     { name: 'ABOUT', path: '/about' },
     { name: 'CONSULTATION', path: '/consultation' },
+    { name: 'TRACK ORDER', path: '/track-order' },
     { name: 'CONTACT US', path: '/contact-us' }
   ];
 

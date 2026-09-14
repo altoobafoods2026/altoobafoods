@@ -21,6 +21,7 @@ const About = lazy(() => import('./pages/About'));
 const Journal = lazy(() => import('./pages/Journal'));
 const JournalPost = lazy(() => import('./pages/JournalPost'));
 const ContactUs = lazy(() => import('./pages/ContactUs'));
+const TrackOrder = lazy(() => import('./pages/TrackOrder'));
 const PolicyPage = lazy(() => import('./pages/PolicyPage'));
 
 import SplashScreen from './components/SplashScreen';
@@ -35,6 +36,7 @@ const GlobalSections = () => {
   // Hide these promotional sections on Contact Us, Studio, About, and Product Detail pages
   if (
     location.pathname === '/contact-us' || 
+    location.pathname === '/track-order' || 
     location.pathname === '/studio' ||
     location.pathname === '/about' ||
     location.pathname === '/login' ||
@@ -86,6 +88,7 @@ export default function App() {
               <Route path="/booking" element={<Booking />} />
               <Route path="/journal/:slug" element={<JournalPost />} />
               <Route path="/contact-us" element={<ContactUs />} />
+              <Route path="/track-order" element={<TrackOrder />} />
               <Route path="/wishlist" element={<Navigate to="/" replace />} />
               <Route path="/login" element={<Navigate to="/" replace />} />
               <Route path="/account" element={<Navigate to="/" replace />} />
