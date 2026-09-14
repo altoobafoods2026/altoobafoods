@@ -1,99 +1,167 @@
-import tailwindcss from '@tailwindcss/vite';
-import react from '@vitejs/plugin-react';
-import path from 'path';
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-[#112233]' ? '@vitejs/plugin-react' : '@vitejs/plugin-react';
 
 export default defineConfig(() => {
   return {
     plugins: [
       react(),
-      tailwindcss(),
       {
         name: 'gokwik-logo-override',
         configureServer(server) {
           server.middlewares.use(async (req, res, next) => {
-            if (req.url && req.url.includes('/components/merchants/')) {
+            if (req.url && req.url.startsWith('/api/track-order')) {
               try {
-                const targetPath = req.url.replace(/^\/gkx-proxy/, '');
-                const targetUrl = 'https://gkx.gokwik.co' + targetPath;
-                const response = await fetch(targetUrl, {
+                const urlObj = new URL(req.url, 'http://localhost:3000');
+                const queryParam = urlObj.searchParams.get('orderId') || urlObj.searchParams.get('query') || urlObj.searchParams.get('phone') || '';
+                const rawQuery = String(queryParam).trim();
+
+                if (!rawQuery) {
+                  res.setHeader('Content-Type', 'application/json');
+                  res.statusCode = 400;
+                  res.end(JSON.stringify({ success: false, message: 'Order ID required' }));
+                  return;
+                }
+
+                const storeDomain = process.env.VITE_SHOPIFY_STORE_DOMAIN || 'imrmuj-v6.myshopify.com';
+                const adminToken = process.env.SHOPIFY_ADMIN_API_TOKEN || process.env.VITE_SHOPIFY_ADMIN_API_TOKEN;
+
+                const cleanDigits = rawQuery.replace(/\D/g, '').slice(-10);
+                const isPhone = cleanDigits.length === 10;
+                const cleanOrderNum = rawQuery.replace(/^#/, '').trim();
+
+                const response = await fetch(`https://${storeDomain}/admin/api/2024-01/orders.json?status=any&limit=100`, {
                   headers: {
-                    'Origin': 'https://imrmuj-v6.myshopify.com',
-                    'Referer': 'https://imrmuj-v6.myshopify.com/'
+                    'X-Shopify-Access-Token': adminToken,
+                    'Content-Type': 'application/json'
                   }
                 });
+
                 const data = await response.json();
-                let str = JSON.stringify(data);
-                const altoobaLogo = 'https://cdn.jsdelivr.net/gh/altoobafoods2026/altoobafoods@main/src/assets/logo.png';
-                str = str
-                  .replace(/https:\/\/assets\.gokwik\.co\/uploads\/[0-9]+_Default%20merchant%20logo\.png/g, altoobaLogo)
-                  .replace(/https:\/\/assets\.gokwik\.co\/uploads\/[0-9]+_Default merchant logo\.png/g, altoobaLogo);
+
+                if (!data.orders || data.orders.length === 0) {
+                  res.setHeader('Content-Type', 'application/json');
+                  res.statusCode = 200;
+                  res.end(JSON.stringify({ success: false, message: 'No orders found' }));
+                  return;
+                }
+
+                const matchedOrders = data.orders.filter((o) => {
+                  if (o.name === `#${cleanOrderNum}` || String(o.order_number) === cleanOrderNum) {
+                    return true;
+                  }
+                  if (isPhone) {
+                    const p1 = (o.phone || '').replace(/\D/g, '');
+                    const p2 = (o.shipping_address?.phone || '').replace(/\D/g, '');
+                    const p3 = (o.customer?.phone || '').replace(/\D/g, '');
+                    return p1.endsWith(cleanDigits) || p2.endsWith(cleanDigits) || p3.endsWith(cleanDigits);
+                  }
+                  return false;
+                });
+
+                if (matchedOrders.length === 0) {
+                  res.setHeader('Content-Type', 'application/json');
+                  res.statusCode = 200;
+                  res.end(JSON.stringify({ success: false, message: `No orders found matching "${rawQuery}".` }));
+                  return;
+                }
+
+                const formattedOrders = matchedOrders.map((order) => {
+                  const isFulfilled = order.fulfillment_status === 'fulfilled';
+                  const fulfillment = (order.fulfillments && order.fulfillments.length > 0) 
+                    ? order.fulfillments[order.fulfillments.length - 1] 
+                    : {};
+                  
+                  const carrier = fulfillment.tracking_company || (isFulfilled ? 'Courier Partner' : 'Pending Dispatch');
+                  const trackingNumber = fulfillment.tracking_number || '';
+                  
+                  let trackingUrl = fulfillment.tracking_url || '';
+                  if (!trackingUrl && trackingNumber) {
+                    const lowerCarrier = carrier.toLowerCase();
+                    if (lowerCarrier.includes('maruti')) {
+                      trackingUrl = `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(trackingNumber)}`;
+                    } else if (lowerCarrier.includes('delhivery')) {
+                      trackingUrl = `https://www.delhivery.com/track/package/${encodeURIComponent(trackingNumber)}`;
+                    } else {
+                      trackingUrl = `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(trackingNumber)}`;
+                    }
+                  }
+
+                  let giftFromNotes = null;
+                  if (Array.isArray(order.note_attributes)) {
+                    const giftAttr = order.note_attributes.find(a => a.name === 'Free Gift' || a.name?.startsWith('Free Gift'));
+                    if (giftAttr) giftFromNotes = giftAttr.value;
+                  }
+
+                  const items = order.line_items.map((line) => {
+                    let giftProp = null;
+                    if (Array.isArray(line.properties)) {
+                      const p = line.properties.find(prop => prop.name === 'Free Gift Included' || prop.name === 'Gift Item');
+                      if (p) giftProp = p.value;
+                    }
+                    return {
+                      name: line.title,
+                      variant: line.variant_title || 'Standard',
+                      quantity: line.quantity,
+                      price: parseFloat(line.price),
+                      image: '/products_banner.jpeg',
+                      complimentaryGift: giftProp || giftFromNotes || null
+                    };
+                  });
+
+                  return {
+                    orderNumber: order.name,
+                    date: new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+                    financialStatus: order.financial_status,
+                    fulfillmentStatus: order.fulfillment_status || 'unfulfilled',
+                    statusText: isFulfilled ? 'Fulfilled & Dispatched' : 'Processing & Packaging at Warehouse',
+                    statusCode: isFulfilled ? 3 : 2,
+                    carrier: carrier,
+                    awbNumber: trackingNumber,
+                    trackingUrl: trackingUrl,
+                    customerName: `${order.customer?.first_name || ''} ${order.customer?.last_name || ''}`.trim(),
+                    items: items,
+                    totalPrice: parseFloat(order.total_price || 0),
+                    isRealFromShopify: true
+                  };
+                });
 
                 res.setHeader('Content-Type', 'application/json');
                 res.statusCode = 200;
-                res.end(str);
+                res.end(JSON.stringify({
+                  success: true,
+                  orders: formattedOrders,
+                  data: formattedOrders[0]
+                }));
                 return;
               } catch (err) {
-                console.error('[GoKwik Logo Override Error]', err);
+                console.error('[Shopify Track Order Middleware Error]', err);
+              }
+            }
+
+            if (req.url && req.url.includes('/components/merchants/')) {
+              try {
+                const targetPath = req.url.replace(/^\/gkx-proxy/, '');
+                const targetUrl = `https://pdp.gokwik.co/gkx/components/merchants/${targetPath}`;
+                const response = await fetch(targetUrl);
+
+                if (response.ok) {
+                  let text = await response.text();
+                  text = text.replace(/gokwik\.co\/assets\/images\/logo-main\.png/g, 'altooba.in/logo.png');
+                  text = text.replace(/gokwik/gi, 'Al-Tooba SSO');
+                  
+                  res.setHeader('Content-Type', response.headers.get('content-type') || 'application/javascript');
+                  res.statusCode = 200;
+                  res.end(text);
+                  return;
+                }
+              } catch (err) {
+                console.error('[GoKwik Proxy Middleware Error]', err);
               }
             }
             next();
           });
         }
       }
-    ],
-    resolve: {
-      alias: {
-        '@': path.resolve(__dirname, '.'),
-      },
-    },
-    build: {
-      chunkSizeWarningLimit: 600,
-      cssCodeSplit: true,
-      minify: 'esbuild',
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (id.includes('node_modules')) {
-              if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom') || id.includes('zustand') || id.includes('scheduler') || id.includes('@remix-run/router')) {
-                return 'vendor-react';
-              }
-              if (id.includes('lucide-react')) {
-                return 'vendor-icons';
-              }
-              if (id.includes('motion') || id.includes('lenis')) {
-                return 'vendor-animation';
-              }
-            }
-          },
-        },
-      },
-    },
-    server: {
-      host: true,
-      proxy: {
-        '/judgeme-api': {
-          target: 'https://judge.me/api/v1',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/judgeme-api/, '')
-        },
-        '/gkx-proxy': {
-          target: 'https://gkx.gokwik.co',
-          changeOrigin: true,
-          secure: false,
-          rewrite: (path) => path.replace(/^\/gkx-proxy/, ''),
-          headers: {
-            Origin: 'https://imrmuj-v6.myshopify.com',
-            Referer: 'https://imrmuj-v6.myshopify.com/'
-          },
-          configure: (proxy) => {
-            proxy.on('proxyReq', (proxyReq) => {
-              proxyReq.setHeader('Origin', 'https://imrmuj-v6.myshopify.com');
-              proxyReq.setHeader('Referer', 'https://imrmuj-v6.myshopify.com/');
-            });
-          }
-        }
-      }
-    },
-  };
+    ];
+  }
 });
