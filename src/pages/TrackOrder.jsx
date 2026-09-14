@@ -294,8 +294,13 @@ export default function TrackOrder() {
                     )}
 
                     {/* Support footer */}
-                    <div className="mt-8 pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400 font-sans">
-                      <span>Carrier: <strong className="text-gray-600">{order.carrier}</strong></span>
+                    <div className="mt-8 pt-4 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-400 font-sans">
+                      <div>
+                        <span>Partner: <strong className="text-gray-700">{order.carrier}</strong></span>
+                        {order.awbNumber && (
+                          <span className="ml-3">AWB: <strong className="text-gray-700">{order.awbNumber}</strong></span>
+                        )}
+                      </div>
                       <a 
                         href={`https://wa.me/918791550503?text=Hi%20Al-Tooba,%20I%20need%20help%20with%20Order%20${encodeURIComponent(order.orderNumber)}`} 
                         target="_blank"

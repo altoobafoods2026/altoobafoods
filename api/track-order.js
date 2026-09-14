@@ -58,17 +58,23 @@ export default async function handler(req, res) {
     // Format orders for UI
     const formattedOrders = matchedOrders.map((order) => {
       const isFulfilled = order.fulfillment_status === 'fulfilled';
-      const fulfillment = order.fulfillments?.[0] || {};
+      // Pick latest fulfillment if available
+      const fulfillment = (order.fulfillments && order.fulfillments.length > 0) 
+        ? order.fulfillments[order.fulfillments.length - 1] 
+        : {};
       
-      const carrier = fulfillment.tracking_company || 'Shree Maruti Courier / Delhivery';
-      const trackingNumber = fulfillment.tracking_number || cleanOrderNum;
+      const carrier = fulfillment.tracking_company || (isFulfilled ? 'Courier Partner' : 'Pending Dispatch');
+      const trackingNumber = fulfillment.tracking_number || '';
       
       let trackingUrl = fulfillment.tracking_url || '';
       if (!trackingUrl && trackingNumber) {
-        if (carrier.toLowerCase().includes('maruti')) {
+        const lowerCarrier = carrier.toLowerCase();
+        if (lowerCarrier.includes('maruti')) {
           trackingUrl = `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(trackingNumber)}`;
-        } else {
+        } else if (lowerCarrier.includes('delhivery')) {
           trackingUrl = `https://www.delhivery.com/track/package/${encodeURIComponent(trackingNumber)}`;
+        } else {
+          trackingUrl = `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(trackingNumber)}`;
         }
       }
 
@@ -114,7 +120,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       success: true,
       orders: formattedOrders,
-      data: formattedOrders[0] // Backward compatibility
+      data: formattedOrders[0]
     });
   } catch (err) {
     console.error('Track order API error:', err);
