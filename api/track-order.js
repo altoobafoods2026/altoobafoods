@@ -16,38 +16,140 @@ export default async function handler(req, res) {
   try {
     const rawQuery = String(queryParam).trim();
     const cleanDigits = rawQuery.replace(/\D/g, '').slice(-10);
-    const isPhone = cleanDigits.length === 10;
     const cleanOrderNum = rawQuery.replace(/^#/, '').trim();
+    const searchTarget = cleanDigits || cleanOrderNum || rawQuery;
 
-    // Fetch recent orders from Shopify Admin API
-    const response = await fetch(`https://${storeDomain}/admin/api/2024-01/orders.json?status=any&limit=100`, {
-      headers: {
-        'X-Shopify-Access-Token': adminToken,
-        'Content-Type': 'application/json'
+    let matchedOrders = [];
+
+    // 1. Primary Search: Shopify GraphQL API (Searches ALL store orders across history by phone or order number)
+    try {
+      const gqlQuery = `
+        query {
+          orders(first: 20, query: "${searchTarget}") {
+            edges {
+              node {
+                id
+                name
+                createdAt
+                displayFinancialStatus
+                displayFulfillmentStatus
+                phone
+                shippingAddress {
+                  name
+                  phone
+                }
+                fulfillments {
+                  trackingInfo {
+                    company
+                    number
+                    url
+                  }
+                }
+                lineItems(first: 20) {
+                  edges {
+                    node {
+                      title
+                      variantTitle
+                      quantity
+                      originalUnitPriceSet {
+                        shopMoney {
+                          amount
+                        }
+                      }
+                    }
+                  }
+                }
+                totalPriceSet {
+                  shopMoney {
+                    amount
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const gRes = await fetch(`https://${storeDomain}/admin/api/2024-01/graphql.json`, {
+        method: 'POST',
+        headers: {
+          'X-Shopify-Access-Token': adminToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ query: gqlQuery })
+      });
+
+      if (gRes.ok) {
+        const gJson = await gRes.json();
+        const edges = gJson.data?.orders?.edges || [];
+        if (edges.length > 0) {
+          matchedOrders = edges.map(e => {
+            const node = e.node;
+            const fulfillment = node.fulfillments?.[0]?.trackingInfo?.[0] || {};
+            const items = (node.lineItems?.edges || []).map(li => ({
+              name: li.node.title,
+              variant: li.node.variantTitle || 'Standard',
+              quantity: li.node.quantity,
+              price: parseFloat(li.node.originalUnitPriceSet?.shopMoney?.amount || 0),
+              image: '/products_banner.jpeg'
+            }));
+            return {
+              name: node.name,
+              order_number: node.name.replace('#', ''),
+              created_at: node.createdAt,
+              financial_status: node.displayFinancialStatus?.toLowerCase(),
+              fulfillment_status: node.displayFulfillmentStatus?.toLowerCase(),
+              phone: node.phone || node.shippingAddress?.phone,
+              shipping_address: node.shippingAddress,
+              tracking_company: fulfillment.company,
+              tracking_number: fulfillment.number,
+              tracking_url: fulfillment.url,
+              customer_name: node.shippingAddress?.name || '',
+              line_items: items,
+              total_price: parseFloat(node.totalPriceSet?.shopMoney?.amount || 0),
+              isGql: true
+            };
+          });
+        }
       }
-    });
-
-    const data = await response.json();
-
-    if (!data.orders || data.orders.length === 0) {
-      return res.status(200).json({ success: false, message: 'No orders found' });
+    } catch (gErr) {
+      console.error('[Shopify GraphQL Search Error]', gErr);
     }
 
-    // Filter matching orders
-    const matchedOrders = data.orders.filter((o) => {
-      // Order ID match (#1629 or 1629)
-      if (o.name === `#${cleanOrderNum}` || String(o.order_number) === cleanOrderNum) {
-        return true;
+    // 2. Fallback Search: REST API
+    if (matchedOrders.length === 0) {
+      try {
+        const isNameQuery = /^\d+$/.test(cleanOrderNum);
+        const restUrl = isNameQuery
+          ? `https://${storeDomain}/admin/api/2024-01/orders.json?status=any&name=${encodeURIComponent(cleanOrderNum)}`
+          : `https://${storeDomain}/admin/api/2024-01/orders.json?status=any&limit=250`;
+
+        const rRes = await fetch(restUrl, {
+          headers: {
+            'X-Shopify-Access-Token': adminToken,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (rRes.ok) {
+          const rData = await rRes.json();
+          if (rData.orders && rData.orders.length > 0) {
+            matchedOrders = rData.orders.filter(o => {
+              if (o.name === `#${cleanOrderNum}` || String(o.order_number) === cleanOrderNum) return true;
+              if (cleanDigits.length === 10) {
+                const p1 = (o.phone || '').replace(/\D/g, '');
+                const p2 = (o.shipping_address?.phone || '').replace(/\D/g, '');
+                const p3 = (o.customer?.phone || '').replace(/\D/g, '');
+                return p1.endsWith(cleanDigits) || p2.endsWith(cleanDigits) || p3.endsWith(cleanDigits);
+              }
+              return false;
+            });
+          }
+        }
+      } catch (rErr) {
+        console.error('[Shopify REST Search Error]', rErr);
       }
-      // Phone match
-      if (isPhone) {
-        const p1 = (o.phone || '').replace(/\D/g, '');
-        const p2 = (o.shipping_address?.phone || '').replace(/\D/g, '');
-        const p3 = (o.customer?.phone || '').replace(/\D/g, '');
-        return p1.endsWith(cleanDigits) || p2.endsWith(cleanDigits) || p3.endsWith(cleanDigits);
-      }
-      return false;
-    });
+    }
 
     if (matchedOrders.length === 0) {
       return res.status(200).json({
@@ -59,14 +161,13 @@ export default async function handler(req, res) {
     // Format orders with live Delhivery shipment tracking integration
     const formattedOrders = await Promise.all(matchedOrders.map(async (order) => {
       const isFulfilled = order.fulfillment_status === 'fulfilled';
-      // Pick latest fulfillment if available
-      const fulfillment = (isFulfilled && order.fulfillments && order.fulfillments.length > 0) 
-        ? order.fulfillments[order.fulfillments.length - 1] 
-        : {};
+      const fulfillment = order.isGql 
+        ? { tracking_company: order.tracking_company, tracking_number: order.tracking_number, tracking_url: order.tracking_url }
+        : ((isFulfilled && order.fulfillments && order.fulfillments.length > 0) ? order.fulfillments[order.fulfillments.length - 1] : {});
       
-      let carrier = isFulfilled ? (fulfillment.tracking_company || 'Courier Partner') : 'Pending Dispatch';
-      let trackingNumber = isFulfilled ? (fulfillment.tracking_number || '') : '';
-      let trackingUrl = isFulfilled ? (fulfillment.tracking_url || '') : '';
+      let carrier = fulfillment.tracking_company || (isFulfilled ? 'Courier Partner' : 'Pending Dispatch');
+      let trackingNumber = fulfillment.tracking_number || '';
+      let trackingUrl = fulfillment.tracking_url || '';
       
       let delhiveryStatus = null;
       let delhiveryLocation = null;
@@ -133,21 +234,25 @@ export default async function handler(req, res) {
         if (giftAttr) giftFromNotes = giftAttr.value;
       }
 
-      const items = order.line_items.map((line) => {
-        let giftProp = null;
-        if (Array.isArray(line.properties)) {
-          const p = line.properties.find(prop => prop.name === 'Free Gift Included' || prop.name === 'Gift Item');
-          if (p) giftProp = p.value;
-        }
-        return {
-          name: line.title,
-          variant: line.variant_title || 'Standard',
-          quantity: line.quantity,
-          price: parseFloat(line.price),
-          image: '/products_banner.jpeg',
-          complimentaryGift: giftProp || giftFromNotes || null
-        };
-      });
+      const items = order.isGql 
+        ? order.line_items 
+        : order.line_items.map((line) => {
+            let giftProp = null;
+            if (Array.isArray(line.properties)) {
+              const p = line.properties.find(prop => prop.name === 'Free Gift Included' || prop.name === 'Gift Item');
+              if (p) giftProp = p.value;
+            }
+            return {
+              name: line.title,
+              variant: line.variant_title || 'Standard',
+              quantity: line.quantity,
+              price: parseFloat(line.price),
+              image: '/products_banner.jpeg',
+              complimentaryGift: giftProp || giftFromNotes || null
+            };
+          });
+
+      const customerName = order.customer_name || `${order.customer?.first_name || ''} ${order.customer?.last_name || ''}`.trim();
 
       return {
         orderNumber: order.name,
@@ -160,7 +265,7 @@ export default async function handler(req, res) {
         awbNumber: trackingNumber,
         trackingUrl: trackingUrl,
         liveLocation: delhiveryLocation,
-        customerName: `${order.customer?.first_name || ''} ${order.customer?.last_name || ''}`.trim(),
+        customerName: customerName,
         items: items,
         totalPrice: parseFloat(order.total_price || 0),
         isRealFromShopify: true
