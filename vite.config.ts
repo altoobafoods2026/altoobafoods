@@ -1,12 +1,27 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-[#112233]' ? '@vitejs/plugin-react' : '@vitejs/plugin-react';
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  const storeDomain = env.VITE_SHOPIFY_STORE_DOMAIN || 'imrmuj-v6.myshopify.com';
+  const adminToken = env.SHOPIFY_ADMIN_API_TOKEN || env.VITE_SHOPIFY_ADMIN_API_TOKEN || '';
+
   return {
+    server: {
+      proxy: {
+        '/gkx-proxy': {
+          target: 'https://gkx.gokwik.co',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/gkx-proxy/, '')
+        }
+      }
+    },
     plugins: [
+      tailwindcss(),
       react(),
       {
-        name: 'gokwik-logo-override',
+        name: 'track-order-proxy',
         configureServer(server) {
           server.middlewares.use(async (req, res, next) => {
             if (req.url && req.url.startsWith('/api/track-order')) {
@@ -21,9 +36,6 @@ export default defineConfig(() => {
                   res.end(JSON.stringify({ success: false, message: 'Order ID required' }));
                   return;
                 }
-
-                const storeDomain = process.env.VITE_SHOPIFY_STORE_DOMAIN || 'imrmuj-v6.myshopify.com';
-                const adminToken = process.env.SHOPIFY_ADMIN_API_TOKEN || process.env.VITE_SHOPIFY_ADMIN_API_TOKEN;
 
                 const cleanDigits = rawQuery.replace(/\D/g, '').slice(-10);
                 const isPhone = cleanDigits.length === 10;
@@ -67,22 +79,25 @@ export default defineConfig(() => {
 
                 const formattedOrders = matchedOrders.map((order) => {
                   const isFulfilled = order.fulfillment_status === 'fulfilled';
-                  const fulfillment = (order.fulfillments && order.fulfillments.length > 0) 
+                  const fulfillment = (isFulfilled && order.fulfillments && order.fulfillments.length > 0) 
                     ? order.fulfillments[order.fulfillments.length - 1] 
                     : {};
                   
-                  const carrier = fulfillment.tracking_company || (isFulfilled ? 'Courier Partner' : 'Pending Dispatch');
-                  const trackingNumber = fulfillment.tracking_number || '';
+                  const carrier = isFulfilled ? (fulfillment.tracking_company || 'Courier Partner') : 'Pending Dispatch';
+                  const trackingNumber = isFulfilled ? (fulfillment.tracking_number || '') : '';
                   
-                  let trackingUrl = fulfillment.tracking_url || '';
-                  if (!trackingUrl && trackingNumber) {
-                    const lowerCarrier = carrier.toLowerCase();
-                    if (lowerCarrier.includes('maruti')) {
-                      trackingUrl = `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(trackingNumber)}`;
-                    } else if (lowerCarrier.includes('delhivery')) {
-                      trackingUrl = `https://www.delhivery.com/track/package/${encodeURIComponent(trackingNumber)}`;
-                    } else {
-                      trackingUrl = `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(trackingNumber)}`;
+                  let trackingUrl = '';
+                  if (isFulfilled) {
+                    trackingUrl = fulfillment.tracking_url || '';
+                    if (!trackingUrl && trackingNumber) {
+                      const lowerCarrier = carrier.toLowerCase();
+                      if (lowerCarrier.includes('maruti')) {
+                        trackingUrl = `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(trackingNumber)}`;
+                      } else if (lowerCarrier.includes('delhivery')) {
+                        trackingUrl = `https://www.delhivery.com/track/package/${encodeURIComponent(trackingNumber)}`;
+                      } else {
+                        trackingUrl = `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(trackingNumber)}`;
+                      }
                     }
                   }
 
@@ -137,31 +152,10 @@ export default defineConfig(() => {
                 console.error('[Shopify Track Order Middleware Error]', err);
               }
             }
-
-            if (req.url && req.url.includes('/components/merchants/')) {
-              try {
-                const targetPath = req.url.replace(/^\/gkx-proxy/, '');
-                const targetUrl = `https://pdp.gokwik.co/gkx/components/merchants/${targetPath}`;
-                const response = await fetch(targetUrl);
-
-                if (response.ok) {
-                  let text = await response.text();
-                  text = text.replace(/gokwik\.co\/assets\/images\/logo-main\.png/g, 'altooba.in/logo.png');
-                  text = text.replace(/gokwik/gi, 'Al-Tooba SSO');
-                  
-                  res.setHeader('Content-Type', response.headers.get('content-type') || 'application/javascript');
-                  res.statusCode = 200;
-                  res.end(text);
-                  return;
-                }
-              } catch (err) {
-                console.error('[GoKwik Proxy Middleware Error]', err);
-              }
-            }
             next();
           });
         }
       }
-    ];
-  }
+    ]
+  };
 });

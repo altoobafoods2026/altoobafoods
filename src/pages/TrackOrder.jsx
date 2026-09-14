@@ -150,6 +150,9 @@ export default function TrackOrder() {
               <form onSubmit={handleFormSubmit} className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="text"
+                  id="track-order-query"
+                  name="trackOrderQuery"
+                  autoComplete="on"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Enter Order # (e.g. #1629) or Mobile Number"
@@ -205,7 +208,7 @@ export default function TrackOrder() {
                           {order.statusText}
                         </span>
 
-                        {order.trackingUrl && (
+                        {order.fulfillmentStatus === 'fulfilled' && order.trackingUrl && (
                           <a
                             href={order.trackingUrl}
                             target="_blank"
@@ -296,8 +299,8 @@ export default function TrackOrder() {
                     {/* Support footer */}
                     <div className="mt-8 pt-4 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-400 font-sans">
                       <div>
-                        <span>Partner: <strong className="text-gray-700">{order.carrier}</strong></span>
-                        {order.awbNumber && (
+                        <span>Partner: <strong className="text-gray-700">{order.fulfillmentStatus === 'fulfilled' ? order.carrier : 'Pending Dispatch'}</strong></span>
+                        {order.fulfillmentStatus === 'fulfilled' && order.awbNumber && (
                           <span className="ml-3">AWB: <strong className="text-gray-700">{order.awbNumber}</strong></span>
                         )}
                       </div>

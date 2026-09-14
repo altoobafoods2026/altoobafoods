@@ -59,22 +59,25 @@ export default async function handler(req, res) {
     const formattedOrders = matchedOrders.map((order) => {
       const isFulfilled = order.fulfillment_status === 'fulfilled';
       // Pick latest fulfillment if available
-      const fulfillment = (order.fulfillments && order.fulfillments.length > 0) 
+      const fulfillment = (isFulfilled && order.fulfillments && order.fulfillments.length > 0) 
         ? order.fulfillments[order.fulfillments.length - 1] 
         : {};
       
-      const carrier = fulfillment.tracking_company || (isFulfilled ? 'Courier Partner' : 'Pending Dispatch');
-      const trackingNumber = fulfillment.tracking_number || '';
+      const carrier = isFulfilled ? (fulfillment.tracking_company || 'Courier Partner') : 'Pending Dispatch';
+      const trackingNumber = isFulfilled ? (fulfillment.tracking_number || '') : '';
       
-      let trackingUrl = fulfillment.tracking_url || '';
-      if (!trackingUrl && trackingNumber) {
-        const lowerCarrier = carrier.toLowerCase();
-        if (lowerCarrier.includes('maruti')) {
-          trackingUrl = `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(trackingNumber)}`;
-        } else if (lowerCarrier.includes('delhivery')) {
-          trackingUrl = `https://www.delhivery.com/track/package/${encodeURIComponent(trackingNumber)}`;
-        } else {
-          trackingUrl = `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(trackingNumber)}`;
+      let trackingUrl = '';
+      if (isFulfilled) {
+        trackingUrl = fulfillment.tracking_url || '';
+        if (!trackingUrl && trackingNumber) {
+          const lowerCarrier = carrier.toLowerCase();
+          if (lowerCarrier.includes('maruti')) {
+            trackingUrl = `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(trackingNumber)}`;
+          } else if (lowerCarrier.includes('delhivery')) {
+            trackingUrl = `https://www.delhivery.com/track/package/${encodeURIComponent(trackingNumber)}`;
+          } else {
+            trackingUrl = `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(trackingNumber)}`;
+          }
         }
       }
 

@@ -129,6 +129,9 @@ export default function Studio() {
             <Search className="w-5 h-5 text-[#D4A24C] shrink-0 mr-3.5" />
             <input
               type="text"
+              id="studio-search-input"
+              name="search"
+              autoComplete="off"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search remedies by name, category, or ingredient..."

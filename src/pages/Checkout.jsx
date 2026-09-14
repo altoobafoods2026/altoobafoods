@@ -237,10 +237,12 @@ export default function Checkout() {
               <h3 className="font-serif font-bold text-xl text-forest mb-6 border-b border-forest/5 pb-2">1. Contact Information</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">First Name *</label>
+                  <label htmlFor="checkout-firstName" className="block text-[11px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">First Name *</label>
                   <input
                     type="text"
+                    id="checkout-firstName"
                     name="firstName"
+                    autoComplete="given-name"
                     value={formData.firstName}
                     onChange={handleInputChange}
                     className="w-full bg-parchment/20 border border-forest/10 rounded-full px-5 py-3 text-sm font-sans text-forest focus:outline-none focus:border-forest"
@@ -248,10 +250,12 @@ export default function Checkout() {
                   {formErrors.firstName && <span className="text-red-700 text-xs mt-1 block">{formErrors.firstName}</span>}
                 </div>
                 <div>
-                  <label className="block text-[11px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">Last Name *</label>
+                  <label htmlFor="checkout-lastName" className="block text-[11px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">Last Name *</label>
                   <input
                     type="text"
+                    id="checkout-lastName"
                     name="lastName"
+                    autoComplete="family-name"
                     value={formData.lastName}
                     onChange={handleInputChange}
                     className="w-full bg-parchment/20 border border-forest/10 rounded-full px-5 py-3 text-sm font-sans text-forest focus:outline-none focus:border-forest"
@@ -259,10 +263,12 @@ export default function Checkout() {
                   {formErrors.lastName && <span className="text-red-700 text-xs mt-1 block">{formErrors.lastName}</span>}
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-[11px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">Email Address *</label>
+                  <label htmlFor="checkout-email" className="block text-[11px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">Email Address *</label>
                   <input
                     type="email"
+                    id="checkout-email"
                     name="email"
+                    autoComplete="email"
                     value={formData.email}
                     onChange={handleInputChange}
                     className="w-full bg-parchment/20 border border-forest/10 rounded-full px-5 py-3 text-sm font-sans text-forest focus:outline-none focus:border-forest"
@@ -270,10 +276,12 @@ export default function Checkout() {
                   {formErrors.email && <span className="text-red-700 text-xs mt-1 block">{formErrors.email}</span>}
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-[11px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">Phone Number *</label>
+                  <label htmlFor="checkout-phone" className="block text-[11px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">Phone Number *</label>
                   <input
                     type="tel"
+                    id="checkout-phone"
                     name="phone"
+                    autoComplete="tel"
                     value={formData.phone}
                     onChange={handleInputChange}
                     placeholder="e.g. +92 300 1234567"
@@ -289,10 +297,12 @@ export default function Checkout() {
               <h3 className="font-serif font-bold text-xl text-forest mb-6 border-b border-forest/5 pb-2">2. Shipping Address</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
-                  <label className="block text-[11px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">Street Address *</label>
+                  <label htmlFor="checkout-address" className="block text-[11px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">Street Address *</label>
                   <input
                     type="text"
+                    id="checkout-address"
                     name="address"
+                    autoComplete="street-address"
                     value={formData.address}
                     onChange={handleInputChange}
                     placeholder="House/Apartment number, street name"
@@ -301,10 +311,12 @@ export default function Checkout() {
                   {formErrors.address && <span className="text-red-700 text-xs mt-1 block">{formErrors.address}</span>}
                 </div>
                 <div>
-                  <label className="block text-[11px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">City *</label>
+                  <label htmlFor="checkout-city" className="block text-[11px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">City *</label>
                   <input
                     type="text"
+                    id="checkout-city"
                     name="city"
+                    autoComplete="address-level2"
                     value={formData.city}
                     onChange={handleInputChange}
                     className="w-full bg-parchment/20 border border-forest/10 rounded-full px-5 py-3 text-sm font-sans text-forest focus:outline-none focus:border-forest"
@@ -312,10 +324,12 @@ export default function Checkout() {
                   {formErrors.city && <span className="text-red-700 text-xs mt-1 block">{formErrors.city}</span>}
                 </div>
                 <div>
-                  <label className="block text-[11px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">State / Province *</label>
+                  <label htmlFor="checkout-state" className="block text-[11px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">State / Province *</label>
                   <input
                     type="text"
+                    id="checkout-state"
                     name="state"
+                    autoComplete="address-level1"
                     value={formData.state}
                     onChange={handleInputChange}
                     className="w-full bg-parchment/20 border border-forest/10 rounded-full px-5 py-3 text-sm font-sans text-forest focus:outline-none focus:border-forest"
@@ -323,10 +337,12 @@ export default function Checkout() {
                   {formErrors.state && <span className="text-red-700 text-xs mt-1 block">{formErrors.state}</span>}
                 </div>
                 <div>
-                  <label className="block text-[11px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">Postal / Zip Code *</label>
+                  <label htmlFor="checkout-zip" className="block text-[11px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">Postal / Zip Code *</label>
                   <input
                     type="text"
+                    id="checkout-zip"
                     name="zip"
+                    autoComplete="postal-code"
                     value={formData.zip}
                     onChange={handleInputChange}
                     className="w-full bg-parchment/20 border border-forest/10 rounded-full px-5 py-3 text-sm font-sans text-forest focus:outline-none focus:border-forest"
@@ -347,6 +363,7 @@ export default function Checkout() {
                   <div className="flex items-center gap-3">
                     <input
                       type="radio"
+                      id="payment-cod"
                       name="paymentMethod"
                       value="cod"
                       checked={formData.paymentMethod === 'cod'}
@@ -367,6 +384,7 @@ export default function Checkout() {
                   <div className="flex items-center gap-3">
                     <input
                       type="radio"
+                      id="payment-card"
                       name="paymentMethod"
                       value="card"
                       checked={formData.paymentMethod === 'card'}
@@ -383,10 +401,12 @@ export default function Checkout() {
                 {formData.paymentMethod === 'card' && (
                   <div className="p-5 border border-forest/10 bg-warm-light/20 rounded-2xl space-y-4">
                     <div>
-                      <label className="block text-[10px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">Card Number</label>
+                      <label htmlFor="checkout-cardNumber" className="block text-[10px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">Card Number</label>
                       <input
                         type="text"
+                        id="checkout-cardNumber"
                         name="cardNumber"
+                        autoComplete="cc-number"
                         value={formData.cardNumber}
                         onChange={handleInputChange}
                         placeholder="4111 2222 3333 4444"
@@ -397,10 +417,12 @@ export default function Checkout() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[10px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">Expiry Date</label>
+                        <label htmlFor="checkout-cardExpiry" className="block text-[10px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">Expiry Date</label>
                         <input
                           type="text"
+                          id="checkout-cardExpiry"
                           name="cardExpiry"
+                          autoComplete="cc-exp"
                           value={formData.cardExpiry}
                           onChange={handleInputChange}
                           placeholder="MM/YY"
@@ -410,10 +432,12 @@ export default function Checkout() {
                         {formErrors.cardExpiry && <span className="text-red-700 text-xs mt-1 block">{formErrors.cardExpiry}</span>}
                       </div>
                       <div>
-                        <label className="block text-[10px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">CVV / Security Code</label>
+                        <label htmlFor="checkout-cardCvv" className="block text-[10px] font-sans font-bold uppercase tracking-wider text-forest/60 mb-2">CVV / Security Code</label>
                         <input
                           type="password"
+                          id="checkout-cardCvv"
                           name="cardCvv"
+                          autoComplete="cc-csc"
                           value={formData.cardCvv}
                           onChange={handleInputChange}
                           placeholder="123"

@@ -146,6 +146,8 @@ export default function NoorCategories({ products = [] }) {
                     <img 
                       src={optimizeShopifyImage(cat.bg, 350)} 
                       alt={cat.name}
+                      width="350"
+                      height="350"
                       loading="lazy"
                       decoding="async"
                       className="w-[100%] h-[85%] object-contain object-bottom group-hover:scale-110 transition-transform duration-[1.5s] ease-out opacity-100 drop-shadow-[0_12px_12px_rgba(0,0,0,0.14)] pb-7 sm:pb-8"

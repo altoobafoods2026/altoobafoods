@@ -145,11 +145,13 @@ export default function ConsultationForm({ initialType = 'Video Consultation', r
         {/* Personal Info Grid - Row 1: Full Name & Age */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           <div className="sm:col-span-2 space-y-1.5 sm:space-y-2.5">
-            <label className="text-[10px] font-bold font-sans text-[#D4A24C] uppercase tracking-widest ml-1">Full Name</label>
+            <label htmlFor="consultation-fullName" className="text-[10px] font-bold font-sans text-[#D4A24C] uppercase tracking-widest ml-1">Full Name</label>
             <input
               required
               type="text"
+              id="consultation-fullName"
               name="fullName"
+              autoComplete="name"
               value={formData.fullName}
               onChange={handleChange}
               className="w-full bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-[#FAF7F2] focus:outline-none focus:ring-2 focus:ring-[#D4A24C]/60 focus:border-[#D4A24C]/60 transition-all shadow-[inset_0_2px_10px_rgba(0,0,0,0.1)] hover:bg-white/10 placeholder:text-[#FAF7F2]/30"
@@ -158,10 +160,11 @@ export default function ConsultationForm({ initialType = 'Video Consultation', r
           </div>
 
           <div className="space-y-1.5 sm:space-y-2.5">
-            <label className="text-[10px] font-bold font-sans text-[#D4A24C] uppercase tracking-widest ml-1">Age</label>
+            <label htmlFor="consultation-age" className="text-[10px] font-bold font-sans text-[#D4A24C] uppercase tracking-widest ml-1">Age</label>
             <input
               required
               type="number"
+              id="consultation-age"
               name="age"
               min="1"
               max="120"
@@ -176,11 +179,13 @@ export default function ConsultationForm({ initialType = 'Video Consultation', r
         {/* Contact Info & Gender - Row 2: Phone Number & Gender */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div className="space-y-1.5 sm:space-y-2.5">
-            <label className="text-[10px] font-bold font-sans text-[#D4A24C] uppercase tracking-widest ml-1">Phone Number</label>
+            <label htmlFor="consultation-phone" className="text-[10px] font-bold font-sans text-[#D4A24C] uppercase tracking-widest ml-1">Phone Number</label>
             <input
               required
               type="tel"
+              id="consultation-phone"
               name="phone"
+              autoComplete="tel"
               maxLength={15}
               value={formData.phone}
               onChange={handleChange}
@@ -190,10 +195,11 @@ export default function ConsultationForm({ initialType = 'Video Consultation', r
           </div>
 
           <div className="space-y-1.5 sm:space-y-2.5">
-            <label className="text-[10px] font-bold font-sans text-[#D4A24C] uppercase tracking-widest ml-1">Gender</label>
+            <label htmlFor="consultation-gender" className="text-[10px] font-bold font-sans text-[#D4A24C] uppercase tracking-widest ml-1">Gender</label>
             <div className="relative">
               <select
                 required
+                id="consultation-gender"
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
@@ -212,9 +218,10 @@ export default function ConsultationForm({ initialType = 'Video Consultation', r
 
         {/* Medical Issue */}
         <div className="space-y-1.5 sm:space-y-2.5">
-          <label className="text-[10px] font-bold font-sans text-[#D4A24C] uppercase tracking-widest ml-1">Briefly describe your issue</label>
+          <label htmlFor="consultation-description" className="text-[10px] font-bold font-sans text-[#D4A24C] uppercase tracking-widest ml-1">Briefly describe your issue</label>
           <textarea
             required
+            id="consultation-description"
             name="description"
             value={formData.description}
             onChange={handleChange}

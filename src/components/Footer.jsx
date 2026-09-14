@@ -30,7 +30,9 @@ export default function Footer() {
             <form onSubmit={handleSubscribeSubmit} className="relative w-full max-w-sm flex items-center bg-transparent border border-parchment/30 rounded-full px-1 py-1">
               <input
                 type="email"
+                id="footer-newsletter-email"
                 name="email"
+                autoComplete="email"
                 required
                 placeholder="Enter Email Address"
                 className="w-full pl-4 pr-3 py-2 bg-transparent text-parchment placeholder-muted-green outline-none border-none text-xs focus:ring-0"
