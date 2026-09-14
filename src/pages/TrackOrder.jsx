@@ -192,14 +192,24 @@ export default function TrackOrder() {
                             Order {order.orderNumber}
                           </h2>
                           <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-sans font-bold uppercase tracking-wider ${
-                            order.statusCode === 5 
+                            order.isCancelled || order.statusCode === -1
+                              ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                              : order.statusCode === 5 
                               ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' 
                               : order.statusCode >= 3
                               ? 'bg-emerald-50/80 text-[#0D3B2A] border border-[#0D3B2A]/20'
                               : 'bg-amber-50 text-amber-800 border border-amber-200'
                           }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${order.statusCode === 5 ? 'bg-emerald-600' : order.statusCode >= 3 ? 'bg-[#0D3B2A]' : 'bg-amber-600'}`} />
-                            <span>{order.statusText}</span>
+                            <span className={`w-1.5 h-1.5 rounded-full ${
+                              order.isCancelled || order.statusCode === -1
+                                ? 'bg-rose-600'
+                                : order.statusCode === 5 
+                                ? 'bg-emerald-600' 
+                                : order.statusCode >= 3 
+                                ? 'bg-[#0D3B2A]' 
+                                : 'bg-amber-600'
+                            }`} />
+                            <span>{order.isCancelled ? 'Cancelled' : order.statusText}</span>
                           </span>
                         </div>
 
@@ -212,7 +222,7 @@ export default function TrackOrder() {
                         </div>
                       </div>
 
-                      {order.trackingUrl && (
+                      {!order.isCancelled && order.trackingUrl && (
                         <a
                           href={order.trackingUrl}
                           target="_blank"
@@ -227,57 +237,69 @@ export default function TrackOrder() {
                       )}
                     </div>
 
-                    {/* Live Location Alert Bar (if available) */}
-                    {order.liveLocation && (
-                      <div className="mb-6 px-4 py-3 rounded-xl bg-[#FAF7F2] border border-[#D4A24C]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-sans text-[#0D3B2A]">
-                        <div className="flex items-center gap-2">
-                          <span className="text-base flex-shrink-0">📍</span>
-                          <span>
-                            <strong className="font-semibold">Current Location:</strong> {order.liveLocation.replace(/_/g, ' ')}
-                          </span>
-                        </div>
-                        <span className="text-[10px] text-[#D4A24C] font-bold uppercase tracking-wider bg-[#0D3B2A] text-white px-2.5 py-0.5 rounded-full shrink-0 self-start sm:self-auto">
-                          Live Courier Update
+                    {/* Cancellation Alert Box */}
+                    {order.isCancelled ? (
+                      <div className="mb-6 px-4 py-3 rounded-xl bg-rose-50 border border-rose-200 text-xs font-sans text-rose-800 flex items-center gap-2">
+                        <span className="text-base flex-shrink-0">⛔</span>
+                        <span>
+                          <strong className="font-semibold">Order Cancelled:</strong> This order was cancelled {order.cancelledDate ? `on ${order.cancelledDate}` : ''}. For any refund or cancellation inquiries, please contact our support below.
                         </span>
                       </div>
-                    )}
-
-                    {/* Minimal Progress Line */}
-                    <div className="mb-8 py-2">
-                      <div className="relative flex items-center justify-between">
-                        <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-200 -translate-y-1/2 z-0" />
-                        
-                        <div 
-                          className="absolute top-1/2 left-0 h-0.5 bg-[#0D3B2A] -translate-y-1/2 z-0 transition-all duration-500"
-                          style={{ width: `${Math.min(100, Math.max(0, ((order.statusCode - 1) / (steps.length - 1)) * 100))}%` }}
-                        />
-
-                        {steps.map((step) => {
-                          const isDone = step.code <= order.statusCode;
-                          const isCurrent = step.code === order.statusCode;
-
-                          return (
-                            <div key={step.code} className="relative z-10 flex flex-col items-center">
-                              <div 
-                                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                                  isDone 
-                                    ? 'bg-[#0D3B2A] text-white' 
-                                    : 'bg-white border border-gray-300 text-gray-400'
-                                } ${isCurrent ? 'ring-4 ring-[#0D3B2A]/15 border-2 border-[#0D3B2A]' : ''}`}
-                              >
-                                {isDone ? '✓' : step.code}
-                              </div>
-
-                              <span className={`text-[11px] font-sans font-medium mt-2 text-center whitespace-nowrap ${
-                                isDone ? 'text-[#0D3B2A] font-semibold' : 'text-gray-400'
-                              }`}>
-                                {step.label}
+                    ) : (
+                      <>
+                        {/* Live Location Alert Bar (if available) */}
+                        {order.liveLocation && (
+                          <div className="mb-6 px-4 py-3 rounded-xl bg-[#FAF7F2] border border-[#D4A24C]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-sans text-[#0D3B2A]">
+                            <div className="flex items-center gap-2">
+                              <span className="text-base flex-shrink-0">📍</span>
+                              <span>
+                                <strong className="font-semibold">Current Location:</strong> {order.liveLocation.replace(/_/g, ' ')}
                               </span>
                             </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                            <span className="text-[10px] text-[#D4A24C] font-bold uppercase tracking-wider bg-[#0D3B2A] text-white px-2.5 py-0.5 rounded-full shrink-0 self-start sm:self-auto">
+                              Live Courier Update
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Minimal Progress Line */}
+                        <div className="mb-8 py-2">
+                          <div className="relative flex items-center justify-between">
+                            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-200 -translate-y-1/2 z-0" />
+                            
+                            <div 
+                              className="absolute top-1/2 left-0 h-0.5 bg-[#0D3B2A] -translate-y-1/2 z-0 transition-all duration-500"
+                              style={{ width: `${Math.min(100, Math.max(0, ((order.statusCode - 1) / (steps.length - 1)) * 100))}%` }}
+                            />
+
+                            {steps.map((step) => {
+                              const isDone = step.code <= order.statusCode;
+                              const isCurrent = step.code === order.statusCode;
+
+                              return (
+                                <div key={step.code} className="relative z-10 flex flex-col items-center">
+                                  <div 
+                                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                                      isDone 
+                                        ? 'bg-[#0D3B2A] text-white' 
+                                        : 'bg-white border border-gray-300 text-gray-400'
+                                    } ${isCurrent ? 'ring-4 ring-[#0D3B2A]/15 border-2 border-[#0D3B2A]' : ''}`}
+                                  >
+                                    {isDone ? '✓' : step.code}
+                                  </div>
+
+                                  <span className={`text-[11px] font-sans font-medium mt-2 text-center whitespace-nowrap ${
+                                    isDone ? 'text-[#0D3B2A] font-semibold' : 'text-gray-400'
+                                  }`}>
+                                    {step.label}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </>
+                    )}
 
                     {/* Items List */}
                     {order.items && order.items.length > 0 && (

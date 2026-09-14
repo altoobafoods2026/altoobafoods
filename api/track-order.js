@@ -31,6 +31,8 @@ export default async function handler(req, res) {
                 id
                 name
                 createdAt
+                cancelledAt
+                cancelReason
                 displayFinancialStatus
                 displayFulfillmentStatus
                 phone
@@ -97,6 +99,8 @@ export default async function handler(req, res) {
               name: node.name,
               order_number: node.name.replace('#', ''),
               created_at: node.createdAt,
+              cancelled_at: node.cancelledAt,
+              cancel_reason: node.cancelReason,
               financial_status: node.displayFinancialStatus?.toLowerCase(),
               fulfillment_status: node.displayFulfillmentStatus?.toLowerCase(),
               phone: node.phone || node.shippingAddress?.phone,
@@ -211,10 +215,11 @@ export default async function handler(req, res) {
         }
       }
 
-      let statusCode = isFulfilled ? 3 : 2;
-      let statusText = isFulfilled ? 'Dispatched' : 'Processing';
+      const isCancelled = Boolean(order.cancelled_at);
+      let statusCode = isCancelled ? -1 : (isFulfilled ? 3 : 2);
+      let statusText = isCancelled ? 'Cancelled' : (isFulfilled ? 'Dispatched' : 'Processing');
 
-      if (delhiveryStatus) {
+      if (!isCancelled && delhiveryStatus) {
         const sLower = delhiveryStatus.toLowerCase();
         if (sLower.includes('delivered')) {
           statusCode = 5;
@@ -257,6 +262,8 @@ export default async function handler(req, res) {
       return {
         orderNumber: order.name,
         date: new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+        isCancelled: isCancelled,
+        cancelledDate: order.cancelled_at ? new Date(order.cancelled_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : null,
         financialStatus: order.financial_status,
         fulfillmentStatus: order.fulfillment_status || (delhiveryStatus ? 'fulfilled' : 'unfulfilled'),
         statusText: statusText,

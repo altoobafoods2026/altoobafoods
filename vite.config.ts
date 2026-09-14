@@ -233,10 +233,11 @@ export default defineConfig(({ mode }) => {
                     }
                   }
 
-                  let statusCode = isFulfilled ? 3 : 2;
-                  let statusText = isFulfilled ? 'Dispatched' : 'Processing';
+                  const isCancelled = Boolean(order.cancelled_at || order.cancelledAt);
+                  let statusCode = isCancelled ? -1 : (isFulfilled ? 3 : 2);
+                  let statusText = isCancelled ? 'Cancelled' : (isFulfilled ? 'Dispatched' : 'Processing');
 
-                  if (delhiveryStatus) {
+                  if (!isCancelled && delhiveryStatus) {
                     const sLower = delhiveryStatus.toLowerCase();
                     if (sLower.includes('delivered')) {
                       statusCode = 5;
@@ -279,6 +280,8 @@ export default defineConfig(({ mode }) => {
                   return {
                     orderNumber: order.name,
                     date: new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+                    isCancelled: isCancelled,
+                    cancelledDate: (order.cancelled_at || order.cancelledAt) ? new Date(order.cancelled_at || order.cancelledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : null,
                     financialStatus: order.financial_status,
                     fulfillmentStatus: order.fulfillment_status || (delhiveryStatus ? 'fulfilled' : 'unfulfilled'),
                     statusText: statusText,
