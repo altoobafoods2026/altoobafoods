@@ -63,12 +63,7 @@ export default function Navbar() {
     e.stopPropagation();
     const currentLoggedIn = isKwikPassLoggedIn();
     setIsLoggedIn(currentLoggedIn);
-    if (currentLoggedIn) {
-      setIsUserDropdownOpen((prev) => !prev);
-    } else {
-      setIsUserDropdownOpen(false);
-      triggerKwikpassLogin();
-    }
+    setIsUserDropdownOpen((prev) => !prev);
   };
 
   const handleLogoutClick = (e) => {
@@ -155,7 +150,6 @@ export default function Navbar() {
     { name: 'PRODUCTS', path: '/studio' },
     { name: 'ABOUT', path: '/about' },
     { name: 'CONSULTATION', path: '/consultation' },
-    { name: 'TRACK ORDER', path: '/track-order' },
     { name: 'CONTACT US', path: '/contact-us' }
   ];
 
@@ -202,7 +196,7 @@ export default function Navbar() {
                 id="kp-login-button-header-logo"
                 onClick={handleUserIconClick}
                 className={`p-2 rounded-full transition-colors relative cursor-pointer ${isTransparent ? 'hover:bg-white/10 hover:text-white' : 'hover:bg-forest/5 hover:text-forest/80'}`}
-                aria-label={isLoggedIn ? "Account Menu" : "Sign In with KwikPass"}
+                aria-label="Account Menu"
               >
                 <svg className="w-5.5 h-5.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
@@ -212,21 +206,50 @@ export default function Navbar() {
                 )}
               </button>
 
-              {/* Logged-In Dropdown: Only shown when user is logged in */}
-              {isLoggedIn && isUserDropdownOpen && (
-                <div className="absolute right-0 mt-2.5 w-36 bg-white rounded-2xl shadow-[0_12px_36px_rgba(0,0,0,0.14)] border border-gray-100/90 p-1.5 z-50 animate-fade-up text-left">
-                  {/* Logout */}
-                  <button
-                    onClick={handleLogoutClick}
-                    className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl hover:bg-red-50/80 transition-colors text-left cursor-pointer group"
+              {/* User Dropdown Menu */}
+              {isUserDropdownOpen && (
+                <div className="absolute right-0 mt-2.5 w-44 bg-white rounded-2xl shadow-[0_12px_36px_rgba(0,0,0,0.14)] border border-gray-100/90 p-1.5 z-50 animate-fade-up text-left">
+                  {/* Track Order (Above Logout) */}
+                  <Link
+                    to="/track-order"
+                    onClick={() => setIsUserDropdownOpen(false)}
+                    className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl hover:bg-[#0D3B2A]/5 transition-colors text-left cursor-pointer group"
                   >
-                    <svg className="w-5 h-5 text-[#EF4444] transition-transform group-hover:translate-x-0.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                      <polyline points="16 17 21 12 16 7" />
-                      <line x1="21" y1="12" x2="9" y2="12" />
+                    <svg className="w-4.5 h-4.5 text-[#0D3B2A] flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0C.678 5.572.25 6.05.25 6.618v1.957" />
                     </svg>
-                    <span className="text-[14px] font-sans font-bold text-[#EF4444]">Logout</span>
-                  </button>
+                    <span className="text-[13px] font-sans font-bold text-[#0D3B2A]">Track Order</span>
+                  </Link>
+
+                  <div className="h-[1px] bg-gray-100 my-1" />
+
+                  {/* Logout or Login option */}
+                  {isLoggedIn ? (
+                    <button
+                      onClick={handleLogoutClick}
+                      className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl hover:bg-red-50/80 transition-colors text-left cursor-pointer group"
+                    >
+                      <svg className="w-4.5 h-4.5 text-[#EF4444] transition-transform group-hover:translate-x-0.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                      </svg>
+                      <span className="text-[13px] font-sans font-bold text-[#EF4444]">Logout</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setIsUserDropdownOpen(false);
+                        triggerKwikpassLogin();
+                      }}
+                      className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl hover:bg-emerald-50/80 transition-colors text-left cursor-pointer group"
+                    >
+                      <svg className="w-4.5 h-4.5 text-emerald-700 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                      </svg>
+                      <span className="text-[13px] font-sans font-bold text-emerald-800">Login</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
