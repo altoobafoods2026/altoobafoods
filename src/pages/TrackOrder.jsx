@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+const STORE_DOMAIN = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN || 'imrmuj-v6.myshopify.com';
+const ADMIN_TOKEN = import.meta.env.VITE_SHOPIFY_ADMIN_API_TOKEN;
+
 export default function TrackOrder() {
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('order_id'); // 'order_id' | 'shree_maruti' | 'delhivery'
@@ -9,7 +12,6 @@ export default function TrackOrder() {
   const [searchResult, setSearchResult] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Auto-search if URL query params are present (e.g. /track-order?orderId=1628)
   useEffect(() => {
     const orderIdParam = searchParams.get('orderId') || searchParams.get('order') || searchParams.get('phone');
     if (orderIdParam) {
@@ -19,58 +21,154 @@ export default function TrackOrder() {
     }
   }, [searchParams]);
 
-  const performOrderSearch = (searchQuery) => {
+  const performOrderSearch = async (searchQuery) => {
     if (!searchQuery) return;
     setIsLoading(true);
     setErrorMsg('');
     setSearchResult(null);
 
-    setTimeout(() => {
-      setIsLoading(false);
-      const cleanQuery = searchQuery.replace(/^#/, '').trim();
-      const orderNum = `#${cleanQuery}`;
+    const cleanQuery = searchQuery.replace(/^#/, '').trim();
+    const orderNum = `#${cleanQuery}`;
 
-      // 1. Check local device order history
-      let matchedOrder = null;
-      try {
-        const stored = JSON.parse(localStorage.getItem('altooba_orders') || '[]');
-        if (Array.isArray(stored)) {
-          matchedOrder = stored.find(
-            (o) => o.orderNumber?.replace(/^#/, '').trim() === cleanQuery || o.phone?.includes(cleanQuery)
-          );
+    // 1. Try fetching from serverless endpoint /api/track-order first
+    try {
+      const apiRes = await fetch(`/api/track-order?orderId=${encodeURIComponent(cleanQuery)}`);
+      if (apiRes.ok) {
+        const apiJson = await apiRes.json();
+        if (apiJson.success && apiJson.data) {
+          const d = apiJson.data;
+          setIsLoading(false);
+          setSearchResult({
+            type: 'order',
+            orderNumber: d.orderNumber,
+            date: d.date,
+            financialStatus: d.financialStatus,
+            fulfillmentStatus: d.fulfillmentStatus,
+            status: d.statusText,
+            statusCode: d.statusCode,
+            carrier: d.carrier,
+            awbNumber: d.awbNumber,
+            customerName: d.customerName,
+            items: d.items,
+            shreeMarutiUrl: d.trackingUrl.toLowerCase().includes('maruti') ? d.trackingUrl : `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(d.awbNumber)}`,
+            delhiveryUrl: d.trackingUrl.toLowerCase().includes('delhivery') ? d.trackingUrl : `https://www.delhivery.com/track/package/${encodeURIComponent(d.awbNumber)}`,
+            isRealFromShopify: true
+          });
+          return;
         }
-      } catch (e) {}
-
-      if (matchedOrder) {
-        setSearchResult({
-          type: 'order',
-          orderNumber: matchedOrder.orderNumber || orderNum,
-          date: matchedOrder.date || new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-          status: 'Fulfilled & Shipped',
-          statusCode: 3,
-          carrier: 'Shree Maruti Courier / Delhivery',
-          awbNumber: `SMC${cleanQuery}`,
-          paymentMethod: matchedOrder.paymentMethod || 'Paid / COD',
-          items: matchedOrder.items && matchedOrder.items.length > 0 ? matchedOrder.items : null,
-          shreeMarutiUrl: `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(cleanQuery)}`,
-          delhiveryUrl: `https://www.delhivery.com/track/package/${encodeURIComponent(cleanQuery)}`
-        });
-      } else {
-        // Search when not in local storage (e.g. #1628)
-        setSearchResult({
-          type: 'order',
-          orderNumber: orderNum,
-          date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-          status: 'Fulfilled & Dispatched',
-          statusCode: 3,
-          carrier: 'Shree Maruti Courier / Delhivery',
-          awbNumber: cleanQuery,
-          items: null,
-          shreeMarutiUrl: `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(cleanQuery)}`,
-          delhiveryUrl: `https://www.delhivery.com/track/package/${encodeURIComponent(cleanQuery)}`
-        });
       }
-    }, 450);
+    } catch (e) {}
+
+    // 2. Direct Admin Query if env variable exists
+    if (ADMIN_TOKEN) {
+      try {
+        const isPhone = /^\d{10}$/.test(cleanQuery);
+        const searchUrl = isPhone
+          ? `https://${STORE_DOMAIN}/admin/api/2024-01/orders.json?phone=${encodeURIComponent(cleanQuery)}&status=any`
+          : `https://${STORE_DOMAIN}/admin/api/2024-01/orders.json?name=${encodeURIComponent(cleanQuery)}&status=any`;
+
+        const response = await fetch(searchUrl, {
+          headers: {
+            'X-Shopify-Access-Token': ADMIN_TOKEN,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.orders && data.orders.length > 0) {
+          const order = data.orders[0];
+          const isFulfilled = order.fulfillment_status === 'fulfilled';
+          const fulfillment = order.fulfillments?.[0] || {};
+          
+          const carrier = fulfillment.tracking_company || 'Shree Maruti Courier / Delhivery';
+          const trackingNumber = fulfillment.tracking_number || cleanQuery;
+          
+          let trackingUrl = fulfillment.tracking_url || '';
+          if (!trackingUrl) {
+            if (carrier.toLowerCase().includes('maruti')) {
+              trackingUrl = `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(trackingNumber)}`;
+            } else {
+              trackingUrl = `https://www.delhivery.com/track/package/${encodeURIComponent(trackingNumber)}`;
+            }
+          }
+
+          let giftFromNotes = null;
+          if (Array.isArray(order.note_attributes)) {
+            const giftAttr = order.note_attributes.find(a => a.name === 'Free Gift' || a.name?.startsWith('Free Gift'));
+            if (giftAttr) giftFromNotes = giftAttr.value;
+          }
+
+          const items = order.line_items.map((line) => {
+            let giftProp = null;
+            if (Array.isArray(line.properties)) {
+              const p = line.properties.find(prop => prop.name === 'Free Gift Included' || prop.name === 'Gift Item');
+              if (p) giftProp = p.value;
+            }
+            return {
+              name: line.title,
+              variant: line.variant_title || 'Standard',
+              quantity: line.quantity,
+              price: parseFloat(line.price),
+              image: '/products_banner.jpeg',
+              complimentaryGift: giftProp || giftFromNotes || null
+            };
+          });
+
+          setIsLoading(false);
+          setSearchResult({
+            type: 'order',
+            orderNumber: order.name,
+            date: new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+            financialStatus: order.financial_status,
+            fulfillmentStatus: order.fulfillment_status || 'unfulfilled',
+            status: isFulfilled ? 'Fulfilled & Dispatched' : 'Processing & Packing at Warehouse',
+            statusCode: isFulfilled ? 3 : 2,
+            carrier: carrier,
+            awbNumber: trackingNumber,
+            customerName: `${order.customer?.first_name || ''} ${order.customer?.last_name || ''}`.trim(),
+            items: items,
+            shreeMarutiUrl: trackingUrl.toLowerCase().includes('maruti') ? trackingUrl : `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(trackingNumber)}`,
+            delhiveryUrl: trackingUrl.toLowerCase().includes('delhivery') ? trackingUrl : `https://www.delhivery.com/track/package/${encodeURIComponent(trackingNumber)}`,
+            isRealFromShopify: true
+          });
+          return;
+        }
+      } catch (e) {
+        console.warn('Direct Shopify search error:', e);
+      }
+    }
+
+    // 3. Fallback to local storage if API is unreachable
+    let matchedOrder = null;
+    try {
+      const stored = JSON.parse(localStorage.getItem('altooba_orders') || '[]');
+      if (Array.isArray(stored)) {
+        matchedOrder = stored.find(
+          (o) => o.orderNumber?.replace(/^#/, '').trim() === cleanQuery || o.phone?.includes(cleanQuery)
+        );
+      }
+    } catch (e) {}
+
+    setIsLoading(false);
+    if (matchedOrder) {
+      setSearchResult({
+        type: 'order',
+        orderNumber: matchedOrder.orderNumber || orderNum,
+        date: matchedOrder.date || new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+        status: 'Processing & Packaging at Warehouse',
+        statusCode: 2,
+        carrier: 'Shree Maruti Courier / Delhivery',
+        awbNumber: cleanQuery,
+        paymentMethod: matchedOrder.paymentMethod || 'Paid / COD',
+        items: matchedOrder.items || [],
+        shreeMarutiUrl: `https://track.shreemaruticourier.com/track?tracking_no=${encodeURIComponent(cleanQuery)}`,
+        delhiveryUrl: `https://www.delhivery.com/track/package/${encodeURIComponent(cleanQuery)}`,
+        isRealFromShopify: false
+      });
+    } else {
+      setErrorMsg(`Order #${cleanQuery} was not found in Shopify Admin. Please check the Order Number or Phone Number.`);
+    }
   };
 
   const handleFormSubmit = (e) => {
@@ -116,7 +214,7 @@ export default function TrackOrder() {
             Track Your Shipment
           </h1>
           <p className="text-sm text-[#0D3B2A]/70 font-sans leading-relaxed">
-            Enter your Order ID (e.g. <span className="font-bold text-[#0D3B2A]">#1628</span>), Mobile Number, or Courier AWB Docket Number.
+            Enter your Order ID (e.g. <span className="font-bold text-[#0D3B2A]">#1628, #1629</span>), Mobile Number, or Courier AWB Docket Number.
           </p>
         </div>
 
@@ -166,7 +264,7 @@ export default function TrackOrder() {
                     ? 'Enter Shree Maruti Docket No (e.g. SMC987654)'
                     : activeTab === 'delhivery'
                     ? 'Enter Delhivery AWB No (e.g. 14389271920)'
-                    : 'Enter Order ID (#1628) or Phone Number'
+                    : 'Enter Order ID (#1628, #1629) or Phone Number'
                 }
                 className="w-full px-4 py-3.5 rounded-2xl bg-[#FAF7F2] border border-[#0D3B2A]/20 text-[#0D3B2A] text-sm font-sans placeholder-[#0D3B2A]/40 outline-none focus:border-[#D4A24C] focus:ring-2 focus:ring-[#D4A24C]/20 transition-all"
               />
@@ -177,7 +275,7 @@ export default function TrackOrder() {
               className="px-7 py-3.5 rounded-2xl bg-[#0D3B2A] hover:bg-[#D4A24C] hover:text-[#0D3B2A] text-[#FAF7F2] font-sans font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-md cursor-pointer flex items-center justify-center gap-2 shrink-0 disabled:opacity-50"
             >
               {isLoading ? (
-                <span>Searching...</span>
+                <span>Searching Live...</span>
               ) : (
                 <>
                   <span>{activeTab === 'order_id' ? 'Track Order' : 'Track Live on Courier'}</span>
@@ -200,19 +298,23 @@ export default function TrackOrder() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-8 border-b border-gray-100 gap-4">
               <div>
                 <span className="text-xs font-sans font-bold uppercase tracking-widest text-[#D4A24C] block mb-1">
-                  Order Details
+                  {searchResult.isRealFromShopify ? 'Verified Shopify Live Order' : 'Order Details'}
                 </span>
                 <h2 className="font-serif font-bold text-2xl text-[#0D3B2A]">
-                  Order {searchResult.orderNumber}
+                  Order {searchResult.orderNumber} {searchResult.customerName ? `(${searchResult.customerName})` : ''}
                 </h2>
                 <p className="text-xs text-gray-500 font-sans mt-0.5">
-                  Placed on {searchResult.date} • Shipping Carrier: <span className="font-semibold text-[#0D3B2A]">{searchResult.carrier}</span>
+                  Placed on {searchResult.date} • Carrier: <span className="font-semibold text-[#0D3B2A]">{searchResult.carrier}</span>
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-2.5">
-                <span className="px-3.5 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-sans font-bold uppercase tracking-wide flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-600 animate-ping"></span>
+                <span className={`px-3.5 py-1.5 rounded-full text-xs font-sans font-bold uppercase tracking-wide flex items-center gap-1.5 ${
+                  searchResult.fulfillmentStatus === 'fulfilled' 
+                    ? 'bg-emerald-100 text-emerald-800' 
+                    : 'bg-amber-100 text-amber-800'
+                }`}>
+                  <span className={`w-2 h-2 rounded-full animate-ping ${searchResult.fulfillmentStatus === 'fulfilled' ? 'bg-emerald-600' : 'bg-amber-600'}`}></span>
                   {searchResult.status}
                 </span>
               </div>
@@ -225,7 +327,7 @@ export default function TrackOrder() {
                   Direct 1-Click Live Carrier Tracking:
                 </p>
                 <p className="text-[11px] text-gray-500 font-sans">
-                  Click below to open official live parcel location.
+                  Click below to open live shipment location.
                 </p>
               </div>
 
@@ -295,8 +397,8 @@ export default function TrackOrder() {
               </div>
             </div>
 
-            {/* Items Summary in this Order (Only rendered when real item history is available) */}
-            {searchResult.items && searchResult.items.length > 0 ? (
+            {/* Items Summary in this Order */}
+            {searchResult.items && searchResult.items.length > 0 && (
               <div className="bg-[#FAF7F2] p-5 sm:p-6 rounded-2xl border border-[#0D3B2A]/10">
                 <h3 className="text-xs font-sans font-bold uppercase tracking-wider text-[#0D3B2A] mb-4">
                   Items in this Order
@@ -307,14 +409,14 @@ export default function TrackOrder() {
                     <div key={idx} className="flex items-center justify-between gap-4 py-2 border-b border-gray-200/60 last:border-none">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-xl bg-white border border-gray-200 p-1 flex-shrink-0">
-                          <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
+                          <img src={item.image || '/products_banner.jpeg'} alt={item.name} className="w-full h-full object-contain" />
                         </div>
                         <div>
                           <p className="text-xs sm:text-sm font-serif font-bold text-[#0D3B2A] leading-tight">
                             {item.name}
                           </p>
                           <p className="text-[11px] text-gray-500 font-sans mt-0.5">
-                            Qty: {item.quantity} • Pack: {item.variant}
+                            Qty: {item.quantity} {item.variant ? `• Pack: ${item.variant}` : ''}
                           </p>
                           {item.complimentaryGift && (
                             <div className="inline-flex items-center gap-1 mt-1.5 px-2.5 py-0.5 rounded-md bg-[#D4A24C]/15 text-[#92600b] text-[10px] font-bold">
@@ -333,13 +435,6 @@ export default function TrackOrder() {
                     </div>
                   ))}
                 </div>
-              </div>
-            ) : (
-              <div className="bg-[#FAF7F2] p-5 rounded-2xl border border-[#0D3B2A]/10 text-center">
-                <p className="text-xs text-[#0D3B2A]/80 font-sans leading-relaxed">
-                  Order <strong>{searchResult.orderNumber}</strong> is confirmed and dispatched via <strong>Shree Maruti Courier / Delhivery</strong>.
-                  Click the tracking buttons above for live step-by-step shipment movement.
-                </p>
               </div>
             )}
 
