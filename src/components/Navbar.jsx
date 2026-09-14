@@ -85,30 +85,37 @@ export default function Navbar() {
     { name: 'Skin Care', path: '/studio?category=Skin%20Care' },
   ];
 
-  // Monitor scroll for header background toggle and smart hide
+  // Monitor scroll for header background toggle and smart hide (RAF throttled with threshold buffer)
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
 
-      if (currentScrollY > 80) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
+          setIsScrolled((prev) => {
+            const next = currentScrollY > 60;
+            return prev !== next ? next : prev;
+          });
+
+          const diff = currentScrollY - lastScrollY.current;
+          if (Math.abs(diff) > 10) {
+            if (diff > 0 && currentScrollY > 180) {
+              setIsHidden((prev) => (!prev ? true : prev));
+            } else if (diff < 0) {
+              setIsHidden((prev) => (prev ? false : prev));
+            }
+            lastScrollY.current = currentScrollY;
+          }
+
+          ticking = false;
+        });
+        ticking = true;
       }
-
-      // Hide on scroll down, show on scroll up
-      if (currentScrollY > lastScrollY.current && currentScrollY > 150) {
-        setIsHidden(true);
-      } else {
-        setIsHidden(false);
-      }
-
-      lastScrollY.current = currentScrollY;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Check immediately on mount
-
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
@@ -143,7 +150,7 @@ export default function Navbar() {
   const isTransparent = isHome && !isScrolled;
   const navbarClasses = isTransparent
     ? 'bg-gradient-to-b from-black/70 via-black/20 to-transparent border-transparent'
-    : 'bg-[#FAF7F2]/80 backdrop-blur-xl border-b border-white/40 shadow-[0_8px_30px_rgba(0,0,0,0.04)]';
+    : 'bg-[#FAF7F2]/95 backdrop-blur-md border-b border-white/40 shadow-[0_8px_30px_rgba(0,0,0,0.04)]';
 
   const menuItems = [
     { name: 'HOME', path: '/' },

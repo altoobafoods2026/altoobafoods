@@ -87,7 +87,7 @@ export default function Footer() {
             <ul className="space-y-3 text-sm">
               <li>
                 <Link to="/track-order" className="hover:text-parchment transition-colors text-[#D4A24C] font-bold flex items-center gap-1.5">
-                  <span>🚚 Track Your Order</span>
+                  <span>Track Your Order</span>
                 </Link>
               </li>
               <li>

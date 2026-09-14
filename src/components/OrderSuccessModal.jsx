@@ -149,7 +149,7 @@ export default function OrderSuccessModal() {
               onClick={handleClose}
               className="w-full rounded-full py-2.5 bg-[#D4A24C] hover:bg-[#b08339] text-[#0D3B2A] text-xs font-sans font-extrabold uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
             >
-              <span>🚚 Track Order Status</span>
+              <span>Track Order Status</span>
             </Link>
 
             {/* Stay on this screen button */}

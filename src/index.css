@@ -47,6 +47,11 @@
 }
 
 /* Base Styles */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
 html, body {
   background-color: #f5ebd8;
   color: #1f3a1d;
