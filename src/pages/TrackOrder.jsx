@@ -263,7 +263,7 @@ export default function TrackOrder() {
                         )}
 
                         {/* Minimal Progress Line */}
-                        <div className="mb-8 py-2">
+                        <div className="mb-6 py-2">
                           <div className="relative flex items-center justify-between">
                             <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-200 -translate-y-1/2 z-0" />
                             
@@ -279,7 +279,7 @@ export default function TrackOrder() {
                               return (
                                 <div key={step.code} className="relative z-10 flex flex-col items-center">
                                   <div 
-                                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                                       isDone 
                                         ? 'bg-[#0D3B2A] text-white' 
                                         : 'bg-white border border-gray-300 text-gray-400'
@@ -288,7 +288,8 @@ export default function TrackOrder() {
                                     {isDone ? '✓' : step.code}
                                   </div>
 
-                                  <span className={`text-[11px] font-sans font-medium mt-2 text-center whitespace-nowrap ${
+                                  {/* Desktop Labels */}
+                                  <span className={`hidden sm:block text-[11px] font-sans font-medium mt-2 text-center whitespace-nowrap ${
                                     isDone ? 'text-[#0D3B2A] font-semibold' : 'text-gray-400'
                                   }`}>
                                     {step.label}
@@ -296,6 +297,16 @@ export default function TrackOrder() {
                                 </div>
                               );
                             })}
+                          </div>
+
+                          {/* Mobile Current Stage Badge (Prevents mobile text overlap completely) */}
+                          <div className="sm:hidden mt-4 text-center">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF7F2] border border-[#0D3B2A]/15 text-[11px] font-sans text-[#0D3B2A] font-semibold">
+                              <span>Stage {Math.min(5, Math.max(1, order.statusCode))}/5:</span>
+                              <strong className="text-[#0D3B2A] font-bold">
+                                {steps.find(s => s.code === Math.min(5, Math.max(1, order.statusCode)))?.label || order.statusText}
+                              </strong>
+                            </span>
                           </div>
                         </div>
                       </>
