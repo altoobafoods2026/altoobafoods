@@ -12,6 +12,7 @@ import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
 import { initiateGokwikCheckout } from '../services/gokwik';
 import { optimizeShopifyImage } from '../utils/imageOptimizer';
+import { isOfferActiveYet } from '../utils/offerSchedule';
 import TrustedBy from '../components/TrustedBy';
 import ProductCard from '../components/ProductCard';
 import OfferCountdownBadge from '../components/OfferCountdownBadge';
@@ -567,6 +568,21 @@ export default function ProductDetail() {
 
             {/* Quantity and Action Row */}
             <div className="flex flex-col gap-3">
+              {/* Scheduled Offer Teaser (if accessed before start time on live site) */}
+              {!isOfferActiveYet(product) && (
+                <div className="p-3.5 sm:p-4 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 flex items-center gap-3 shadow-xs">
+                  <span className="text-2xl shrink-0">🔒</span>
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider block text-amber-900">
+                      Offer Launches 22 Nov at 8:00 PM
+                    </span>
+                    <p className="text-[11px] text-amber-800 leading-tight mt-0.5">
+                      This special Umrah blessing offer will unlock tomorrow at 8:00 PM sharp.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3">
                 <div className="flex items-center gap-4 shrink-0">
                   <span className="text-[11px] font-bold tracking-widest text-gray-900 uppercase">QUANTITY:</span>
@@ -590,11 +606,11 @@ export default function ProductDetail() {
                 {/* Add to Cart Button */}
                 <button
                   onClick={handleAddToCart}
-                  disabled={!product.inStock}
+                  disabled={!product.inStock || !isOfferActiveYet(product)}
                   className="w-full sm:flex-1 bg-white text-[#153423] border-2 border-[#153423] hover:bg-[#153423] hover:text-white transition-all duration-300 py-3.5 rounded-[14px] font-sans font-bold text-[12px] uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed shadow-sm cursor-pointer flex items-center justify-center gap-2"
                 >
-                  {product.inStock ? 'Add to Cart' : 'Out of Stock'}
-                  {product.inStock && (
+                  {!isOfferActiveYet(product) ? 'Starts 22 Nov 8 PM' : (product.inStock ? 'Add to Cart' : 'Out of Stock')}
+                  {product.inStock && isOfferActiveYet(product) && (
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
                       <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -607,7 +623,7 @@ export default function ProductDetail() {
               {/* Instant Checkout / Buy Now Button */}
               <button
                 onClick={handleBuyNow}
-                disabled={!product.inStock || isBuyingNow}
+                disabled={!product.inStock || isBuyingNow || !isOfferActiveYet(product)}
                 className="w-full bg-[#153423] hover:bg-[#1f4a33] text-[#FAF7F2] transition-all duration-300 py-3.5 rounded-[14px] font-sans font-bold text-[13px] uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_16px_rgba(21,52,35,0.2)] hover:shadow-lg hover:scale-[1.008] active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2.5"
               >
                 {isBuyingNow ? (
@@ -615,6 +631,8 @@ export default function ProductDetail() {
                     <div className="w-4 h-4 border-2 border-parchment/30 border-t-parchment rounded-full animate-spin" />
                     <span>Opening 1-Click Checkout...</span>
                   </>
+                ) : !isOfferActiveYet(product) ? (
+                  <span>🔒 Unlocks Tomorrow at 8:00 PM</span>
                 ) : (
                   <>
                     <span className="text-[#D4A24C] text-base">⚡</span>

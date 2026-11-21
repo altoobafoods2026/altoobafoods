@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { useCartStore } from '../../store/cartStore';
 import { useToastStore } from '../../store/toastStore';
 import { optimizeShopifyImage } from '../../utils/imageOptimizer';
+import { isOfferActiveYet } from '../../utils/offerSchedule';
 import OfferCountdownBadge from '../OfferCountdownBadge';
 
 export default function NoorBundles({ products = [] }) {
@@ -19,15 +20,20 @@ export default function NoorBundles({ products = [] }) {
 
   // Filter real Wellness Kits and Combos from Shopify products in exact Shopify sequence
   const kits = products
-    .filter(p => 
-      isLuckyDrawProduct(p) ||
-      p.category === 'Wellness Kit' ||
-      p.collections?.some(c => c.toLowerCase().includes('wellness')) ||
-      p.name.toLowerCase().includes('kit') ||
-      p.name.toLowerCase().includes('hamper') ||
-      p.slug.includes('wellness') ||
-      p.slug.includes('kit')
-    )
+    .filter(p => {
+      // Must not be a future scheduled offer on production before start time
+      if (!isOfferActiveYet(p)) return false;
+
+      return (
+        isLuckyDrawProduct(p) ||
+        p.category === 'Wellness Kit' ||
+        p.collections?.some(c => c.toLowerCase().includes('wellness')) ||
+        p.name?.toLowerCase().includes('kit') ||
+        p.name?.toLowerCase().includes('hamper') ||
+        p.slug?.includes('wellness') ||
+        p.slug?.includes('kit')
+      );
+    })
     .sort((a, b) => {
       // Products with lucky-draw tag always get highest priority for the hero card!
       const aLucky = isLuckyDrawProduct(a);
