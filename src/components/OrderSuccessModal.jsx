@@ -24,8 +24,8 @@ export default function OrderSuccessModal() {
       const hasLuckyDrawItem = currentCartItems.some(it => {
         const prod = it.product || {};
         const tags = Array.isArray(prod.tags) ? prod.tags : [];
-        return tags.some(t => /lucky[-_]?draw|contest|giveaway|token/i.test(t)) ||
-               /lucky[-_]?draw|contest|giveaway/i.test(it.name || '') ||
+        return tags.some(t => /lucky[-_]?draw|contest|giveaway|token|umrah/i.test(t)) ||
+               /lucky[-_]?draw|contest|giveaway|umrah/i.test(it.name || '') ||
                /wellness\s*kit|hamper/i.test(it.name || '') ||
                prod.category === 'Wellness Kit';
       });

@@ -262,8 +262,8 @@ export default async function handler(req, res) {
       const customerName = order.customer_name || `${order.customer?.first_name || ''} ${order.customer?.last_name || ''}`.trim();
       const rawTags = order.tags || [];
       const tagsList = Array.isArray(rawTags) ? rawTags : String(rawTags || '').split(',').map(t => t.trim().toLowerCase());
-      const hasLuckyDraw = tagsList.some(t => /lucky[-_]?draw|contest|giveaway/i.test(t)) ||
-                           items.some(it => /lucky[-_]?draw|contest|wellness\s*kit/i.test(it.name || ''));
+      const hasLuckyDraw = tagsList.some(t => /lucky[-_]?draw|contest|giveaway|umrah/i.test(t)) ||
+                           items.some(it => /lucky[-_]?draw|contest|umrah|wellness\s*kit/i.test(it.name || ''));
       const luckyToken = hasLuckyDraw ? `LUCKY-${order.name.replace('#', '')}` : null;
 
       return {

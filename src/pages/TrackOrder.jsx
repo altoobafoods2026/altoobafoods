@@ -192,7 +192,7 @@ export default function TrackOrder() {
               <div className="space-y-6">
                 {ordersList.map((order, idx) => {
                   const orderLuckyToken = order.luckyToken || (
-                    order.items?.some(it => /lucky[-_]?draw|contest|giveaway|wellness\s*kit/i.test(it.name || ''))
+                    order.items?.some(it => /lucky[-_]?draw|contest|giveaway|umrah|wellness\s*kit/i.test(it.name || ''))
                       ? `LUCKY-${String(order.orderNumber).replace(/\D/g, '') || String(order.orderNumber).replace(/^#/, '')}`
                       : null
                   );
