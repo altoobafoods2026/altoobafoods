@@ -195,9 +195,9 @@ export default function NoorBundles({ products = [] }) {
               <div className="relative w-full flex-1 min-h-[180px] sm:min-h-[260px] overflow-hidden bg-[#FAF7F2] flex items-center justify-center block">
                 <Link to={`/product/${heroBundle.slug}`} className="w-full h-full flex items-center justify-center">
                   <img 
-                    src={optimizeShopifyImage(heroBundle.image, 600)} 
+                    src={optimizeShopifyImage(heroBundle.image, 1600)} 
                     alt={heroBundle.name}
-                    loading="lazy"
+                    loading="eager"
                     decoding="async"
                     className="w-full h-full max-h-[240px] sm:max-h-[330px] md:max-h-[350px] object-cover sm:object-contain transform group-hover:scale-105 transition-transform duration-700 ease-out"
                   />
