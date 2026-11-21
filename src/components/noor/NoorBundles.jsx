@@ -63,7 +63,9 @@ export default function NoorBundles({ products = [] }) {
     itemsList: heroProduct.shortDesc || heroProduct.description?.substring(0, 95) || 'Authentic Prophetic Wellness Kit with Complete Nutrition & Pure Herbal Care',
     price: heroProduct.price,
     mrp: heroProduct.mrp > heroProduct.price ? heroProduct.mrp : heroProduct.price * 1.2,
-    image: (heroProduct.descriptionImages && heroProduct.descriptionImages[0]) || heroProduct.cardImage || heroProduct.images?.[0] || '',
+    image: isHeroLuckyDraw
+      ? (heroProduct.cardImage || heroProduct.images?.[0] || '')
+      : ((heroProduct.descriptionImages && heroProduct.descriptionImages[0]) || heroProduct.cardImage || heroProduct.images?.[0] || ''),
     inStock: heroProduct.inStock,
     isLuckyDraw: isHeroLuckyDraw
   };
