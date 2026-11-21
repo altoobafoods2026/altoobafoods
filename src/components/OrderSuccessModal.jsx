@@ -16,6 +16,41 @@ export default function OrderSuccessModal() {
   };
 
   useEffect(() => {
+    // 1-Click Test Simulation Helper (e.g. ?test_order=true)
+    if (typeof window !== 'undefined' && window.location.search.includes('test_order=true')) {
+      const testOrder = {
+        orderNumber: '#1054',
+        orderId: 'gid://shopify/Order/1054',
+        totalPrice: 650,
+        paymentMethod: 'Cash on Delivery (COD)',
+        phone: '8433284322',
+        email: 'customer@gmail.com',
+        address: 'House 42, Mumbai, Maharashtra - 400001',
+        date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+        hasLuckyDraw: true,
+        luckyToken: 'LUCKY-1054',
+        items: [
+          {
+            name: 'Al-Tooba Special Umrah Offer: Buy Talbina (500g) Get 250g Free + Guaranteed Umrah Lucky Draw Token',
+            variant: 'Standard',
+            quantity: 1,
+            price: 650,
+            image: 'https://cdn.shopify.com/s/files/1/0819/7072/5115/files/Altoobaumrahdesign.png?v=1795263274'
+          }
+        ]
+      };
+
+      try {
+        const existing = JSON.parse(localStorage.getItem('altooba_orders') || '[]');
+        const updated = [testOrder, ...existing.filter(o => o.orderNumber !== testOrder.orderNumber)];
+        localStorage.setItem('altooba_orders', JSON.stringify(updated));
+      } catch (e) {}
+
+      setOrderData(testOrder);
+      setIsOpen(true);
+      return;
+    }
+
     const handleOrderCompleted = (event) => {
       const detail = event?.detail || {};
       const currentCartItems = useCartStore.getState().items || [];

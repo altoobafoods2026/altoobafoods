@@ -64,17 +64,39 @@ export default function TrackOrder() {
           setIsLoading(false);
           setOrdersList(list);
           return;
-        } else {
-          setErrorMsg(apiJson.message || `No orders found matching "${cleanQuery}".`);
         }
-      } else {
-        setErrorMsg('Could not query order status. Please try again.');
       }
     } catch (e) {
-      console.error(e);
-      setErrorMsg('Network error. Please try again.');
+      console.warn('API lookup failed, checking local orders fallback', e);
     }
 
+    // LocalStorage fallback (e.g. instant post-purchase or test order tracking)
+    try {
+      const localOrders = JSON.parse(localStorage.getItem('altooba_orders') || '[]');
+      const cleanDigits = cleanQuery.replace(/\D/g, '').slice(-10);
+      const cleanNum = cleanQuery.replace(/^#/, '');
+
+      const matched = localOrders.filter(o => {
+        const oNum = String(o.orderNumber || '').replace(/^#/, '');
+        const oPhone = String(o.phone || '').replace(/\D/g, '');
+        if (oNum === cleanNum) return true;
+        if (cleanDigits && oPhone.endsWith(cleanDigits)) return true;
+        return false;
+      });
+
+      if (matched.length > 0) {
+        setIsLoading(false);
+        setOrdersList(matched.map(m => ({
+          ...m,
+          statusText: m.statusText || 'Preparing for Dispatch',
+          statusCode: m.statusCode || 1,
+          carrier: m.carrier || 'Express Delivery'
+        })));
+        return;
+      }
+    } catch (e) {}
+
+    setErrorMsg(`No orders found matching "${cleanQuery}".`);
     setIsLoading(false);
   }, []);
 
