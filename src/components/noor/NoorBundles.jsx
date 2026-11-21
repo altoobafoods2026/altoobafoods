@@ -11,9 +11,16 @@ export default function NoorBundles({ products = [] }) {
   const addItem = useCartStore((state) => state.addItem);
   const showToast = useToastStore((state) => state.showToast);
 
+  // Helper to check if a product has lucky-draw / contest tag
+  const isLuckyDrawProduct = (p) => {
+    if (!p) return false;
+    return p.tags?.some(t => /lucky[-_]?draw|contest|giveaway|token/i.test(t)) || false;
+  };
+
   // Filter real Wellness Kits and Combos from Shopify products in exact Shopify sequence
   const kits = products
     .filter(p => 
+      isLuckyDrawProduct(p) ||
       p.category === 'Wellness Kit' ||
       p.collections?.some(c => c.toLowerCase().includes('wellness')) ||
       p.name.toLowerCase().includes('kit') ||
@@ -22,6 +29,12 @@ export default function NoorBundles({ products = [] }) {
       p.slug.includes('kit')
     )
     .sort((a, b) => {
+      // Products with lucky-draw tag always get highest priority for the hero card!
+      const aLucky = isLuckyDrawProduct(a);
+      const bLucky = isLuckyDrawProduct(b);
+      if (aLucky && !bLucky) return -1;
+      if (!aLucky && bLucky) return 1;
+
       const orderA = a.collectionOrders?.['wellness-kit'] ?? 999;
       const orderB = b.collectionOrders?.['wellness-kit'] ?? 999;
       return orderA - orderB;
@@ -38,19 +51,21 @@ export default function NoorBundles({ products = [] }) {
 
   if (!heroProduct) return null;
 
+  const isHeroLuckyDraw = isLuckyDrawProduct(heroProduct);
   const heroBundle = {
     id: heroProduct.id,
     productRef: heroProduct,
     name: heroProduct.name,
     slug: heroProduct.slug,
-    badge: 'WELLNESS KIT',
+    badge: isHeroLuckyDraw ? '🎁 LUCKY DRAW OFFER' : 'WELLNESS KIT',
     discountBadge: heroProduct.discount > 0 ? `SAVE ${heroProduct.discount}%` : (heroProduct.mrp > heroProduct.price ? `SAVE ${Math.round(((heroProduct.mrp - heroProduct.price) / heroProduct.mrp) * 100)}%` : 'BEST VALUE'),
-    itemsCount: 'Complete Care Bundle',
+    itemsCount: isHeroLuckyDraw ? 'Special Lucky Draw Kit' : 'Complete Care Bundle',
     itemsList: heroProduct.shortDesc || heroProduct.description?.substring(0, 95) || 'Authentic Prophetic Wellness Kit with Complete Nutrition & Pure Herbal Care',
     price: heroProduct.price,
     mrp: heroProduct.mrp > heroProduct.price ? heroProduct.mrp : heroProduct.price * 1.2,
     image: (heroProduct.descriptionImages && heroProduct.descriptionImages[0]) || heroProduct.cardImage || heroProduct.images?.[0] || '',
-    inStock: heroProduct.inStock
+    inStock: heroProduct.inStock,
+    isLuckyDraw: isHeroLuckyDraw
   };
 
   const rawStacked = [stackedProduct1, stackedProduct2].filter(Boolean);
@@ -190,11 +205,27 @@ export default function NoorBundles({ products = [] }) {
                 <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 pointer-events-none">
                   <OfferCountdownBadge tags={heroProduct.tags} productId={heroProduct.id} />
                 </div>
+
+                {/* Top-Left Lucky Draw Exclusive Badge */}
+                {heroBundle.isLuckyDraw && (
+                  <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 pointer-events-none animate-pulse">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-gradient-to-r from-[#D4A24C] via-[#b8860b] to-[#8A5E12] text-white shadow-[0_4px_16px_rgba(212,162,76,0.45)] border border-amber-200/50 text-[9px] sm:text-[10.5px] font-sans font-extrabold uppercase tracking-widest">
+                      <span>🎟️</span>
+                      <span>Lucky Draw Offer</span>
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Bottom Info Bar */}
               <div className="p-4 sm:p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-gray-100 bg-white">
                 <Link to={`/product/${heroBundle.slug}`} className="flex-1 hover:no-underline min-w-0">
+                  {heroBundle.isLuckyDraw && (
+                    <div className="inline-flex items-center gap-1.5 mb-1.5 px-2.5 py-0.5 rounded-full bg-[#0D3B2A]/10 border border-[#0D3B2A]/15 text-[#0D3B2A] text-[9.5px] sm:text-[10.5px] font-sans font-bold uppercase tracking-wider">
+                      <span>🎁</span>
+                      <span>Guaranteed Lucky Token on Purchase</span>
+                    </div>
+                  )}
                   <h3 className="text-lg sm:text-xl md:text-2xl font-serif font-bold text-[#0D3B2A] group-hover:text-[#8A5E12] transition-colors leading-snug truncate">
                     {heroBundle.name}
                   </h3>

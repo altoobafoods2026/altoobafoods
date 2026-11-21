@@ -5,11 +5,33 @@ import { useCartStore } from '../store/cartStore';
 export default function OrderSuccessModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [orderData, setOrderData] = useState(null);
+  const [copiedToken, setCopiedToken] = useState(false);
+
+  const handleCopyToken = (token) => {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(token);
+      setCopiedToken(true);
+      setTimeout(() => setCopiedToken(false), 2500);
+    }
+  };
 
   useEffect(() => {
     const handleOrderCompleted = (event) => {
       const detail = event?.detail || {};
       const currentCartItems = useCartStore.getState().items || [];
+
+      // Check if any cart item qualifies for the lucky draw
+      const hasLuckyDrawItem = currentCartItems.some(it => {
+        const prod = it.product || {};
+        const tags = Array.isArray(prod.tags) ? prod.tags : [];
+        return tags.some(t => /lucky[-_]?draw|contest|giveaway|token/i.test(t)) ||
+               /lucky[-_]?draw|contest|giveaway/i.test(it.name || '') ||
+               /wellness\s*kit|hamper/i.test(it.name || '') ||
+               prod.category === 'Wellness Kit';
+      });
+
+      const cleanOrderNum = String(detail.orderNumber || '1005').replace(/\D/g, '') || String(detail.orderNumber || '1005').replace(/^#/, '');
+      const luckyToken = hasLuckyDrawItem ? `LUCKY-${cleanOrderNum}` : null;
 
       const newOrder = {
         orderNumber: detail.orderNumber || '#1005',
@@ -20,6 +42,8 @@ export default function OrderSuccessModal() {
         email: detail.email || '',
         address: detail.address || null,
         date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+        hasLuckyDraw: hasLuckyDrawItem,
+        luckyToken: luckyToken,
         items: currentCartItems.map((it) => ({
           name: it.product?.title || it.title || it.name || 'Al-Tooba Prophetic Remedy',
           variant: it.selectedVariant || 'Standard',
@@ -132,6 +156,53 @@ export default function OrderSuccessModal() {
               </span>
             </div>
           </div>
+
+          {/* Golden Lucky Draw Ticket Card */}
+          {orderData.luckyToken && (
+            <div className="relative my-2.5 p-3 sm:p-3.5 rounded-2xl bg-gradient-to-br from-[#FFF9EE] via-[#FFF3D6] to-[#FFE8B2] border-2 border-dashed border-[#D4A24C] shadow-sm text-left overflow-hidden">
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <span className="inline-flex items-center gap-1 text-[9.5px] sm:text-[10px] font-sans font-extrabold uppercase tracking-widest text-[#8A5E12]">
+                  <span>🎟️</span>
+                  <span>Lucky Draw Entry Confirmed</span>
+                </span>
+                <span className="text-[9px] font-sans font-bold text-[#0D3B2A] bg-white/90 px-2 py-0.5 rounded-full border border-[#D4A24C]/40">
+                  1x Valid Token
+                </span>
+              </div>
+
+              <div className="bg-white/95 rounded-xl p-2.5 border border-[#D4A24C]/35 flex items-center justify-between gap-3 shadow-inner">
+                <div className="min-w-0">
+                  <span className="text-[9px] uppercase tracking-wider text-gray-500 font-sans font-bold block">
+                    Your Lucky Token Number:
+                  </span>
+                  <span className="font-mono font-black text-lg sm:text-xl text-[#0D3B2A] tracking-wider select-all block truncate">
+                    {orderData.luckyToken}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => handleCopyToken(orderData.luckyToken)}
+                  className="px-3 py-1.5 rounded-lg bg-[#0D3B2A] hover:bg-[#8A5E12] text-white text-[10px] font-sans font-bold uppercase tracking-wider transition-all shadow-sm flex items-center gap-1 shrink-0 cursor-pointer"
+                >
+                  {copiedToken ? (
+                    <>
+                      <span>✓</span>
+                      <span>Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <p className="text-[9.5px] text-[#5C4018] mt-1.5 leading-snug">
+                ✨ <strong>Keep this token safe!</strong> Winner will be announced when the 1-month offer concludes.
+              </p>
+            </div>
+          )}
 
           {/* Authentic Guarantee Pill */}
           <div className="p-2 sm:p-2.5 bg-[#FAF3E0] border border-[#D4A24C]/30 rounded-xl text-left flex items-center gap-2">

@@ -11,6 +11,15 @@ export default function TrackOrder() {
   const [isLoading, setIsLoading] = useState(false);
   const [ordersList, setOrdersList] = useState([]);
   const [errorMsg, setErrorMsg] = useState('');
+  const [copiedToken, setCopiedToken] = useState('');
+
+  const handleCopyToken = (token) => {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(token);
+      setCopiedToken(token);
+      setTimeout(() => setCopiedToken(''), 2500);
+    }
+  };
 
   // Sync login status and listeners
   useEffect(() => {
@@ -181,8 +190,15 @@ export default function TrackOrder() {
             {/* Orders List */}
             {ordersList.length > 0 && (
               <div className="space-y-6">
-                {ordersList.map((order, idx) => (
-                  <div key={idx} className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-sm">
+                {ordersList.map((order, idx) => {
+                  const orderLuckyToken = order.luckyToken || (
+                    order.items?.some(it => /lucky[-_]?draw|contest|giveaway|wellness\s*kit/i.test(it.name || ''))
+                      ? `LUCKY-${String(order.orderNumber).replace(/\D/g, '') || String(order.orderNumber).replace(/^#/, '')}`
+                      : null
+                  );
+
+                  return (
+                    <div key={idx} className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-sm">
                     
                     {/* Header info */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-gray-100 gap-4 mb-5">
@@ -247,6 +263,41 @@ export default function TrackOrder() {
                       </div>
                     ) : (
                       <>
+                        {/* Lucky Draw Token Banner */}
+                        {orderLuckyToken && (
+                          <div className="mb-6 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-[#FFF9EE] via-[#FFF3D6] to-[#FFE8B2] border border-[#D4A24C]/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-[#0D3B2A] text-white flex items-center justify-center text-lg shrink-0 shadow-sm">
+                                🎟️
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] font-sans font-extrabold uppercase tracking-widest text-[#8A5E12]">
+                                    Official Lucky Draw Token
+                                  </span>
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                </div>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="font-mono font-black text-base sm:text-lg text-[#0D3B2A] tracking-wider select-all">
+                                    {orderLuckyToken}
+                                  </span>
+                                  <button
+                                    onClick={() => handleCopyToken(orderLuckyToken)}
+                                    className="px-2 py-0.5 rounded bg-[#0D3B2A]/10 hover:bg-[#0D3B2A]/20 text-[#0D3B2A] text-[10px] font-sans font-bold uppercase transition-colors flex items-center gap-1 cursor-pointer"
+                                  >
+                                    {copiedToken === orderLuckyToken ? '✓ Copied' : 'Copy'}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="text-[10px] sm:text-[11px] text-[#5C4018] font-sans sm:text-right shrink-0 leading-tight">
+                              <p className="font-semibold">✨ Keep this token safe!</p>
+                              <p className="text-gray-600">Winners drawn at the end of the 1-month offer.</p>
+                            </div>
+                          </div>
+                        )}
+
                         {/* Live Location Alert Bar (if available) */}
                         {order.liveLocation && (
                           <div className="mb-6 px-4 py-3 rounded-xl bg-[#FAF7F2] border border-[#D4A24C]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-sans text-[#0D3B2A]">
@@ -370,8 +421,9 @@ export default function TrackOrder() {
                     </div>
 
                   </div>
-                ))}
-              </div>
+                );
+              })}
+            </div>
             )}
           </>
         )}
