@@ -214,16 +214,16 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 3. Shop By Categories (Noor Remedies) */}
+      {/* 3. Offers & Hampers (Curated Collections & Hampers) */}
+      <NoorBundles products={regularProducts} />
+
+      {/* 4. Shop By Categories (Noor Remedies) */}
       <NoorCategories products={regularProducts} />
 
-      {/* 4. Best Sellers Section */}
+      {/* 5. Best Sellers Section */}
       <div id="explore-section">
         <NoorBestSellers products={regularProducts} />
       </div>
-
-      {/* 5. Bundle & Save (Asymmetric Grid Section) */}
-      <NoorBundles products={regularProducts} />
 
       {/* 6. Complete Collection Section */}
       <NoorCompleteCollection products={regularProducts} />
