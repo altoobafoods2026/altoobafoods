@@ -214,15 +214,6 @@ export default function NoorBundles({ products = [] }) {
                   <OfferCountdownBadge tags={heroProduct.tags} productId={heroProduct.id} />
                 </div>
 
-                {/* Top-Left Exclusive Badge */}
-                {heroBundle.isLuckyDraw && (
-                  <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 pointer-events-none">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-[#D4A24C] via-[#b8860b] to-[#8A5E12] text-white shadow-[0_4px_16px_rgba(212,162,76,0.45)] border border-amber-200/50 text-[9px] sm:text-[10.5px] font-sans font-extrabold uppercase tracking-widest">
-                      <span>✨</span>
-                      <span>Special Offer</span>
-                    </span>
-                  </div>
-                )}
               </div>
 
               {/* Bottom Info Bar */}
