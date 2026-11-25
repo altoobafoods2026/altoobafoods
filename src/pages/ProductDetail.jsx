@@ -423,20 +423,6 @@ export default function ProductDetail() {
               </span>
             </div>
 
-            {/* Umrah Lucky Draw Offer Banner */}
-            {product.tags?.some(t => /lucky[-_]?draw|contest|giveaway/i.test(t)) && (
-              <div className="mb-3.5 p-3 sm:p-3.5 rounded-xl bg-gradient-to-r from-[#FFF9EE] via-[#FFF3D6] to-[#FFE8B2] border border-[#D4A24C]/60 flex items-center gap-2.5 shadow-xs">
-                <span className="text-xl sm:text-2xl shrink-0">🎟️</span>
-                <div className="text-left min-w-0">
-                  <span className="text-[10px] sm:text-[11px] font-sans font-extrabold uppercase tracking-widest text-[#8A5E12] block">
-                    Umrah Lucky Draw Entry Included
-                  </span>
-                  <p className="text-[11px] sm:text-xs text-[#5C4018] font-sans font-medium leading-tight">
-                    Every order gets an official unique Lucky Token for the Mega Umrah draw!
-                  </p>
-                </div>
-              </div>
-            )}
 
             {/* Limited Time Offer Countdown Badge */}
             {product.tags && (

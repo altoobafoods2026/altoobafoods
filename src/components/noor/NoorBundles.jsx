@@ -63,9 +63,9 @@ export default function NoorBundles({ products = [] }) {
     productRef: heroProduct,
     name: heroProduct.name,
     slug: heroProduct.slug,
-    badge: isHeroLuckyDraw ? '🎁 LUCKY DRAW OFFER' : 'WELLNESS KIT',
+    badge: isHeroLuckyDraw ? '✨ SPECIAL OFFER' : 'WELLNESS KIT',
     discountBadge: heroProduct.discount > 0 ? `SAVE ${heroProduct.discount}%` : (heroProduct.mrp > heroProduct.price ? `SAVE ${Math.round(((heroProduct.mrp - heroProduct.price) / heroProduct.mrp) * 100)}%` : 'BEST VALUE'),
-    itemsCount: isHeroLuckyDraw ? 'Special Lucky Draw Kit' : 'Complete Care Bundle',
+    itemsCount: isHeroLuckyDraw ? 'Special Offer Kit' : 'Complete Care Bundle',
     itemsList: heroProduct.shortDesc || heroProduct.description?.substring(0, 95) || 'Authentic Prophetic Wellness Kit with Complete Nutrition & Pure Herbal Care',
     price: heroProduct.price,
     mrp: heroProduct.mrp > heroProduct.price ? heroProduct.mrp : heroProduct.price * 1.2,
@@ -214,12 +214,12 @@ export default function NoorBundles({ products = [] }) {
                   <OfferCountdownBadge tags={heroProduct.tags} productId={heroProduct.id} />
                 </div>
 
-                {/* Top-Left Lucky Draw Exclusive Badge */}
+                {/* Top-Left Exclusive Badge */}
                 {heroBundle.isLuckyDraw && (
-                  <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 pointer-events-none animate-pulse">
+                  <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 pointer-events-none">
                     <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-[#D4A24C] via-[#b8860b] to-[#8A5E12] text-white shadow-[0_4px_16px_rgba(212,162,76,0.45)] border border-amber-200/50 text-[9px] sm:text-[10.5px] font-sans font-extrabold uppercase tracking-widest">
-                      <span>🎟️</span>
-                      <span>Lucky Draw<span className="hidden sm:inline"> Offer</span></span>
+                      <span>✨</span>
+                      <span>Special Offer</span>
                     </span>
                   </div>
                 )}
@@ -228,12 +228,6 @@ export default function NoorBundles({ products = [] }) {
               {/* Bottom Info Bar */}
               <div className="p-4 sm:p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-gray-100 bg-white">
                 <Link to={`/product/${heroBundle.slug}`} className="flex-1 hover:no-underline min-w-0">
-                  {heroBundle.isLuckyDraw && (
-                    <div className="inline-flex items-center gap-1.5 mb-1.5 px-2.5 py-0.5 rounded-full bg-[#0D3B2A]/10 border border-[#0D3B2A]/15 text-[#0D3B2A] text-[9.5px] sm:text-[10.5px] font-sans font-bold uppercase tracking-wider">
-                      <span>🎁</span>
-                      <span>Guaranteed Lucky Token on Purchase</span>
-                    </div>
-                  )}
                   <h3 className="text-lg sm:text-xl md:text-2xl font-serif font-bold text-[#0D3B2A] group-hover:text-[#8A5E12] transition-colors leading-snug truncate">
                     {heroBundle.name}
                   </h3>
